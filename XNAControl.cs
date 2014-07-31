@@ -98,6 +98,26 @@ namespace XNAControls
 			}
 		}
 
+		/// <summary>
+		/// Gets/sets whether this control should be drawn
+		/// Setting this applies it to all child controls as well
+		/// </summary>
+		public new bool Visible
+		{
+			get { return base.Visible; }
+			set
+			{
+				IEnumerable<IGameComponent> childs = GetChildren();
+				foreach(IGameComponent comp in childs)
+				{
+					if (comp is XNAControl)
+						(comp as XNAControl).Visible = value;
+				}
+
+				base.Visible = value;
+			}
+		}
+
 		protected bool MouseOver
 		{
 			get
@@ -206,6 +226,8 @@ namespace XNAControls
 		//private SpriteFont dbg;
 		public override void Draw(GameTime gameTime)
 		{
+			if (!Visible)
+				return;
 			//used for debugging draworders: drawing the DrawOrder variable on each control so i could see what it was dynamically
 			//if(dbg == null)
 			//	dbg = EncapsulatingGame.Content.Load<SpriteFont>("dbg");

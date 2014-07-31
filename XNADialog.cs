@@ -215,8 +215,11 @@ namespace XNAControls
 				//(ctrl as XNADialog)._updateChildrenDrawOrder(ctrl.DrawOrder); //handled in OnDrawOrderChanged
 			}
 
-			foreach (XNAControl ctrl in Game.Components)
+			foreach (IGameComponent comp in Game.Components)
 			{
+				if (!(comp is XNAControl))
+					continue;
+				XNAControl ctrl = comp as XNAControl;
 				if (ctrl.TopParent == null && !(ctrl is XNADialog))
 				{
 					ctrl.DrawOrder += 5;

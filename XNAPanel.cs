@@ -5,25 +5,70 @@ using System.Collections.Generic;
 
 namespace XNAControls
 {
+	public class XNAComponentPanel : DrawableGameComponent
+	{
+		public List<DrawableGameComponent> Components { get; set; }
+
+		public XNAComponentPanel(Game game)
+			: base(game)
+		{
+			Components = new List<DrawableGameComponent>();
+		}
+
+		public override void Initialize()
+		{
+			for (int i = 0; i < Components.Count; i++)
+				Components[i].Initialize();
+
+			base.Initialize();
+		}
+
+		public override void Update(GameTime gameTime)
+		{
+			for (int i = 0; i < Components.Count; i++)
+				Components[i].Update(gameTime);
+
+			base.Update(gameTime);
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			for (int i = 0; i < Components.Count; i++)
+				Components[i].Draw(gameTime);
+
+			base.Draw(gameTime);
+		}
+
+		public void ClearTextBoxes()
+		{
+			List<DrawableGameComponent> tbs = Components.FindAll(x => x is XNATextBox);
+			foreach (DrawableGameComponent tb in tbs)
+			{
+				(tb as XNATextBox).Text = "";
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			for (int i = 0; i < Components.Count; i++)
+				Components[i].Dispose();
+
+			base.Dispose(disposing);
+		}
+	}
+
+		
 	/// <summary>
 	/// Note: I've changed XNAPanel to act more like an actual panel of controls, as in WinForms
 	/// It derives from control so we have a lot of the convenience functions and can specify an
 	/// offset for the child components
+	/// 
+	/// Use XNAComponentPanel to get old functionality
 	/// </summary>
 	public class XNAPanel : XNAControl
 	{
-		//Note: the Components object was removed to support encapsulation of child controls more fluidly
-		//In order to update the components collection of a game to a panel, simply set the 'Visible' property
-		//The collection should not be modified mid-game
-
-		[Obsolete("Components has been deprecated. Use the Visible property of XNAPanel to show/hide the controls instead. AddComponent and RemoveComponent can be used to change the collection.")]
-		public List<DrawableGameComponent> Components
-		{
-			get { throw new MemberAccessException("The Components collection of XNAPanel has been deprecated. Do not use this property."); }
-		}
-
 		public XNAPanel(Game game, Rectangle? area = null)
-			: base(game, area == null ? new Nullable<Vector2>(new Vector2(area.Value.X, area.Value.Y)) : null, area) { }
+			: base(game, area == null ? null : new Nullable<Vector2>(new Vector2(area.Value.X, area.Value.Y)), area) { }
 		
 		public void ClearTextBoxes()
 		{
@@ -59,7 +104,7 @@ namespace XNAControls
 		//hide the base class method to set parent for this XNAPanel instance...
 		public new void SetParent(XNAControl ctrl)
 		{
-			throw new InvalidOperationException("A panel may not have a parent (it breaks the model)");
+			throw new InvalidOperationException("A panel may not have a parent. It should be a top-level control.");
 		}
 	}
 }
