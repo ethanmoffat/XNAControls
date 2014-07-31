@@ -119,7 +119,7 @@ namespace XNAControls
 
 			_fixDrawOrder();
 
-			EncapsulatingGame.Components.Add(this);
+			Game.Components.Add(this);
 		}
 
 		protected XNADialog(Game encapsulatingGame)
@@ -141,7 +141,7 @@ namespace XNAControls
 				//_updateChildrenDrawOrder(dlg.DrawOrder); //handled in OnDrawOrderChanged
 			}
 
-			foreach(DrawableGameComponent component in EncapsulatingGame.Components)
+			foreach(DrawableGameComponent component in Game.Components)
 			{
 				if (!(component is XNAControl))
 					continue;
@@ -180,7 +180,7 @@ namespace XNAControls
 			if(PreviousMouseState.LeftButton == ButtonState.Pressed && curState.LeftButton == ButtonState.Pressed 
 				&& DrawAreaWithOffset.Contains(curState.X, curState.Y) && shouldClickDrag)
 			{
-				Rectangle gdm = EncapsulatingGame.Window.ClientBounds;
+				Rectangle gdm = Game.Window.ClientBounds;
 
 				Vector2 newDrawLoc = new Vector2(DrawAreaWithOffset.X + (curState.X - PreviousMouseState.X), DrawAreaWithOffset.Y + (curState.Y - PreviousMouseState.Y));
 				if (newDrawLoc.X < 0) newDrawLoc.X = 0;
@@ -215,7 +215,7 @@ namespace XNAControls
 				//(ctrl as XNADialog)._updateChildrenDrawOrder(ctrl.DrawOrder); //handled in OnDrawOrderChanged
 			}
 
-			foreach (XNAControl ctrl in EncapsulatingGame.Components)
+			foreach (XNAControl ctrl in Game.Components)
 			{
 				if (ctrl.TopParent == null && !(ctrl is XNADialog))
 				{

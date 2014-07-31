@@ -21,6 +21,7 @@ namespace XNAControls
 
 		protected bool enableImmediateColorRevert = true;
 
+		[Obsolete("Passing a font as a parameter is deprecated. Specify font family and font size instead, and set additional parameters using the .Font property.")]
 		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, Font font, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
 			: base(game, area)
 		{
@@ -29,10 +30,26 @@ namespace XNAControls
 			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
+		[Obsolete("Passing a font as a parameter is deprecated. Specify font family and font size instead, and set additional parameters using the .Font property.")]
 		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, Font font)
 			: base(game, area)
 		{
 			Font = new Font(font, FontStyle.Underline);
+			ForeColor = Color.FromArgb(13, 158, 17);
+		}
+
+		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, string fontFamily, float fontSize, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
+			: base(game, area)
+		{
+			RenderingHint = renderHint;
+			Font = new Font(fontFamily, fontSize, style);
+			ForeColor = Color.FromArgb(13, 158, 17);
+		}
+
+		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
+			: base(game, area)
+		{
+			Font = new Font(fontFamily, fontSize);
 			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 

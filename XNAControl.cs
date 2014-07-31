@@ -84,15 +84,6 @@ namespace XNAControls
 		}
 
 		/// <summary>
-		/// The game object that "owns" the control.
-		/// </summary>
-		public Game EncapsulatingGame
-		{
-			get;
-			protected set;
-		}
-
-		/// <summary>
 		/// Gets the very top parent control of this control.
 		/// </summary>
 		public XNAControl TopParent
@@ -144,7 +135,6 @@ namespace XNAControls
 
 			parent = null;
 			SpriteBatch = new SpriteBatch(game.GraphicsDevice);
-			EncapsulatingGame = game;
 
 			xOff = yOff = 0;
 
@@ -161,7 +151,6 @@ namespace XNAControls
 
 			parent = null;
 			SpriteBatch = new SpriteBatch(game.GraphicsDevice);
-			EncapsulatingGame = game;
 			xOff = yOff = 0;
 
 			DrawOrder = 0;
@@ -249,7 +238,7 @@ namespace XNAControls
 		{
 			IEnumerable<IGameComponent> components;
 
-			components = EncapsulatingGame.Components.Where((IGameComponent x, int ind) =>
+			components = Game.Components.Where((IGameComponent x, int ind) =>
 			{
 				if (!(x is XNAControl)) return false;
 				else return (x as XNAControl).parent == this;
@@ -302,7 +291,8 @@ namespace XNAControls
 			foreach (IGameComponent component in components)
 				(component as XNAControl).Close();
 
-			EncapsulatingGame.Components.Remove(this);
+			Game.Components.Remove(this);
+			Dispose();
 		}
 	}
 }

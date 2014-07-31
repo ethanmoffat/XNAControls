@@ -5,7 +5,7 @@ namespace XNAControls
 {
 	public enum StretchMode
 	{
-		None,
+		CenterInFrame,
 		Stretch
 	}
 
@@ -27,7 +27,7 @@ namespace XNAControls
 				SpriteBatch.Begin();
 				switch (StretchMode)
 				{
-					case XNAControls.StretchMode.None:
+					case XNAControls.StretchMode.CenterInFrame:
 						SpriteBatch.Draw(Texture,
 							new Rectangle(DrawAreaWithOffset.X + DrawArea.Width / 2 - Texture.Width / 2,
 								DrawAreaWithOffset.Y + DrawArea.Height / 2 - Texture.Width / 2,

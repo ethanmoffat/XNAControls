@@ -148,7 +148,7 @@ namespace XNAControls
 		void RenderBackground()
 		{
 			if (backgroundColor != null || borderColor != null)
-				background = EncapsulatingGame.DrawRectangle(
+				background = Game.DrawRectangle(
 					new SD.Size(drawArea.Width, drawArea.Height),
 					BackgroundColor ?? SD.Color.Transparent,
 					BorderColor ?? SD.Color.Transparent);
@@ -156,8 +156,8 @@ namespace XNAControls
 
 		public void AddMenuItem(string text, EventHandler chooseAction)
 		{
-			XNAMenuItem menuItem = new XNAMenuItem(EncapsulatingGame,
-				new Rectangle(DrawAreaWithOffset.X, DrawAreaWithOffset.Y + ItemHeight * Items.Count, DrawAreaWithOffset.Width, ItemHeight), Font)
+			XNAMenuItem menuItem = new XNAMenuItem(Game,
+				new Rectangle(DrawAreaWithOffset.X, DrawAreaWithOffset.Y + ItemHeight * Items.Count, DrawAreaWithOffset.Width, ItemHeight), Font.FontFamily.Name, Font.Size)
 				{
 					TextAlign = SD.ContentAlignment.TopCenter,
 					Text = text,
@@ -283,6 +283,12 @@ namespace XNAControls
 			}
 
 			base.Draw(gameTime);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			_font.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 }

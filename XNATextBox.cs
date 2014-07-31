@@ -294,7 +294,7 @@ namespace XNAControls
 
 	public delegate void TextBoxEvent(object sender, EventArgs e = null);
 
-	public class XNATextBox : XNAControl, IKeyboardSubscriber, IDisposable
+	public class XNATextBox : XNAControl, IKeyboardSubscriber
 	{
 		Texture2D _textBoxBG;
 		Texture2D _textBoxLeft;
@@ -347,7 +347,7 @@ namespace XNAControls
 					_text = filtered;
 				}
 
-				_textTexture = EncapsulatingGame.DrawText(PasswordBox ? new string('*', _text.Length) : _text, _font, TextColor);
+				_textTexture = Game.DrawText(PasswordBox ? new string('*', _text.Length) : _text, _font, TextColor);
 			}
 		}
 
@@ -389,7 +389,7 @@ namespace XNAControls
 					_defaultText = filtered;
 				}
 
-				_defaultTextTexture = EncapsulatingGame.DrawText(_defaultText, _font, System.Drawing.Color.FromArgb(80, 80, 80));
+				_defaultTextTexture = Game.DrawText(_defaultText, _font, System.Drawing.Color.FromArgb(80, 80, 80));
 			}
 		}
 

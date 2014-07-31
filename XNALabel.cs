@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace XNAControls
 {
-	public class XNALabel : XNAControl, IDisposable
+	public class XNALabel : XNAControl
 	{
 		public string Text
 		{
@@ -203,7 +203,7 @@ namespace XNAControls
 
 		void GenerateImage()
 		{
-			_texture = EncapsulatingGame.DrawText(Text, Font, ForeColor, TextWidth, RenderingHint, rowSpacing ?? 0);
+			_texture = Game.DrawText(Text, Font, ForeColor, TextWidth, RenderingHint, rowSpacing ?? 0);
 		}
 
 		public new void Dispose()

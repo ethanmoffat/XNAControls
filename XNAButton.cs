@@ -19,7 +19,7 @@ namespace XNAControls
 			set
 			{
 				_text = value;
-				_TEXTture = EncapsulatingGame.DrawText(_text, new System.Drawing.Font("Arial", 12), System.Drawing.Color.Black);
+				_TEXTture = Game.DrawText(_text, new System.Drawing.Font("Arial", 12), System.Drawing.Color.Black);
 			}
 		}
 
