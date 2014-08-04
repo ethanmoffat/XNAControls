@@ -13,6 +13,7 @@ namespace XNAControls
 		public enum XNADialogButtons
 		{
 			Ok,
+			Cancel,
 			OkCancel
 		}
 

@@ -133,6 +133,16 @@ namespace XNAControls
 			_align = ContentAlignment.TopLeft;
 		}
 
+		public XNALabel(XNAFramework.Game game, XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
+			: base(game, new XNAFramework.Vector2(area.X, area.Y), area)
+		{
+			_autoSize = true;
+			_text = "";
+			_font = new Font(fontFamily, fontSize);
+			_color = Color.Black;
+			_align = ContentAlignment.TopLeft;
+		}
+
 		int? rowSpacing;
 		string _text;
 		bool _autoSize;
