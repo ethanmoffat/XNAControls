@@ -199,9 +199,12 @@ namespace XNAControls
 			if (!Visible)
 				return;
 
-			SpriteBatch.Begin();
-			SpriteBatch.Draw(bgTexture, DrawAreaWithOffset, Color.White);
-			SpriteBatch.End();
+			if (bgTexture != null)
+			{
+				SpriteBatch.Begin();
+				SpriteBatch.Draw(bgTexture, DrawAreaWithOffset, Color.White);
+				SpriteBatch.End();
+			}
 
 			base.Draw(gt);
 		}
