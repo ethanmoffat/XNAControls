@@ -12,13 +12,12 @@ namespace XNAControls
 	public abstract class XNAControl : DrawableGameComponent
 	{
 		/// <summary>
-		/// Static members: ModalDialog is set to non-null when a dialog is popped up.
-		/// This stops all other controls that are not a part of the dialog from updating,
-		///		so they will not respond to button presses/mouse clicks while the dialog
-		///		is being displayed. Dialogs reset ModalDialog to null when they are closed.
+		/// Static members: Dialogs are pushed onto the stack as they are opened. Only the
+		///		top-most dialog can be interacted with. Dialogs are popped off the stack
+		///		once they are closed. Optionally, they are given a Closing event that has a
+		///		particular dialog result.
 		/// </summary>
-		public static Stack<XNADialog> ModalDialogs = new Stack<XNADialog>();
-		public static XNADialog.XNADialogResult ModalDialogResult;
+		public static Stack<XNADialog> Dialogs = new Stack<XNADialog>();
 
 		public SpriteBatch SpriteBatch { get; set; }
 
@@ -38,6 +37,11 @@ namespace XNAControls
 		protected int xOff, yOff;
 
 		protected bool shouldClickDrag = true;
+
+		//flag to indicate that the control is initialized.
+		//child controls should check their parent's initialized field
+		//and make sure it is true before updating/drawing
+		protected internal bool Initialized { get; protected set; }
 
 		protected EventHandler SizeChanged;
 
@@ -205,6 +209,7 @@ namespace XNAControls
 		/// </summary>
 		public override void Initialize()
 		{
+			Initialized = true;
 			base.Initialize();
 		}
 		
@@ -217,6 +222,9 @@ namespace XNAControls
 			if (drawArea.Width == 0 || drawArea.Height == 0)
 				throw new InvalidOperationException("The drawn area of the control must not be 0.");
 
+			if (!Visible || (TopParent != null && !TopParent.Initialized))
+				return;
+
 			PreviousMouseState = Mouse.GetState();
 			PreviousKeyState = Keyboard.GetState();
 
@@ -226,7 +234,7 @@ namespace XNAControls
 		//private SpriteFont dbg;
 		public override void Draw(GameTime gameTime)
 		{
-			if (!Visible)
+			if (!Visible || (TopParent != null && !TopParent.Initialized))
 				return;
 			//used for debugging draworders: drawing the DrawOrder variable on each control so i could see what it was dynamically
 			//if(dbg == null)

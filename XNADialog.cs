@@ -8,32 +8,47 @@ using Microsoft.Xna.Framework.Input;
 
 namespace XNAControls
 {
+	/// <summary>
+	/// XNADialogButtons
+	/// Specifies the buttons that should be shown on a dialog
+	/// </summary>
+	public enum XNADialogButtons
+	{
+		Ok,
+		Cancel,
+		OkCancel
+	}
+
+	/// <summary>
+	/// XNADialogResult
+	/// Returns the value of the clicked button (based on the button text)
+	/// </summary>
+	public enum XNADialogResult
+	{
+		OK,
+		Cancel,
+		Yes,
+		No,
+		Back,
+		Next,
+		NO_BUTTON_PRESSED
+	}
+
+	public class CloseDialogEventArgs : EventArgs
+	{
+		public XNADialogResult Result { get; protected set; }
+
+		public CloseDialogEventArgs(XNADialogResult result)
+		{
+			Result = result;
+		}
+	}
+
 	public class XNADialog : XNAControl
 	{
-		public enum XNADialogButtons
-		{
-			Ok,
-			Cancel,
-			OkCancel
-		}
+		public delegate void OnDialogClose(object sender, CloseDialogEventArgs e);
 
-		/// <summary>
-		/// XNADialog.XNADialogResult
-		/// Returns the value of the clicked button (based on the button text)
-		/// </summary>
-		public enum XNADialogResult
-		{
-			OK,
-			Cancel,
-			Yes,
-			No,
-			Back,
-			Next
-		}
-		
-		public delegate void CustomClose(bool success);
-
-		public CustomClose CloseAction { get; set; }
+		public event OnDialogClose DialogClosing;
 
 		protected XNALabel caption;
 		public string CaptionText
@@ -73,11 +88,11 @@ namespace XNAControls
 			XNAButton Ok, Cancel;
 			Ok = new XNAButton(encapsulatingGame, new Vector2(196, 116));
 			Ok.Text = "Ok";
-			Ok.OnClick += (object x, EventArgs e) => { Close(); };
+			Ok.OnClick += (object x, EventArgs e) => { Close(Ok, XNADialogResult.OK); };
 			Ok.SetParent(this);
 			Cancel = new XNAButton(encapsulatingGame, new Vector2(196, 116));
 			Cancel.Text = "Cancel";
-			Cancel.OnClick += (object x, EventArgs e) => { Close(); };
+			Cancel.OnClick += (object x, EventArgs e) => { Close(Cancel, XNADialogResult.Cancel); };
 			Cancel.SetParent(this);
 
 			switch (whichButtons)
@@ -85,6 +100,10 @@ namespace XNAControls
 				case XNADialogButtons.Ok:
 					dlgButtons.Add(Ok);
 					Cancel.Close();
+					break;
+				case XNADialogButtons.Cancel:
+					dlgButtons.Add(Cancel);
+					Ok.Close();
 					break;
 				case XNADialogButtons.OkCancel:
 					Ok.DrawLocation = new Vector2(106, 116);
@@ -116,7 +135,7 @@ namespace XNAControls
 			//draw dialog on top of everything - always!
 			//child controls DrawOrder is set accordingly
 
-			XNAControl.ModalDialogs.Push(this);
+			XNAControl.Dialogs.Push(this);
 
 			_fixDrawOrder();
 
@@ -134,7 +153,7 @@ namespace XNAControls
 		protected void _fixDrawOrder()
 		{			
 			this.DrawOrder = 0;
-			foreach(XNADialog dlg in ModalDialogs)
+			foreach(XNADialog dlg in Dialogs)
 			{
 				if (dlg == this)
 					continue;
@@ -165,7 +184,7 @@ namespace XNAControls
 		
 		public override void Update(GameTime gt)
 		{
-			if (!Visible || (XNAControl.ModalDialogs.Count > 0 && XNAControl.ModalDialogs.Peek() != this))
+			if (!Visible || (XNAControl.Dialogs.Count > 0 && XNAControl.Dialogs.Peek() != this))
 				return;
 			
 			KeyboardState keyState = Keyboard.GetState();
@@ -209,14 +228,31 @@ namespace XNAControls
 			base.Draw(gt);
 		}
 
-		public override void Close()
+		/// <summary>
+		/// This should be called whenever a button is clicked. Any action to be taken by the dialog when it closes
+		/// should be specified in the DialogClosing event, with a switch on the CloseDialogEventArgs.Result property
+		/// </summary>
+		/// <param name="whichButton">The button closing the dialog</param>
+		/// <param name="result">The result that the DialogClosing event should receive</param>
+		protected virtual void Close(XNAButton whichButton, XNADialogResult result)
 		{
-			XNAControl.ModalDialogs.Pop();
+			if (DialogClosing != null)
+				DialogClosing(whichButton, new CloseDialogEventArgs(result));
+			
+			this.Close();
+		}
 
-			foreach(XNAControl ctrl in XNAControl.ModalDialogs)
+		//This is hidden from user code. User code should not call Close(); instead, Closing the dialog should be
+		//handled by calling Close(XNAButton, XNADialogResult); since it calls the DialogClosing method before
+		//calling this.Close()
+		protected new void Close() //don't allow base classes to override close; and hide the inherited member
+		{
+			XNAControl.Dialogs.Pop();
+
+			foreach(XNAControl ctrl in XNAControl.Dialogs)
 			{
 				ctrl.DrawOrder += 5;
-				//(ctrl as XNADialog)._updateChildrenDrawOrder(ctrl.DrawOrder); //handled in OnDrawOrderChanged
+				//DrawOrder for children is handled in XNAControl.OnDrawOrderChanged
 			}
 
 			foreach (IGameComponent comp in Game.Components)
@@ -230,10 +266,6 @@ namespace XNAControls
 				}
 			}
 
-			if (CloseAction != null)
-				CloseAction(false); //should be called with 'true' explicitly when the action succeeds
-
-			//set the dialog results accordingly based on the button press here
 			base.Close();
 		}
 	}

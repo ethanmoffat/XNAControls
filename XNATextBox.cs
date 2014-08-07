@@ -439,7 +439,7 @@ namespace XNAControls
 
 		public override void Update(GameTime gameTime)
 		{
-			if (!Visible || (XNAControl.ModalDialogs.Count != 0 && XNAControl.ModalDialogs.Peek() != TopParent as XNADialog))
+			if (!Visible || (XNAControl.Dialogs.Count != 0 && XNAControl.Dialogs.Peek() != TopParent as XNADialog))
 				return;
 			MouseState mouse = Microsoft.Xna.Framework.Input.Mouse.GetState();
 			Point mousePoint = new Point(mouse.X, mouse.Y);
@@ -537,7 +537,7 @@ namespace XNAControls
 		{
 			//ignore command input (ie enter keypresses) when there is a modal dialog up
 			//	and this text box is not a member of the modal dialog that is up
-			if (XNAControl.ModalDialogs.Count != 0 && XNAControl.ModalDialogs.Peek() != TopParent as XNADialog)
+			if (XNAControl.Dialogs.Count != 0 && XNAControl.Dialogs.Peek() != TopParent as XNADialog)
 				return;
 
 			switch (command)

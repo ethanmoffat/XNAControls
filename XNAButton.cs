@@ -117,7 +117,7 @@ namespace XNAControls
 
 		public override void Update(GameTime gt)
 		{
-			if (!Visible || (XNAControl.ModalDialogs.Count > 0 && (XNAControl.ModalDialogs.Peek() != TopParent as XNADialog || TopParent == null)))
+			if (!Visible || (XNAControl.Dialogs.Count > 0 && (XNAControl.Dialogs.Peek() != TopParent as XNADialog || TopParent == null)))
 				return;
 
 			if (MouseOver && OnClick != null && PreviousMouseState.LeftButton == ButtonState.Pressed && Mouse.GetState().LeftButton == ButtonState.Released)

@@ -193,7 +193,7 @@ namespace XNAControls
 
 		public override void Update(GameTime gameTime)
 		{
-			if (!Visible || (XNAControl.ModalDialogs.Count != 0 && XNAControl.ModalDialogs.Peek() != TopParent as XNADialog))
+			if (!Visible || (XNAControl.Dialogs.Count != 0 && XNAControl.Dialogs.Peek() != TopParent as XNADialog))
 				return;
 
 			foreach (XNAMenuItem menuItem in Items)
