@@ -33,6 +33,9 @@ namespace XNAControls
 
 		public override void Draw(GameTime gameTime)
 		{
+			if (!Visible)
+				return;
+
 			for (int i = 0; i < Components.Count; i++)
 				Components[i].Draw(gameTime);
 
@@ -72,11 +75,10 @@ namespace XNAControls
 		
 		public void ClearTextBoxes()
 		{
-			IEnumerable<IGameComponent> children = GetChildren();
-			foreach(IGameComponent component in children)
+			foreach(XNAControl child in children)
 			{
-				if(component is XNATextBox)
-					(component as XNATextBox).Text = "";
+				if(child is XNATextBox)
+					(child as XNATextBox).Text = "";
 			}
 		}
 

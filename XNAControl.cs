@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 
@@ -21,30 +22,6 @@ namespace XNAControls
 
 		public SpriteBatch SpriteBatch { get; set; }
 
-		protected Vector2 drawLocation;
-		protected Rectangle drawArea;
-
-		protected void _setSize(int width, int height)
-		{
-			drawArea.Width = width;
-			drawArea.Height = height;
-
-			if (SizeChanged != null)
-				SizeChanged(null, null);
-		}
-
-		protected XNAControl parent;
-		protected int xOff, yOff;
-
-		protected bool shouldClickDrag = true;
-
-		//flag to indicate that the control is initialized.
-		//child controls should check their parent's initialized field
-		//and make sure it is true before updating/drawing
-		protected internal bool Initialized { get; protected set; }
-
-		protected EventHandler SizeChanged;
-
 		/// <summary>
 		/// Returns the DrawLocation on the screen (no offset)
 		/// Sets the location to draw on the screen for moving controls
@@ -60,13 +37,9 @@ namespace XNAControls
 				drawArea.Y = (int)value.Y;
 
 				//update all the child offsets in this code recursively
-				IEnumerable<IGameComponent> children = GetChildren();
-				foreach (IGameComponent child in children)
+				foreach (XNAControl child in children)
 				{
-					if (child is XNAControl)
-					{
-						(child as XNAControl).SetParent(this);
-					}
+					child.SetParent(this);
 				}
 			}
 		}
@@ -111,11 +84,9 @@ namespace XNAControls
 			get { return base.Visible; }
 			set
 			{
-				IEnumerable<IGameComponent> childs = GetChildren();
-				foreach(IGameComponent comp in childs)
+				foreach(XNAControl child in children)
 				{
-					if (comp is XNAControl)
-						(comp as XNAControl).Visible = value;
+					child.Visible = value;
 				}
 
 				base.Visible = value;
@@ -140,9 +111,29 @@ namespace XNAControls
 		}
 
 		protected MouseState PreviousMouseState { get; set; }
-
 		protected KeyboardState PreviousKeyState { get; set; }
 
+		protected Vector2 drawLocation;
+		protected Rectangle drawArea;
+
+		protected void _setSize(int width, int height)
+		{
+			drawArea.Width = width;
+			drawArea.Height = height;
+
+			if (SizeChanged != null)
+				SizeChanged(null, null);
+		}
+
+		protected XNAControl parent;
+		protected int xOff, yOff;
+
+		protected bool shouldClickDrag = true;
+
+		protected EventHandler SizeChanged;
+
+		protected List<XNAControl> children = new List<XNAControl>();
+		
 		/// <summary>
 		/// Construct a generic XNAControl with an encapsulating game, a location on screen, and an area.
 		/// </summary>
@@ -186,44 +177,66 @@ namespace XNAControls
 		/// <param name="newParent">The new parent control</param>
 		public void SetParent(XNAControl newParent)
 		{
-			parent = newParent;
-			if (parent == null)
+			//When newParent is null:		this control is in Game.Components. Any children are removed from Game.Components. This is removed from parent's children.
+			//When newParent is not null:	this control is removed from Game.Components. This is added to parent's child controls.
+			if(newParent == null)
 			{
-				xOff = yOff = 0;
-				return;
-			}
-			xOff = (int)parent.DrawAreaWithOffset.X;
-			yOff = (int)parent.DrawAreaWithOffset.Y;
-			DrawOrder = parent.DrawOrder + 1;
+				if (parent != null && parent.children.Contains(this))
+				{
+					parent.children.Remove(this);
+					//update DrawOrder?
+				}
 
-			IEnumerable<IGameComponent> children = GetChildren();
-			foreach(IGameComponent child in children)
+				if (!Game.Components.Contains(this))
+					Game.Components.Add(this);
+
+				parent = newParent;
+				xOff = yOff = 0;
+			}
+			else
 			{
-				if (child is XNAControl)
-					(child as XNAControl).SetParent(this);
+				if (Game.Components.Contains(this))
+					Game.Components.Remove(this);
+
+				parent = newParent;
+
+				if (!parent.children.Contains(this))
+					parent.children.Add(this);
+
+				xOff = (int)parent.DrawAreaWithOffset.X;
+				yOff = (int)parent.DrawAreaWithOffset.Y;
+				DrawOrder = parent.DrawOrder + 1;
+
+				//update offsets/draworder of children
+				foreach(XNAControl child in children)
+					child.SetParent(this);
+			}
+
+			if (children.Count > 0)
+			{
+				children.Sort((x, y) =>
+				{
+					return x.DrawOrder - y.DrawOrder;
+				});
 			}
 		}
 		
-		/// <summary>
-		/// Override initialization for all children
-		/// </summary>
-		public override void Initialize()
-		{
-			Initialized = true;
-			base.Initialize();
-		}
-		
-		/// <summary>
-		/// Override updating for all children (GameComponent)
-		/// </summary>
-		/// <param name="gameTime"></param>
 		public override void Update(GameTime gameTime)
 		{
 			if (drawArea.Width == 0 || drawArea.Height == 0)
 				throw new InvalidOperationException("The drawn area of the control must not be 0.");
 
-			if (!Visible || (TopParent != null && !TopParent.Initialized))
+			if (!Visible)
 				return;
+
+			foreach (XNAControl child in children)
+				child.Update(gameTime);
+
+			Rectangle gdm = Game.Window.ClientBounds;
+			if (DrawLocation.X < 0) DrawLocation = new Vector2(0, DrawLocation.Y);
+			if (DrawLocation.Y < 0) DrawLocation = new Vector2(DrawLocation.X, 0);
+			if (DrawLocation.X > gdm.Width - DrawAreaWithOffset.Width) DrawLocation = new Vector2(gdm.Width - DrawAreaWithOffset.Width, DrawLocation.Y);
+			if (DrawLocation.Y > gdm.Height - DrawAreaWithOffset.Height) DrawLocation = new Vector2(DrawLocation.X, gdm.Height - DrawAreaWithOffset.Height);
 
 			PreviousMouseState = Mouse.GetState();
 			PreviousKeyState = Keyboard.GetState();
@@ -234,8 +247,11 @@ namespace XNAControls
 		//private SpriteFont dbg;
 		public override void Draw(GameTime gameTime)
 		{
-			if (!Visible || (TopParent != null && !TopParent.Initialized))
+			if (!Visible)
 				return;
+
+			foreach (XNAControl child in children)
+				child.Draw(gameTime);
 			//used for debugging draworders: drawing the DrawOrder variable on each control so i could see what it was dynamically
 			//if(dbg == null)
 			//	dbg = EncapsulatingGame.Content.Load<SpriteFont>("dbg");
@@ -252,31 +268,12 @@ namespace XNAControls
 		/// <param name="args"></param>
 		protected override void OnVisibleChanged(object sender, EventArgs args)
 		{
-			IEnumerable<IGameComponent> components = GetChildren();
-
-			foreach (IGameComponent component in components)
-				(component as XNAControl).Visible = this.Visible;
+			foreach (XNAControl child in children)
+				child.Visible = this.Visible;
 
 			base.OnVisibleChanged(sender, args);
 		}
-
-		/// <summary>
-		/// Get all child controls for this Control
-		/// </summary>
-		/// <returns>Enumerable list of children</returns>
-		public IEnumerable<IGameComponent> GetChildren()
-		{
-			IEnumerable<IGameComponent> components;
-
-			components = Game.Components.Where((IGameComponent x, int ind) =>
-			{
-				if (!(x is XNAControl)) return false;
-				else return (x as XNAControl).parent == this;
-			});
-
-			return components;
-		}
-
+		
 		/// <summary>
 		/// Change drawing order for all child controls when this control's draw order is changed
 		/// </summary>
@@ -284,12 +281,9 @@ namespace XNAControls
 		/// <param name="args"></param>
 		protected override void OnDrawOrderChanged(object sender, EventArgs args)
 		{
-			IEnumerable<IGameComponent> children = GetChildren();
-
-			foreach(IGameComponent child in children)
+			foreach(XNAControl child in children)
 			{
-				if (child is DrawableGameComponent)
-					(child as DrawableGameComponent).DrawOrder = this.DrawOrder + 1;
+				child.DrawOrder = this.DrawOrder + 1;
 			}
 
 			base.OnDrawOrderChanged(sender, args);
@@ -313,15 +307,14 @@ namespace XNAControls
 		/// Closes a component, removing it from the list of Game components in encapsulatingGame
 		/// </summary>
 		public virtual void Close()
-		{
-			//this needs to be a list otherwise the IEnumerable<T> detects that the collection was modified
-			List<IGameComponent> components = GetChildren().ToList();
-			
+		{			
 			//remove all children from the game components list too
-			foreach (IGameComponent component in components)
-				(component as XNAControl).Close();
+			foreach (XNAControl child in children)
+				child.Close();
 
-			Game.Components.Remove(this);
+			if (Game.Components.Contains(this))
+				Game.Components.Remove(this);
+
 			Dispose();
 		}
 	}

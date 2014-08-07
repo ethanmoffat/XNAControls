@@ -22,6 +22,9 @@ namespace XNAControls
 
 		public override void Draw(GameTime gameTime)
 		{
+			if (!Visible)
+				return;
+
 			if (Texture != null)
 			{
 				SpriteBatch.Begin();

@@ -69,6 +69,8 @@ namespace XNAControls
 		protected List<XNAButton> dlgButtons;
 
 		protected TimeSpan? openTime;
+
+		protected XNADialogButtons whichButtons;
 		
 		public XNADialog(Game encapsulatingGame, string msgText, string captionText = "", XNADialogButtons whichButtons = XNADialogButtons.Ok)
 			: base(encapsulatingGame)
@@ -95,7 +97,7 @@ namespace XNAControls
 			Cancel.OnClick += (object x, EventArgs e) => { Close(Cancel, XNADialogResult.Cancel); };
 			Cancel.SetParent(this);
 
-			switch (whichButtons)
+			switch (this.whichButtons = whichButtons)
 			{
 				case XNADialogButtons.Ok:
 					dlgButtons.Add(Ok);
@@ -193,21 +195,21 @@ namespace XNAControls
 			{
 				//tie enter key press to close the dialog
 				//if we ever implement dialogresults this should constitute an "OK" response
-				Close();
+				if (whichButtons == XNADialogButtons.Cancel)
+				{
+					//do the CloseAction tied to the cancel button
+				}
+				else
+				{
+					//do the CloseAction tied to the OK button
+				}
 			}
 
 			MouseState curState = Mouse.GetState();
 			if(PreviousMouseState.LeftButton == ButtonState.Pressed && curState.LeftButton == ButtonState.Pressed 
 				&& DrawAreaWithOffset.Contains(curState.X, curState.Y) && shouldClickDrag)
 			{
-				Rectangle gdm = Game.Window.ClientBounds;
-
-				Vector2 newDrawLoc = new Vector2(DrawAreaWithOffset.X + (curState.X - PreviousMouseState.X), DrawAreaWithOffset.Y + (curState.Y - PreviousMouseState.Y));
-				if (newDrawLoc.X < 0) newDrawLoc.X = 0;
-				else if (newDrawLoc.Y < 0) newDrawLoc.Y = 0;
-				else if (newDrawLoc.X > gdm.Width - DrawAreaWithOffset.Width) newDrawLoc.X = gdm.Width - DrawAreaWithOffset.Width;
-				else if (newDrawLoc.Y > gdm.Height - DrawAreaWithOffset.Height) newDrawLoc.Y = gdm.Height - DrawAreaWithOffset.Height;
-				DrawLocation = newDrawLoc;
+				DrawLocation = new Vector2(DrawAreaWithOffset.X + (curState.X - PreviousMouseState.X), DrawAreaWithOffset.Y + (curState.Y - PreviousMouseState.Y));
 			}
 			
 			base.Update(gt);
