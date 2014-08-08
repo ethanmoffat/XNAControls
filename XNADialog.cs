@@ -37,10 +37,12 @@ namespace XNAControls
 	public class CloseDialogEventArgs : EventArgs
 	{
 		public XNADialogResult Result { get; protected set; }
+		public bool CancelClose { get; set; }
 
 		public CloseDialogEventArgs(XNADialogResult result)
 		{
 			Result = result;
+			CancelClose = false;
 		}
 	}
 
@@ -238,19 +240,40 @@ namespace XNAControls
 		/// <param name="result">The result that the DialogClosing event should receive</param>
 		protected virtual void Close(XNAButton whichButton, XNADialogResult result)
 		{
+			XNAControl.Dialogs.Pop(); //remove this dialog from XNADialogs initially
+			int cntBeforeDlgClosingEvent = XNAControl.Dialogs.Count;
+
+			CloseDialogEventArgs args = new CloseDialogEventArgs(result);
 			if (DialogClosing != null)
-				DialogClosing(whichButton, new CloseDialogEventArgs(result));
-			
-			this.Close();
+				DialogClosing(whichButton, args);
+
+			if (args.CancelClose) //user code cancelled the closing operation. this dialog needs to be pushed back onto the stack properly
+			{
+				if (cntBeforeDlgClosingEvent == XNAControl.Dialogs.Count) //no other dialogs were created: push this back on the stack normally
+					XNAControl.Dialogs.Push(this); 
+				else if(cntBeforeDlgClosingEvent > XNAControl.Dialogs.Count) //other dialogs were created: remove them, push this dialog, push them back
+				{
+					//this is super hacky, but i like having a stack for the dialogs that are open and don't want to change it to a list w/random access
+					Stack<XNADialog> newDialogs = new Stack<XNADialog>();
+					while (XNAControl.Dialogs.Count > cntBeforeDlgClosingEvent)
+						newDialogs.Push(XNAControl.Dialogs.Pop());
+					
+					XNAControl.Dialogs.Push(this);
+					while (newDialogs.Count > 0)
+						XNAControl.Dialogs.Push(newDialogs.Pop());
+				}
+
+				return;
+			}
+		
+			this.Close(); //private new method: calls base.Close();
 		}
 
 		//This is hidden from user code. User code should not call Close(); instead, Closing the dialog should be
 		//handled by calling Close(XNAButton, XNADialogResult); since it calls the DialogClosing method before
 		//calling this.Close()
-		protected new void Close() //don't allow base classes to override close; and hide the inherited member
+		private new void Close() //don't allow child classes to override close; and hide the inherited member
 		{
-			XNAControl.Dialogs.Pop();
-
 			foreach(XNAControl ctrl in XNAControl.Dialogs)
 			{
 				ctrl.DrawOrder += 5;
