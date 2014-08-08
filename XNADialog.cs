@@ -155,27 +155,8 @@ namespace XNAControls
 		}
 
 		protected void _fixDrawOrder()
-		{			
-			this.DrawOrder = 0;
-			foreach(XNADialog dlg in Dialogs)
-			{
-				if (dlg == this)
-					continue;
-				dlg.DrawOrder -= 5;
-				//_updateChildrenDrawOrder(dlg.DrawOrder); //handled in OnDrawOrderChanged
-			}
-
-			foreach(DrawableGameComponent component in Game.Components)
-			{
-				if (!(component is XNAControl))
-					continue;
-
-				XNAControl ctrl = component as XNAControl;
-				if (ctrl.TopParent == null && !(ctrl is XNADialog))
-				{
-					ctrl.DrawOrder -= 5;
-				}
-			}
+		{
+			this.DrawOrder = (int)ControlDrawLayer.DialogLayer + (5 * XNAControl.Dialogs.Count);
 		}
 		
 		public void Center(GraphicsDevice device)
@@ -266,31 +247,6 @@ namespace XNAControls
 				return;
 			}
 		
-			this.Close(); //private new method: calls base.Close();
-		}
-
-		//This is hidden from user code. User code should not call Close(); instead, Closing the dialog should be
-		//handled by calling Close(XNAButton, XNADialogResult); since it calls the DialogClosing method before
-		//calling this.Close()
-		private new void Close() //don't allow child classes to override close; and hide the inherited member
-		{
-			foreach(XNAControl ctrl in XNAControl.Dialogs)
-			{
-				ctrl.DrawOrder += 5;
-				//DrawOrder for children is handled in XNAControl.OnDrawOrderChanged
-			}
-
-			foreach (IGameComponent comp in Game.Components)
-			{
-				if (!(comp is XNAControl))
-					continue;
-				XNAControl ctrl = comp as XNAControl;
-				if (ctrl.TopParent == null && !(ctrl is XNADialog))
-				{
-					ctrl.DrawOrder += 5;
-				}
-			}
-
 			base.Close();
 		}
 	}

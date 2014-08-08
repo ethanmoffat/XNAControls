@@ -10,6 +10,27 @@ using Microsoft.Xna.Framework.Input;
 
 namespace XNAControls
 {
+	/// <summary>
+	/// The layer that the control should be drawn on. This is set by default but can be modified by the user.
+	/// Lower layers (numerically) are drawn first. Higher numbers are drawn on top of things.
+	/// These constants are rather arbitrarily defined.
+	/// </summary>
+	public enum ControlDrawLayer
+	{
+		/// <summary>
+		/// The base layer for drawing controls. Offset from other components that might be drawn on layer 0.
+		/// </summary>
+		BaseLayer = 10,
+
+		/// <summary>
+		/// The layer on which to begin drawing dialogs.
+		/// Each new dialog added to XNAControl.Dialogs will take the previous top dialog's draw order
+		///		and add 10 to it as it's own base draw order.
+		///	Controls contained in a dialog will be drawn up 1 level (see SetParent)
+		/// </summary>
+		DialogLayer = 30,
+	}
+
 	public abstract class XNAControl : DrawableGameComponent
 	{
 		/// <summary>
@@ -153,7 +174,7 @@ namespace XNAControls
 
 			xOff = yOff = 0;
 
-			DrawOrder = 0; //normal controls drawn at this level
+			DrawOrder = (int)ControlDrawLayer.BaseLayer; //normal controls drawn at this level
 
 			game.Components.Add(this); //add this control to the game components
 		}
@@ -168,7 +189,7 @@ namespace XNAControls
 			SpriteBatch = new SpriteBatch(game.GraphicsDevice);
 			xOff = yOff = 0;
 
-			DrawOrder = 0;
+			DrawOrder = (int)ControlDrawLayer.BaseLayer;
 		}
 
 		/// <summary>
@@ -203,13 +224,11 @@ namespace XNAControls
 				if (!parent.children.Contains(this))
 					parent.children.Add(this);
 
-				xOff = (int)parent.DrawAreaWithOffset.X;
-				yOff = (int)parent.DrawAreaWithOffset.Y;
+				//DrawOrder of children is auto-updated in OnDrawOrderChanged
 				DrawOrder = parent.DrawOrder + 1;
 
-				//update offsets/draworder of children
-				foreach(XNAControl child in children)
-					child.SetParent(this);
+				//update offsets of children
+				UpdateOffsets();
 			}
 
 			if (children.Count > 0)
@@ -219,6 +238,16 @@ namespace XNAControls
 					return x.DrawOrder - y.DrawOrder;
 				});
 			}
+		}
+
+		//helper for SetParent
+		private void UpdateOffsets()
+		{
+			xOff = (int)parent.DrawAreaWithOffset.X;
+			yOff = (int)parent.DrawAreaWithOffset.Y;
+
+			foreach (XNAControl child in children)
+				child.UpdateOffsets();
 		}
 		
 		public override void Update(GameTime gameTime)
