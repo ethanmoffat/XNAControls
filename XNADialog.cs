@@ -232,7 +232,7 @@ namespace XNAControls
 			{
 				if (cntBeforeDlgClosingEvent == XNAControl.Dialogs.Count) //no other dialogs were created: push this back on the stack normally
 					XNAControl.Dialogs.Push(this); 
-				else if(cntBeforeDlgClosingEvent > XNAControl.Dialogs.Count) //other dialogs were created: remove them, push this dialog, push them back
+				else if(cntBeforeDlgClosingEvent < XNAControl.Dialogs.Count) //other dialogs were created: remove them, push this dialog, push them back
 				{
 					//this is super hacky, but i like having a stack for the dialogs that are open and don't want to change it to a list w/random access
 					Stack<XNADialog> newDialogs = new Stack<XNADialog>();
