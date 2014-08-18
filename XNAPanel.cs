@@ -70,6 +70,8 @@ namespace XNAControls
 	/// </summary>
 	public class XNAPanel : XNAControl
 	{
+		public Microsoft.Xna.Framework.Graphics.Texture2D BackgroundImage { get; set; }
+
 		public XNAPanel(Game game, Rectangle? area = null)
 			: base(game, area == null ? null : new Nullable<Vector2>(new Vector2(area.Value.X, area.Value.Y)), area) { }
 		
@@ -107,6 +109,18 @@ namespace XNAControls
 		public new void SetParent(XNAControl ctrl)
 		{
 			throw new InvalidOperationException("A panel may not have a parent. It should be a top-level control.");
+		}
+
+		public override void Draw(GameTime gameTime)
+		{
+			base.Draw(gameTime);
+
+			if (BackgroundImage != null)
+			{
+				SpriteBatch.Begin();
+				SpriteBatch.Draw(BackgroundImage, DrawAreaWithOffset, Color.White);
+				SpriteBatch.End();
+			}
 		}
 	}
 }
