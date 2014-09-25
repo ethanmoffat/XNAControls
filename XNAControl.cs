@@ -41,6 +41,8 @@ namespace XNAControls
 		/// </summary>
 		public static Stack<XNADialog> Dialogs = new Stack<XNADialog>();
 
+		public static bool DrawOrderVisible = false;
+
 		public SpriteBatch SpriteBatch { get; set; }
 
 		/// <summary>
@@ -95,25 +97,7 @@ namespace XNAControls
 				return ret;
 			}
 		}
-
-		/// <summary>
-		/// Gets/sets whether this control should be drawn
-		/// Setting this applies it to all child controls as well
-		/// </summary>
-		public new bool Visible
-		{
-			get { return base.Visible; }
-			set
-			{
-				foreach(XNAControl child in children)
-				{
-					child.Visible = value;
-				}
-
-				base.Visible = value;
-			}
-		}
-
+		
 		protected bool MouseOver
 		{
 			get
@@ -157,6 +141,7 @@ namespace XNAControls
 		
 		/// <summary>
 		/// Construct a generic XNAControl with an encapsulating game, a location on screen, and an area.
+		/// Side effects: adds this control to the game's components collection
 		/// </summary>
 		/// <param name="game">The game object that "owns" the control</param>
 		/// <param name="location">Location to draw the control on screen</param>
@@ -164,7 +149,7 @@ namespace XNAControls
 		public XNAControl(Game game, Vector2? location, Rectangle? area) : base(game)
 		{
 			drawLocation = location ?? new Vector2(0, 0);
-			drawArea = area ?? new Rectangle((int)drawLocation.X, (int)drawLocation.Y, 0, 0);
+			drawArea = area ?? new Rectangle((int)drawLocation.X, (int)drawLocation.Y, 1, 1);
 
 			PreviousMouseState = Mouse.GetState();
 			PreviousKeyState = Keyboard.GetState();
@@ -179,17 +164,30 @@ namespace XNAControls
 			game.Components.Add(this); //add this control to the game components
 		}
 
-		//this constructor requires child controls to add themselves to game components (testing)
-		public XNAControl(Game game) : base(game)
+		/// <summary>
+		/// Instantiates the control but does NOT add this control to the components collection.
+		/// Parent is set to the specified parent control (null for no parent)
+		/// </summary>
+		/// <param name="game">The game object that should render this control</param>
+		/// <param name="location">Draw location on the screen, from the top-left point (DrawLocation) of the parent control (or 0,0 for no parent)</param>
+		/// <param name="area">Area of the control. Provides a rectangle for SpriteBatch draw operations</param>
+		/// <param name="parentControl">Parent control. Null for no parent. Offsets updated automatically. Parent controls will draw their own children.</param>
+		public XNAControl(Game game, Vector2? location = null, Rectangle? area = null, XNAControl parentControl = null)
+			: base(game)
 		{
+			drawLocation = location ?? new Vector2(0, 0);
+			drawArea = area ?? new Rectangle((int)drawLocation.X, (int)drawLocation.Y, 1, 1);
+
 			PreviousMouseState = Mouse.GetState();
 			PreviousKeyState = Keyboard.GetState();
 
-			parent = null;
 			SpriteBatch = new SpriteBatch(game.GraphicsDevice);
 			xOff = yOff = 0;
 
 			DrawOrder = (int)ControlDrawLayer.BaseLayer;
+
+			if(parentControl != null)
+				SetParent(parentControl);
 		}
 
 		/// <summary>
@@ -232,12 +230,7 @@ namespace XNAControls
 			}
 
 			if (children.Count > 0)
-			{
-				children.Sort((x, y) =>
-				{
-					return x.DrawOrder - y.DrawOrder;
-				});
-			}
+				children.Sort((x, y) => { return x.DrawOrder - y.DrawOrder; });
 		}
 
 		//helper for SetParent
@@ -250,6 +243,10 @@ namespace XNAControls
 				child.UpdateOffsets();
 		}
 		
+		/// <summary>
+		/// Updates base class properties and child controls. Sets previous mouse state. Call this after the derived class does it's update logic.
+		/// </summary>
+		/// <param name="gameTime"></param>
 		public override void Update(GameTime gameTime)
 		{
 			if (drawArea.Width == 0 || drawArea.Height == 0)
@@ -258,8 +255,8 @@ namespace XNAControls
 			if (!Visible)
 				return;
 
-			foreach (XNAControl child in children)
-				child.Update(gameTime);
+			for (int i = 0; i < children.Count; ++i)
+				children[i].Update(gameTime);
 
 			if (TopParent == null) //child controls can have negative offsets! only check for TopParents
 			{
@@ -276,34 +273,31 @@ namespace XNAControls
 			base.Update(gameTime);
 		}
 
-		//private SpriteFont dbg;
+		private SpriteFont dbg;
+		/// <summary>
+		/// Draws any child controls. Call this after the derived class does it's draw logic.
+		/// </summary>
+		/// <param name="gameTime"></param>
 		public override void Draw(GameTime gameTime)
 		{
-			if (!Visible)
+			if (!Visible) //child controls will not be drawn if the parent control is not visible
 				return;
 
-			foreach (XNAControl child in children)
-				child.Draw(gameTime);
-			//used for debugging draworders: drawing the DrawOrder variable on each control so i could see what it was dynamically
-			//if(dbg == null)
-			//	dbg = EncapsulatingGame.Content.Load<SpriteFont>("dbg");
-			//SpriteBatch.Begin();
-			//SpriteBatch.DrawString(dbg, "" + DrawOrder, new Vector2(DrawAreaWithOffset.X + 3, DrawAreaWithOffset.Y + 3), Color.White);
-			//SpriteBatch.End();
-			base.Draw(gameTime);
-		}
-		
-		/// <summary>
-		/// Hide child controls when the "Visible" parameter is changed
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="args"></param>
-		protected override void OnVisibleChanged(object sender, EventArgs args)
-		{
-			foreach (XNAControl child in children)
-				child.Visible = this.Visible;
+			for (int i = 0; i < children.Count; ++i)
+				children[i].Draw(gameTime);
 
-			base.OnVisibleChanged(sender, args);
+			if (DrawOrderVisible)
+			{
+				//used for debugging draworders. Uncomment these lines to see the draw order of each control. 
+				//Updated dynamically with changing parents/children and opening/closing dialogs
+				if (dbg == null)
+					dbg = Game.Content.Load<SpriteFont>("dbg");
+				SpriteBatch.Begin();
+				SpriteBatch.DrawString(dbg, "" + DrawOrder, new Vector2(DrawAreaWithOffset.X + 3, DrawAreaWithOffset.Y + 3), Color.White);
+				SpriteBatch.End();
+			}
+
+			base.Draw(gameTime);
 		}
 		
 		/// <summary>

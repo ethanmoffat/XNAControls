@@ -64,6 +64,12 @@ namespace XNAControls
 				{
 					size = tmpGraphics.MeasureString(text, font).ToSize();
 
+					if (textWidth != null && size.Width > textWidth)
+					{
+						int heightfactor = (int)Math.Round((float)size.Width / (textWidth ?? size.Width));
+						size.Height *= heightfactor;
+					}
+
 					size.Width = textWidth ?? size.Width;
 
 					// size can't have zero width or height
@@ -121,13 +127,11 @@ namespace XNAControls
 								toDraw = toDraw.Remove(0, 1);
 							drawStrings.Add(toDraw);
 						}
+
+						size.Height += tmpGraphics.MeasureString(drawStrings[0], font).ToSize().Height;
 					}
 				}
 			}
-
-			size.Height *= (textWidth == null ? 1 : drawStrings.Count);
-			if (textWidth != null)
-				size.Height += 4 * drawStrings.Count;
 
 			// Resize
 			using (Bitmap bitmap = new Bitmap(size.Width, size.Height))

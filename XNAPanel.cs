@@ -113,14 +113,14 @@ namespace XNAControls
 
 		public override void Draw(GameTime gameTime)
 		{
-			base.Draw(gameTime);
-
 			if (BackgroundImage != null)
 			{
 				SpriteBatch.Begin();
 				SpriteBatch.Draw(BackgroundImage, DrawAreaWithOffset, Color.White);
 				SpriteBatch.End();
 			}
+
+			base.Draw(gameTime);
 		}
 	}
 }
