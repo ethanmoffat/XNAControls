@@ -43,7 +43,7 @@ namespace XNAControls
 
 		public static bool DrawOrderVisible = false;
 
-		public SpriteBatch SpriteBatch { get; set; }
+		protected static SpriteBatch SpriteBatch;
 
 		/// <summary>
 		/// Returns the DrawLocation on the screen (no offset)
@@ -155,7 +155,8 @@ namespace XNAControls
 			PreviousKeyState = Keyboard.GetState();
 
 			parent = null;
-			SpriteBatch = new SpriteBatch(game.GraphicsDevice);
+			if(SpriteBatch == null)
+				SpriteBatch = new SpriteBatch(game.GraphicsDevice);
 
 			xOff = yOff = 0;
 
@@ -181,7 +182,8 @@ namespace XNAControls
 			PreviousMouseState = Mouse.GetState();
 			PreviousKeyState = Keyboard.GetState();
 
-			SpriteBatch = new SpriteBatch(game.GraphicsDevice);
+			if(SpriteBatch == null)
+				SpriteBatch = new SpriteBatch(game.GraphicsDevice);
 			xOff = yOff = 0;
 
 			DrawOrder = (int)ControlDrawLayer.BaseLayer;
