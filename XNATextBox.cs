@@ -325,19 +325,17 @@ namespace XNAControls
 			}
 			set
 			{
-				if (value.Length > MaxChars)
+				if (MaxChars  > 0 && value.Length > MaxChars)
 					return;
 
-				_text = value;
-				if (_text == null)
-					_text = "";
+				_text = value ?? "";
 
 				if (_text != "")
 				{
 					//if you attempt to display a character that is not in your font
 					//you will get an exception, so we filter the characters
 					String filtered = "";
-					foreach (char c in value)
+					foreach (char c in _text)
 					{
 						ushort bla;
 						if (_glyphs != null && _glyphs.CharacterToGlyphMap.TryGetValue((int)Convert.ToUInt16(c), out bla))
@@ -367,19 +365,17 @@ namespace XNAControls
 			}
 			set
 			{
-				if (value.Length > MaxChars)
+				if (MaxChars > 0 && value.Length > MaxChars)
 					return;
 
-				_defaultText = value;
-				if (_defaultText == null)
-					_defaultText = "";
+				_defaultText = value ?? "";
 
 				if (_defaultText != "")
 				{
 					//if you attempt to display a character that is not in your font
 					//you will get an exception, so we filter the characters
 					String filtered = "";
-					foreach (char c in value)
+					foreach (char c in _defaultText)
 					{
 						ushort bla;
 						if (_glyphs != null && _glyphs.CharacterToGlyphMap.TryGetValue((int)Convert.ToUInt16(c), out bla))
@@ -401,7 +397,8 @@ namespace XNAControls
 		/// <param name="encapsulatingGame">Game object "owning" the text box</param>
 		/// <param name="area">The area of the screen in which the TextBox should be rendered (x, y)</param>
 		/// <param name="textures">Array of four textures. 0=background, 1=leftEdge, 2=rightEdge, 3=caret</param>
-		/// <param name="font">Font to use when rendering text</param>
+		/// <param name="fontFamily">Font family string</param>
+		/// <param name="fontSize">Font size in points</param>
 		public XNATextBox(Game encapsulatingGame, Rectangle area, Texture2D[] textures, string fontFamily, float fontSize = 10.0f)
 			: base(encapsulatingGame, new Vector2(area.X, area.Y), area)
 		{
@@ -415,7 +412,10 @@ namespace XNAControls
 
 			// Get glyphs
 			Typeface typeface = new Typeface(_font.OriginalFontName);
-			typeface.TryGetGlyphTypeface(out _glyphs);
+			if (!typeface.TryGetGlyphTypeface(out _glyphs))
+			{
+				throw new ArgumentException("Unable to get typeface for specified font. It may be a font that doesn't exist on this system.");
+			}
 
 			LeftPadding = 0;
 
@@ -466,9 +466,7 @@ namespace XNAControls
 			if (!Visible)
 				return;
 
-			bool caretVisible = true;
-			if ((gameTime.TotalGameTime.TotalMilliseconds % 1000) < 500)
-				caretVisible = false;
+			bool caretVisible = !((gameTime.TotalGameTime.TotalMilliseconds % 1000) < 500);
 
 			String toDraw = Text;
 
@@ -501,7 +499,7 @@ namespace XNAControls
 				if (caretVisible && Selected)
 				{
 					//draw caret
-					int x = texture != _defaultTextTexture && rect != null && rect.Value.Width > 5 ? rect.Value.Width - 3 : 2;
+					int x = texture != _defaultTextTexture && rect.Value.Width > 5 ? rect.Value.Width - 3 : 2;
 
 					SpriteBatch.Draw(_caretTexture,
 						new Vector2(DrawAreaWithOffset.X + x + LeftPadding, DrawAreaWithOffset.Y + 4),
@@ -509,7 +507,7 @@ namespace XNAControls
 				}
 
 				SpriteBatch.Draw(texture,
-					new Rectangle(DrawAreaWithOffset.X + LeftPadding, DrawAreaWithOffset.Y + DrawArea.Height / 2 - texture.Height / 2, rect.Value.Width, rect.Value.Height),
+					new Rectangle(DrawAreaWithOffset.X + LeftPadding, 2 + DrawAreaWithOffset.Y + (DrawArea.Height / 2) - (texture.Height / 2), rect.Value.Width, rect.Value.Height),
 					rect,
 					Microsoft.Xna.Framework.Color.White);
 			}
