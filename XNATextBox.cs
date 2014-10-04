@@ -507,7 +507,7 @@ namespace XNAControls
 				}
 
 				SpriteBatch.Draw(texture,
-					new Rectangle(DrawAreaWithOffset.X + LeftPadding, 2 + DrawAreaWithOffset.Y + (DrawArea.Height / 2) - (texture.Height / 2), rect.Value.Width, rect.Value.Height),
+					new Rectangle(DrawAreaWithOffset.X + LeftPadding, DrawAreaWithOffset.Y + (DrawArea.Height / 2) - (texture.Height / 2), rect.Value.Width, rect.Value.Height),
 					rect,
 					Microsoft.Xna.Framework.Color.White);
 			}
