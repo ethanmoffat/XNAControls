@@ -98,7 +98,7 @@ namespace XNAControls
 			}
 		}
 		
-		protected bool MouseOver
+		public bool MouseOver
 		{
 			get
 			{
@@ -107,7 +107,7 @@ namespace XNAControls
 			}
 		}
 
-		protected bool MouseOverPreviously
+		public bool MouseOverPreviously
 		{
 			get
 			{
