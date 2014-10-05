@@ -313,9 +313,7 @@ namespace XNAControls
 		public bool PasswordBox { get; set; }
 
 		public int LeftPadding { get; set; }
-
-		public event TextBoxEvent Clicked;
-
+		
 		string _text = "";
 		public String Text
 		{
@@ -329,6 +327,8 @@ namespace XNAControls
 					return;
 
 				_text = value ?? "";
+				if (OnTextChanged != null)
+					OnTextChanged(this);
 
 				if (_text != "")
 				{
@@ -449,8 +449,8 @@ namespace XNAControls
 				Highlighted = true;
 				if (PreviousMouseState.LeftButton == ButtonState.Released && mouse.LeftButton == ButtonState.Pressed)
 				{
-					if (Clicked != null)
-						Clicked(this);
+					if (OnClicked != null)
+						OnClicked(this);
 				}
 			}
 			else
@@ -552,8 +552,6 @@ namespace XNAControls
 					if (OnTabPressed != null)
 						OnTabPressed(this);
 					break;
-				default:
-					break;
 			}
 		}
 		public void RecieveSpecialInput(Keys key)
@@ -563,6 +561,8 @@ namespace XNAControls
 
 		public event TextBoxEvent OnEnterPressed;
 		public event TextBoxEvent OnTabPressed;
+		public event TextBoxEvent OnTextChanged;
+		public event TextBoxEvent OnClicked;
 
 		public bool Selected
 		{
