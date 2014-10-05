@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -52,7 +49,7 @@ namespace XNAControls
 		/// </summary>
 		public Vector2 DrawLocation
 		{
-			get { return this.drawLocation; }
+			get { return drawLocation; }
 			set
 			{
 				drawLocation = value;
@@ -90,7 +87,7 @@ namespace XNAControls
 		{
 			get
 			{
-				XNAControl ret = this.parent;
+				XNAControl ret = parent;
 				if (ret != null)
 					while (ret.parent != null)
 						ret = ret.parent;
@@ -211,7 +208,7 @@ namespace XNAControls
 				if (!Game.Components.Contains(this))
 					Game.Components.Add(this);
 
-				parent = newParent;
+				parent = null;
 				xOff = yOff = 0;
 			}
 			else
@@ -232,14 +229,19 @@ namespace XNAControls
 			}
 
 			if (children.Count > 0)
-				children.Sort((x, y) => { return x.DrawOrder - y.DrawOrder; });
+				children.Sort((x, y) => x.DrawOrder - y.DrawOrder);
+		}
+
+		public XNAControl GetParent()
+		{
+			return parent;
 		}
 
 		//helper for SetParent
 		private void UpdateOffsets()
 		{
-			xOff = (int)parent.DrawAreaWithOffset.X;
-			yOff = (int)parent.DrawAreaWithOffset.Y;
+			xOff = parent.DrawAreaWithOffset.X;
+			yOff = parent.DrawAreaWithOffset.Y;
 
 			foreach (XNAControl child in children)
 				child.UpdateOffsets();
@@ -311,7 +313,7 @@ namespace XNAControls
 		{
 			foreach(XNAControl child in children)
 			{
-				child.DrawOrder = this.DrawOrder + 1;
+				child.DrawOrder = DrawOrder + 1;
 			}
 
 			base.OnDrawOrderChanged(sender, args);
