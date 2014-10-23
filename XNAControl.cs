@@ -265,10 +265,17 @@ namespace XNAControls
 			if (TopParent == null) //child controls can have negative offsets! only check for TopParents
 			{
 				Rectangle gdm = Game.Window.ClientBounds;
-				if (DrawLocation.X < 0) DrawLocation = new Vector2(0, DrawLocation.Y);
-				if (DrawLocation.Y < 0) DrawLocation = new Vector2(DrawLocation.X, 0);
-				if (DrawLocation.X > gdm.Width - DrawAreaWithOffset.Width) DrawLocation = new Vector2(gdm.Width - DrawAreaWithOffset.Width, DrawLocation.Y);
-				if (DrawLocation.Y > gdm.Height - DrawAreaWithOffset.Height) DrawLocation = new Vector2(DrawLocation.X, gdm.Height - DrawAreaWithOffset.Height);
+				if (gdm.Width > 0 && gdm.Height > 0) //when the client is minimized, this goes to shit
+				{
+					if (DrawLocation.X < 0)
+						DrawLocation = new Vector2(0, DrawLocation.Y);
+					if (DrawLocation.Y < 0)
+						DrawLocation = new Vector2(DrawLocation.X, 0);
+					if (DrawLocation.X > gdm.Width - DrawAreaWithOffset.Width)
+						DrawLocation = new Vector2(gdm.Width - DrawAreaWithOffset.Width, DrawLocation.Y);
+					if (DrawLocation.Y > gdm.Height - DrawAreaWithOffset.Height)
+						DrawLocation = new Vector2(DrawLocation.X, gdm.Height - DrawAreaWithOffset.Height);
+				}
 			}
 
 			PreviousMouseState = Mouse.GetState();
