@@ -1,9 +1,13 @@
-﻿using XNAFramework = Microsoft.Xna.Framework;
+﻿using System.Windows;
+using System.Windows.Forms.VisualStyles;
+using XNAFramework = Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
+using ContentAlignment = System.Drawing.ContentAlignment;
+using Size = System.Drawing.Size;
 
 namespace XNAControls
 {
@@ -45,6 +49,28 @@ namespace XNAControls
 				GenerateImage();
 			}
 		}
+
+		public Color BackColor
+		{
+			get { return _backColor; }
+			set
+			{
+				_backColor = value;
+
+				if(!AutoSize)
+					_backGround = new Texture2D(Game.GraphicsDevice, DrawArea.Width, DrawArea.Height);
+				else
+					_backGround = new Texture2D(Game.GraphicsDevice, _texture.Width, _texture.Height);
+
+				XNAFramework.Color[] bgData = new XNAFramework.Color[_backGround.Width * _backGround.Height];
+				for (int i = 0; i < bgData.Length; ++i)
+				{
+					bgData[i] = XNAFramework.Color.FromNonPremultiplied(_backColor.R, _backColor.G, _backColor.B, _backColor.A);
+				}
+				_backGround.SetData(bgData);
+			}
+		}
+
 		public bool AutoSize
 		{
 			get
@@ -143,16 +169,16 @@ namespace XNAControls
 			_align = ContentAlignment.TopLeft;
 		}
 
-		int? rowSpacing;
-		string _text;
-		bool _autoSize;
-		Font _font;
-		Color _color;
-		ContentAlignment _align;
-		System.Drawing.Text.TextRenderingHint _renderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-		private int? _textWidth = null;
-		Texture2D _texture;
-		bool _previousMouseOver = false;
+		private int? rowSpacing;
+		private string _text;
+		private bool _autoSize;
+		private Font _font;
+		private Color _color, _backColor;
+		private ContentAlignment _align;
+		private System.Drawing.Text.TextRenderingHint _renderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+		private int? _textWidth;
+		private Texture2D _texture, _backGround;
+		private bool _previousMouseOver;
 
 		public override void Initialize()
 		{
@@ -167,25 +193,30 @@ namespace XNAControls
 
 			SpriteBatch.Begin();
 
-			int x, y;
-			Size size = AutoSize ? new Size(_texture.Width, _texture.Height) : new Size(DrawAreaWithOffset.Width, DrawAreaWithOffset.Height);
+			int x = 0, y = 0;
+			Size size = new Size(_texture.Width, _texture.Height);
+			if (!AutoSize)
+			{
+				// Figure out alignment
+				string align = Enum.GetName(typeof (ContentAlignment), _align) ?? "";
+				if (align.Contains("Left"))
+					x = 0;
+				else if (align.Contains("Center"))
+					x = DrawArea.Width/2 - size.Width/2;
+				else
+					x = DrawArea.Width - size.Width;
+				if (align.Contains("Top"))
+					y = 0;
+				else if (align.Contains("Middle"))
+					y = DrawArea.Height/2 - size.Height/2;
+				else
+					y = DrawArea.Height - size.Height;
+			}
 
-			// Figure out alignment
-			string align = TextAlign.ToString();
-			if (align.Contains("Left"))
-				x = 0;
-			else if (align.Contains("Center"))
-				x = (int)(DrawArea.Width / 2 - size.Width / 2);
-			else
-				x = (int)(DrawArea.Width - size.Width);
-			if (align.Contains("Top"))
-				y = 0;
-			else if (align.Contains("Middle"))
-				y = (int)(DrawArea.Height / 2 - size.Height / 2);
-			else
-				y = (int)(DrawArea.Height - size.Height);
+			if(_backGround != null)
+				SpriteBatch.Draw(_backGround, DrawAreaWithOffset, XNAFramework.Color.White);
 
-			SpriteBatch.Draw(_texture, new XNAFramework.Rectangle(DrawAreaWithOffset.X + x, DrawAreaWithOffset.Y + y, size.Width, size.Height), XNAFramework.Color.White);
+			SpriteBatch.Draw(_texture, new XNAFramework.Vector2(DrawAreaWithOffset.X + x, DrawAreaWithOffset.Y + y), XNAFramework.Color.White);
 			SpriteBatch.End();
 
 			if (MouseOver && !_previousMouseOver)
@@ -203,6 +234,26 @@ namespace XNAControls
 			base.Draw(gameTime);
 		}
 
+		/// <summary>
+		/// Resizes the label using the current font to fit the current text
+		/// <para>Not valid for when AutoSize=true</para>
+		/// </summary>
+		/// <param name="x_padding">Total extra space to add to the new width, in pixels</param>
+		/// <param name="y_padding">Total extra space to add to the new height, in pixels</param>
+		public void ResizeBasedOnText(uint x_padding = 0, uint y_padding = 0)
+		{
+			if (_font == null || AutoSize) return;
+
+			using (Bitmap temp = new Bitmap(1, 1))
+			{
+				using (Graphics g = Graphics.FromImage(temp))
+				{
+					SizeF sz = g.MeasureString(_text, _font);
+					drawArea = new XNAFramework.Rectangle(DrawArea.X, DrawArea.Y, (int)Math.Round(sz.Width) + (int)x_padding, (int)Math.Round(sz.Height) + (int)y_padding);
+				}
+			}
+		}
+
 		protected virtual void MouseIsOver()
 		{
 		}
@@ -218,6 +269,10 @@ namespace XNAControls
 
 		public new void Dispose()
 		{
+			if(_texture != null)
+				_texture.Dispose();
+			if(_backGround != null)
+				_backGround.Dispose();
 			_font.Dispose();
 			base.Dispose();
 		}
