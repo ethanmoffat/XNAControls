@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -23,8 +20,8 @@ namespace XNAControls
 			}
 		}
 
-		private Texture2D _out; //texture for mouse out (primary display texture)
-		private Texture2D _over; //texture for mouse over
+		private readonly Texture2D _out; //texture for mouse out (primary display texture)
+		private readonly Texture2D _over; //texture for mouse over
 		private Texture2D _TEXTture; //get it?
 		private Texture2D _drawTexture; //texture to be drawn, selected based on MouseOver in Update method
 		
@@ -35,7 +32,7 @@ namespace XNAControls
 		/// </summary>
 		public Rectangle? ClickArea
 		{
-			get { return this.area; }
+			get { return area; }
 			set
 			{
 				area = value;
@@ -47,7 +44,7 @@ namespace XNAControls
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// Construct a button where the textures for over/out are a part of a sprite sheet.
 		/// </summary>
@@ -56,21 +53,35 @@ namespace XNAControls
 		/// <param name="location">Location to draw the button</param>
 		/// <param name="outSource">Source within the sprite sheet that contains the texture to draw on MouseOut</param>
 		/// <param name="overSource">Source within the sprite sheet that contains the texture to draw on MouseOver</param>
-		public XNAButton(Game encapsulatingGame, Texture2D sheet, Vector2 location, Rectangle outSource, Rectangle overSource) 
-			: base(encapsulatingGame, location, new Rectangle((int)location.X, (int)location.Y, outSource.Width, outSource.Height))
+		public XNAButton(Game encapsulatingGame, Texture2D sheet, Vector2 location, Rectangle? outSource = null, Rectangle? overSource = null)
+			: base(encapsulatingGame, location, null)
 		{
-			ClickArea = null;
-			
-			_out = new Texture2D(sheet.GraphicsDevice, outSource.Width, outSource.Height);
-			Color[] outData = new Color[outSource.Width * outSource.Height];
-			sheet.GetData<Color>(0, outSource, outData, 0, outData.Length);
-			_out.SetData<Color>(outData);
+			if (outSource == null && overSource == null)
+				throw new Exception("Unable to create button without any image");
 
-			_over = new Texture2D(sheet.GraphicsDevice, overSource.Width, overSource.Height);
-			Color[] overData = new Color[overSource.Width * overSource.Height];
-			sheet.GetData<Color>(0, overSource, overData, 0, overData.Length);
-			_over.SetData<Color>(overData);
-			
+			drawArea = new Rectangle((int) location.X,
+				(int) location.Y,
+				outSource == null ? overSource.Value.Width : outSource.Value.Width,
+				outSource == null ? overSource.Value.Height : outSource.Value.Height);
+
+			ClickArea = null;
+
+			if (outSource.HasValue)
+			{
+				_out = new Texture2D(sheet.GraphicsDevice, outSource.Value.Width, outSource.Value.Height);
+				Color[] outData = new Color[outSource.Value.Width * outSource.Value.Height];
+				sheet.GetData(0, outSource, outData, 0, outData.Length);
+				_out.SetData(outData);
+			}
+
+			if (overSource.HasValue)
+			{
+				_over = new Texture2D(sheet.GraphicsDevice, overSource.Value.Width, overSource.Value.Height);
+				Color[] overData = new Color[overSource.Value.Width * overSource.Value.Height];
+				sheet.GetData(0, overSource, overData, 0, overData.Length);
+				_over.SetData(overData);
+			}
+
 			_drawTexture = _out;
 		}
 
@@ -117,7 +128,7 @@ namespace XNAControls
 
 		public override void Update(GameTime gt)
 		{
-			if (!Visible || (XNAControl.Dialogs.Count > 0 && (XNAControl.Dialogs.Peek() != TopParent as XNADialog || TopParent == null)))
+			if (!Visible || (Dialogs.Count > 0 && (Dialogs.Peek() != TopParent as XNADialog || TopParent == null)))
 				return;
 
 			if (MouseOver && OnClick != null && PreviousMouseState.LeftButton == ButtonState.Pressed && Mouse.GetState().LeftButton == ButtonState.Released)
@@ -166,9 +177,8 @@ namespace XNAControls
 			//draw the text string
 			if (_TEXTture != null)
 			{
-				float xCoord, yCoord;
-				xCoord = (DrawAreaWithOffset.Width / 2) - (_TEXTture.Width / 2) + DrawAreaWithOffset.X;
-				yCoord = (DrawAreaWithOffset.Height / 2) - (_TEXTture.Height / 2) + DrawAreaWithOffset.Y;
+				float xCoord = (DrawAreaWithOffset.Width / 2) - (_TEXTture.Width / 2) + DrawAreaWithOffset.X;
+				float yCoord = (DrawAreaWithOffset.Height / 2) - (_TEXTture.Height / 2) + DrawAreaWithOffset.Y;
 				SpriteBatch.Draw(_TEXTture, new Vector2(xCoord, yCoord), Color.White);
 			}
 			SpriteBatch.End();
