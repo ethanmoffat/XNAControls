@@ -20,6 +20,7 @@ namespace XNAControls
 			}
 		}
 
+		private bool m_dragging;
 		private readonly Texture2D _out; //texture for mouse out (primary display texture)
 		private readonly Texture2D _over; //texture for mouse over
 		private Texture2D _TEXTture; //get it?
@@ -134,21 +135,31 @@ namespace XNAControls
 			if (MouseOver && OnClick != null && PreviousMouseState.LeftButton == ButtonState.Pressed && Mouse.GetState().LeftButton == ButtonState.Released)
 				OnClick(this);
 
-			if (DrawAreaWithOffset.Contains(PreviousMouseState.X, PreviousMouseState.Y) && OnClickDrag != null 
-				&& PreviousMouseState.LeftButton == ButtonState.Pressed && Mouse.GetState().LeftButton == ButtonState.Pressed
-				&& shouldClickDrag)
+			MouseState currentState = Mouse.GetState();
+
+			if (MouseOver && OnClickDrag != null
+				&& PreviousMouseState.LeftButton == ButtonState.Pressed && currentState.LeftButton == ButtonState.Pressed
+				&& shouldClickDrag && !m_dragging)
 			{
 				SuppressParentClickDrag(true);
-				OnClickDrag(this);
+				m_dragging = true;
 			}
-			else
+			else if (PreviousMouseState.LeftButton == ButtonState.Pressed && currentState.LeftButton == ButtonState.Released && m_dragging)
 			{
+				m_dragging = false;
 				SuppressParentClickDrag(false);
+			}
+
+			if (m_dragging) //dragging does not require MouseOver - but starting dragging does
+			{
+				OnClickDrag(this);
 			}
 
 			_drawTexture = MouseOver ? _over : _out;
 
-			PreviousMouseState = Mouse.GetState();
+			PreviousMouseState = currentState;
+
+			base.Update(gt);
 		}
 		
 		public override void Draw(GameTime gameTime)
