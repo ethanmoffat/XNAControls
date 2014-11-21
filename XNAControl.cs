@@ -318,12 +318,15 @@ namespace XNAControls
 		/// <param name="args"></param>
 		protected override void OnDrawOrderChanged(object sender, EventArgs args)
 		{
+			base.OnDrawOrderChanged(sender, args);
+
 			foreach(XNAControl child in children)
 			{
 				child.DrawOrder = DrawOrder + 1;
 			}
 
-			base.OnDrawOrderChanged(sender, args);
+			if(parent != null && parent.children.Count > 1)
+				parent.children.Sort((x, y) => x.DrawOrder >  y.DrawOrder ? 1 : x.DrawOrder == y.DrawOrder ? 0 : -1);
 		}
 
 		/// <summary>
