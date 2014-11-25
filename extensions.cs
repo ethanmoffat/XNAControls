@@ -70,7 +70,8 @@ namespace XNAControls
 						size.Height *= heightfactor;
 					}
 
-					size.Width = textWidth ?? size.Width;
+					if(textWidth != null && size.Width > textWidth.Value)
+						size.Width = textWidth.Value;
 
 					// size can't have zero width or height
 					if (size.Width == 0)
