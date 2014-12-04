@@ -25,7 +25,12 @@ namespace XNAControls
 		private readonly Texture2D _over; //texture for mouse over
 		private Texture2D _TEXTture; //get it?
 		private Texture2D _drawTexture; //texture to be drawn, selected based on MouseOver in Update method
-		
+
+		/// <summary>
+		/// If FlashSpeed is set, the button will change between over/out textures once every 'FlashSpeed' milliseconds
+		/// </summary>
+		public int? FlashSpeed { get; set; }
+
 		private Rectangle? area; //nullable rectangle for optional area that will respond to mouse click/hover
 		/// <summary>
 		/// Get/set the area that should respond to a click event.
@@ -154,8 +159,15 @@ namespace XNAControls
 			{
 				OnClickDrag(this);
 			}
-
-			_drawTexture = MouseOver ? _over : _out;
+			
+			if (!MouseOver && FlashSpeed != null && (int) gt.TotalGameTime.TotalMilliseconds%FlashSpeed == 0)
+			{
+				_drawTexture = _drawTexture == _over ? _out : _over;
+			}
+			else if (MouseOver)
+			{
+				_drawTexture = _over;
+			}
 
 			PreviousMouseState = currentState;
 
