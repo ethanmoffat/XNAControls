@@ -15,15 +15,15 @@ namespace XNAControls
 			set { _highlightColor = value; }
 		}
 
-		public EventHandler OnClick = null;
-		public EventHandler OnMouseOver = null;
-		public EventHandler OnMouseOut = null;
+		public EventHandler OnClick;
+		public EventHandler OnMouseOver;
+		public EventHandler OnMouseOut;
 
 		protected bool enableImmediateColorRevert = true;
 
 		[Obsolete("Passing a font as a parameter is deprecated. Specify font family and font size instead, and set additional parameters using the .Font property.")]
-		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, Font font, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
-			: base(game, area)
+		public XNAHyperLink(XNAFramework.Rectangle area, Font font, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
+			: base(area)
 		{
 			RenderingHint = renderHint;
 			Font = new Font(font, style);
@@ -31,23 +31,23 @@ namespace XNAControls
 		}
 
 		[Obsolete("Passing a font as a parameter is deprecated. Specify font family and font size instead, and set additional parameters using the .Font property.")]
-		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, Font font)
-			: base(game, area)
+		public XNAHyperLink(XNAFramework.Rectangle area, Font font)
+			: base(area)
 		{
 			Font = new Font(font, FontStyle.Underline);
 			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
-		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, string fontFamily, float fontSize, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
-			: base(game, area)
+		public XNAHyperLink(XNAFramework.Rectangle area, string fontFamily, float fontSize, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
+			: base(area)
 		{
 			RenderingHint = renderHint;
 			Font = new Font(fontFamily, fontSize, style);
 			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
-		public XNAHyperLink(XNAFramework.Game game, XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
-			: base(game, area)
+		public XNAHyperLink(XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
+			: base(area)
 		{
 			Font = new Font(fontFamily, fontSize);
 			ForeColor = Color.FromArgb(13, 158, 17);
@@ -55,7 +55,7 @@ namespace XNAControls
 
 		public override void Update(XNAFramework.GameTime gameTime)
 		{
-			if (!Visible || (XNAControl.Dialogs.Count != 0 && XNAControl.Dialogs.Peek() != TopParent as XNADialog))
+			if (!Visible || (Dialogs.Count != 0 && Dialogs.Peek() != TopParent as XNADialog))
 				return;
 
 			if (MouseOver && OnClick != null && PreviousMouseState.LeftButton == ButtonState.Pressed && Mouse.GetState().LeftButton == ButtonState.Released)

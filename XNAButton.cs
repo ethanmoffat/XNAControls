@@ -54,13 +54,12 @@ namespace XNAControls
 		/// <summary>
 		/// Construct a button where the textures for over/out are a part of a sprite sheet.
 		/// </summary>
-		/// <param name="encapsulatingGame">The game that owns the control</param>
 		/// <param name="sheet">The sprite sheet texture</param>
 		/// <param name="location">Location to draw the button</param>
 		/// <param name="outSource">Source within the sprite sheet that contains the texture to draw on MouseOut</param>
 		/// <param name="overSource">Source within the sprite sheet that contains the texture to draw on MouseOver</param>
-		public XNAButton(Game encapsulatingGame, Texture2D sheet, Vector2 location, Rectangle? outSource = null, Rectangle? overSource = null)
-			: base(encapsulatingGame, location, null)
+		public XNAButton(Texture2D sheet, Vector2 location, Rectangle? outSource = null, Rectangle? overSource = null)
+			: base(location, null)
 		{
 			if (outSource == null && overSource == null)
 				throw new Exception("Unable to create button without any image");
@@ -94,11 +93,10 @@ namespace XNAControls
 		/// <summary>
 		/// Construct a button where the textures for over/out are individual textures.
 		/// </summary>
-		/// <param name="encapsulatingGame">The game that owns the button</param>
 		/// <param name="textures">An array of length 2 containing an over texture and an out texture</param>
 		/// <param name="location">Location to draw the button</param>
-		public XNAButton(Game encapsulatingGame, Texture2D[] textures, Vector2 location)
-			: base(encapsulatingGame, location, new Rectangle((int)location.X, (int)location.Y, textures[0].Width, textures[0].Height))
+		public XNAButton(Texture2D[] textures, Vector2 location)
+			: base(location, new Rectangle((int)location.X, (int)location.Y, textures[0].Width, textures[0].Height))
 		{
 			if (textures.Length != 2)
 				throw new ArgumentException("You must specify an array of two textures for this constructor.");
@@ -110,18 +108,18 @@ namespace XNAControls
 			_drawTexture = _out;
 		}
 
-		public XNAButton(Game encapsulatingGame, Vector2 location, string text = "default")
-			: base(encapsulatingGame, location, null)
+		public XNAButton(Vector2 location, string text = "default")
+			: base(location, null)
 		{
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			using (System.IO.Stream s = assembly.GetManifestResourceStream(@"XNAControls.img.button.png"))
 			{
-				_out = Texture2D.FromStream(encapsulatingGame.GraphicsDevice, s);
+				_out = Texture2D.FromStream(Game.GraphicsDevice, s);
 			}
 
 			using(System.IO.Stream s = assembly.GetManifestResourceStream(@"XNAControls.img.button_hover.png"))
 			{
-				_over = Texture2D.FromStream(encapsulatingGame.GraphicsDevice, s);
+				_over = Texture2D.FromStream(Game.GraphicsDevice, s);
 			}
 
 			ClickArea = null;

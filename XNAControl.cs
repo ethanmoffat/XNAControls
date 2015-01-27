@@ -140,10 +140,10 @@ namespace XNAControls
 		/// Construct a generic XNAControl with an encapsulating game, a location on screen, and an area.
 		/// Side effects: adds this control to the game's components collection
 		/// </summary>
-		/// <param name="game">The game object that "owns" the control</param>
 		/// <param name="location">Location to draw the control on screen</param>
 		/// <param name="area">The draw area of the control</param>
-		public XNAControl(Game game, Vector2? location, Rectangle? area) : base(game)
+		public XNAControl(Vector2? location, Rectangle? area) 
+			: base(XNAControls.IsInitialized ? XNAControls.Game : null)
 		{
 			drawLocation = location ?? new Vector2(0, 0);
 			drawArea = area ?? new Rectangle((int)drawLocation.X, (int)drawLocation.Y, 1, 1);
@@ -153,25 +153,24 @@ namespace XNAControls
 
 			parent = null;
 			if(SpriteBatch == null)
-				SpriteBatch = new SpriteBatch(game.GraphicsDevice);
+				SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
 
 			xOff = yOff = 0;
 
 			DrawOrder = (int)ControlDrawLayer.BaseLayer; //normal controls drawn at this level
 
-			game.Components.Add(this); //add this control to the game components
+			Game.Components.Add(this); //add this control to the game components
 		}
 
 		/// <summary>
 		/// Instantiates the control but does NOT add this control to the components collection.
 		/// Parent is set to the specified parent control (null for no parent)
 		/// </summary>
-		/// <param name="game">The game object that should render this control</param>
 		/// <param name="location">Draw location on the screen, from the top-left point (DrawLocation) of the parent control (or 0,0 for no parent)</param>
 		/// <param name="area">Area of the control. Provides a rectangle for SpriteBatch draw operations</param>
 		/// <param name="parentControl">Parent control. Null for no parent. Offsets updated automatically. Parent controls will draw their own children.</param>
-		public XNAControl(Game game, Vector2? location = null, Rectangle? area = null, XNAControl parentControl = null)
-			: base(game)
+		public XNAControl(Vector2? location = null, Rectangle? area = null, XNAControl parentControl = null)
+			: base(XNAControls.IsInitialized ? XNAControls.Game : null)
 		{
 			drawLocation = location ?? new Vector2(0, 0);
 			drawArea = area ?? new Rectangle((int)drawLocation.X, (int)drawLocation.Y, 1, 1);
@@ -180,7 +179,7 @@ namespace XNAControls
 			PreviousKeyState = Keyboard.GetState();
 
 			if(SpriteBatch == null)
-				SpriteBatch = new SpriteBatch(game.GraphicsDevice);
+				SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
 			xOff = yOff = 0;
 
 			DrawOrder = (int)ControlDrawLayer.BaseLayer;

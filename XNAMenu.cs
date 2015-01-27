@@ -132,17 +132,14 @@ namespace XNAControls
 
 		public EventHandler SelectionChanged = null;
 
-		public XNAMenu(Game game, Rectangle area)
-			: base(game, new Vector2(area.X, area.Y), area)
+		public XNAMenu(Rectangle area)
+			: base(new Vector2(area.X, area.Y), area)
 		{
 			Items = new List<XNAMenuItem>();
 			Font = new SD.Font("Arial", 12);
 			ForeColor = SD.Color.Black;
 
-			SizeChanged += (o, e) =>
-				{
-					RenderBackground();
-				};
+			SizeChanged += (o, e) => RenderBackground();
 		}
 
 		void RenderBackground()
@@ -156,7 +153,7 @@ namespace XNAControls
 
 		public void AddMenuItem(string text, EventHandler chooseAction)
 		{
-			XNAMenuItem menuItem = new XNAMenuItem(Game,
+			XNAMenuItem menuItem = new XNAMenuItem(
 				new Rectangle(DrawAreaWithOffset.X, DrawAreaWithOffset.Y + ItemHeight * Items.Count, DrawAreaWithOffset.Width, ItemHeight), Font.FontFamily.Name, Font.Size)
 				{
 					TextAlign = SD.ContentAlignment.TopCenter,

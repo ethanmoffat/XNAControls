@@ -72,8 +72,8 @@ namespace XNAControls
 	{
 		public Microsoft.Xna.Framework.Graphics.Texture2D BackgroundImage { get; set; }
 
-		public XNAPanel(Game game, Rectangle? area = null)
-			: base(game, area == null ? null : new Nullable<Vector2>(new Vector2(area.Value.X, area.Value.Y)), area) { }
+		public XNAPanel(Rectangle? area = null)
+			: base(area == null ? null : new Vector2?(new Vector2(area.Value.X, area.Value.Y)), area) { }
 		
 		public void ClearTextBoxes()
 		{

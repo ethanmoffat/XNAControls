@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -74,8 +72,7 @@ namespace XNAControls
 
 		protected XNADialogButtons whichButtons;
 		
-		public XNADialog(Game encapsulatingGame, string msgText, string captionText = "", XNADialogButtons whichButtons = XNADialogButtons.Ok)
-			: base(encapsulatingGame)
+		public XNADialog(string msgText, string captionText = "", XNADialogButtons whichButtons = XNADialogButtons.Ok)
 		{
 			//specify location of any buttons relative to where control is being drawn
 			dlgButtons = new List<XNAButton>();
@@ -84,19 +81,16 @@ namespace XNAControls
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			using (System.IO.Stream s = assembly.GetManifestResourceStream(@"XNAControls.img.dlg.png"))
 			{
-				bgTexture = Texture2D.FromStream(encapsulatingGame.GraphicsDevice, s);
+				bgTexture = Texture2D.FromStream(Game.GraphicsDevice, s);
 			}
 
 			_setSize(bgTexture.Width, bgTexture.Height);
 
-			XNAButton Ok, Cancel;
-			Ok = new XNAButton(encapsulatingGame, new Vector2(196, 116));
-			Ok.Text = "Ok";
-			Ok.OnClick += (object x, EventArgs e) => { Close(Ok, XNADialogResult.OK); };
+			XNAButton Ok = new XNAButton(new Vector2(196, 116)) {Text = "Ok"};
+			Ok.OnClick += (x, e) => Close(Ok, XNADialogResult.OK);
 			Ok.SetParent(this);
-			Cancel = new XNAButton(encapsulatingGame, new Vector2(196, 116));
-			Cancel.Text = "Cancel";
-			Cancel.OnClick += (object x, EventArgs e) => { Close(Cancel, XNADialogResult.Cancel); };
+			XNAButton Cancel = new XNAButton(new Vector2(196, 116)) {Text = "Cancel"};
+			Cancel.OnClick += (x, e) => Close(Cancel, XNADialogResult.Cancel);
 			Cancel.SetParent(this);
 
 			switch (this.whichButtons = whichButtons)
@@ -117,37 +111,40 @@ namespace XNAControls
 			}
 
 			//top left of text: 15, 40
-			message = new XNALabel(encapsulatingGame, new Rectangle(15, 40, this.DrawArea.Width - 30, this.DrawArea.Height - 80));
-			message.Text = msgText;
-			message.TextAlign = System.Drawing.ContentAlignment.TopLeft;
-			message.Font = new System.Drawing.Font("Arial", 12);
-			message.ForeColor = System.Drawing.Color.Black;
+			message = new XNALabel(new Rectangle(15, 40, DrawArea.Width - 30, DrawArea.Height - 80))
+			{
+				Text = msgText,
+				TextAlign = System.Drawing.ContentAlignment.TopLeft,
+				Font = new System.Drawing.Font("Arial", 12),
+				ForeColor = System.Drawing.Color.Black,
+				TextWidth = 250
+			};
 			message.SetParent(this);
-			message.TextWidth = 250;
 
 			//top left of cap : 9, 11
-			caption = new XNALabel(encapsulatingGame, new Rectangle(9, 11, this.DrawArea.Width - 18, this.DrawArea.Height - 22));
-			caption.Text = captionText;
-			caption.TextAlign = System.Drawing.ContentAlignment.TopLeft;
-			caption.Font = new System.Drawing.Font("Arial", 12);
-			caption.ForeColor = System.Drawing.Color.Black;
+			caption = new XNALabel(new Rectangle(9, 11, DrawArea.Width - 18, DrawArea.Height - 22))
+			{
+				Text = captionText,
+				TextAlign = System.Drawing.ContentAlignment.TopLeft,
+				Font = new System.Drawing.Font("Arial", 12),
+				ForeColor = System.Drawing.Color.Black
+			};
 			caption.SetParent(this);
 
 			//center dialog based on txtSize of background texture
-			Center(encapsulatingGame.GraphicsDevice);
+			Center(Game.GraphicsDevice);
 
 			//draw dialog on top of everything - always!
 			//child controls DrawOrder is set accordingly
 
-			XNAControl.Dialogs.Push(this);
+			Dialogs.Push(this);
 
 			_fixDrawOrder();
 
 			Game.Components.Add(this);
 		}
 
-		protected XNADialog(Game encapsulatingGame)
-			: base(encapsulatingGame)
+		protected XNADialog()
 		{
 			//specify location of any buttons relative to where control is being drawn
 			dlgButtons = new List<XNAButton>();
@@ -156,7 +153,7 @@ namespace XNAControls
 
 		protected void _fixDrawOrder()
 		{
-			this.DrawOrder = (int)ControlDrawLayer.DialogLayer + (5 * XNAControl.Dialogs.Count);
+			DrawOrder = (int)ControlDrawLayer.DialogLayer + (5 * Dialogs.Count);
 		}
 		
 		public void Center(GraphicsDevice device)
@@ -169,22 +166,25 @@ namespace XNAControls
 		
 		public override void Update(GameTime gt)
 		{
-			if (!Visible || (XNAControl.Dialogs.Count > 0 && XNAControl.Dialogs.Peek() != this))
+			if (!Visible || (Dialogs.Count > 0 && Dialogs.Peek() != this))
 				return;
 			
 			KeyboardState keyState = Keyboard.GetState();
+			bool enterPressed = keyState.IsKeyUp(Keys.Enter) && PreviousKeyState.IsKeyDown(Keys.Enter);
+			bool escPressed = keyState.IsKeyUp(Keys.Escape) && PreviousKeyState.IsKeyDown(Keys.Escape);
 			//give a time buffer of 50ms so that an enter keypress from a textbox that produces a dialog isn't picked up by the update method here
-			if(keyState.IsKeyUp(Keys.Enter) && PreviousKeyState.IsKeyDown(Keys.Enter) && (gt.TotalGameTime - (openTime ?? (openTime = gt.TotalGameTime))).Value.Duration().Milliseconds > 50)
+			if((gt.TotalGameTime - (openTime ?? (openTime = gt.TotalGameTime))).Value.Duration().Milliseconds > 50)
 			{
-				//tie enter key press to close the dialog
-				//if we ever implement dialogresults this should constitute an "OK" response
-				if (whichButtons == XNADialogButtons.Cancel)
+				if (enterPressed)
 				{
-					//do the CloseAction tied to the cancel button
+					Close(dlgButtons[0], whichButtons == XNADialogButtons.Cancel ? XNADialogResult.Cancel : XNADialogResult.OK);
 				}
-				else
+				else if (escPressed)
 				{
-					//do the CloseAction tied to the OK button
+					if (whichButtons == XNADialogButtons.Ok)
+						Close(dlgButtons[0], XNADialogResult.OK);
+					else
+						Close(whichButtons == XNADialogButtons.OkCancel ? dlgButtons[1] : dlgButtons[0], XNADialogResult.Cancel);
 				}
 			}
 
@@ -221,8 +221,8 @@ namespace XNAControls
 		/// <param name="result">The result that the DialogClosing event should receive</param>
 		protected virtual void Close(XNAButton whichButton, XNADialogResult result)
 		{
-			XNAControl.Dialogs.Pop(); //remove this dialog from XNADialogs initially
-			int cntBeforeDlgClosingEvent = XNAControl.Dialogs.Count;
+			Dialogs.Pop(); //remove this dialog from XNADialogs initially
+			int cntBeforeDlgClosingEvent = Dialogs.Count;
 
 			CloseDialogEventArgs args = new CloseDialogEventArgs(result);
 			if (DialogClosing != null)
@@ -230,18 +230,18 @@ namespace XNAControls
 
 			if (args.CancelClose) //user code cancelled the closing operation. this dialog needs to be pushed back onto the stack properly
 			{
-				if (cntBeforeDlgClosingEvent == XNAControl.Dialogs.Count) //no other dialogs were created: push this back on the stack normally
-					XNAControl.Dialogs.Push(this); 
-				else if(cntBeforeDlgClosingEvent < XNAControl.Dialogs.Count) //other dialogs were created: remove them, push this dialog, push them back
+				if (cntBeforeDlgClosingEvent == Dialogs.Count) //no other dialogs were created: push this back on the stack normally
+					Dialogs.Push(this); 
+				else if(cntBeforeDlgClosingEvent < Dialogs.Count) //other dialogs were created: remove them, push this dialog, push them back
 				{
 					//this is super hacky, but i like having a stack for the dialogs that are open and don't want to change it to a list w/random access
 					Stack<XNADialog> newDialogs = new Stack<XNADialog>();
-					while (XNAControl.Dialogs.Count > cntBeforeDlgClosingEvent)
-						newDialogs.Push(XNAControl.Dialogs.Pop());
+					while (Dialogs.Count > cntBeforeDlgClosingEvent)
+						newDialogs.Push(Dialogs.Pop());
 					
-					XNAControl.Dialogs.Push(this);
+					Dialogs.Push(this);
 					while (newDialogs.Count > 0)
-						XNAControl.Dialogs.Push(newDialogs.Pop());
+						Dialogs.Push(newDialogs.Pop());
 				}
 
 				return;

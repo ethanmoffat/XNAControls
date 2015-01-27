@@ -15,8 +15,8 @@ namespace XNAControls
 
 		public Texture2D Texture { get; set; }
 
-		public XNAPictureBox(Game game, Rectangle area)
-			: base(game, new Vector2(area.X, area.Y), area)
+		public XNAPictureBox(Rectangle area)
+			: base(new Vector2(area.X, area.Y), area)
 		{
 		}
 
@@ -30,7 +30,7 @@ namespace XNAControls
 				SpriteBatch.Begin();
 				switch (StretchMode)
 				{
-					case XNAControls.StretchMode.CenterInFrame:
+					case StretchMode.CenterInFrame:
 						SpriteBatch.Draw(Texture,
 							new Rectangle(DrawAreaWithOffset.X + DrawArea.Width / 2 - Texture.Width / 2,
 								DrawAreaWithOffset.Y + DrawArea.Height / 2 - Texture.Width / 2,
@@ -39,7 +39,7 @@ namespace XNAControls
 							Color.White);
 						break;
 
-					case XNAControls.StretchMode.Stretch:
+					case StretchMode.Stretch:
 						SpriteBatch.Draw(Texture, new Rectangle(DrawAreaWithOffset.X, DrawAreaWithOffset.Y, DrawArea.Width, DrawArea.Height), Color.White);
 						break;
 				}

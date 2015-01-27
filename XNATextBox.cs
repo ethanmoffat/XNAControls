@@ -394,13 +394,12 @@ namespace XNAControls
 		/// <summary>
 		/// Construct an XNATextBox UI control.
 		/// </summary>
-		/// <param name="encapsulatingGame">Game object "owning" the text box</param>
 		/// <param name="area">The area of the screen in which the TextBox should be rendered (x, y)</param>
 		/// <param name="textures">Array of four textures. 0=background, 1=leftEdge, 2=rightEdge, 3=caret</param>
 		/// <param name="fontFamily">Font family string</param>
 		/// <param name="fontSize">Font size in points</param>
-		public XNATextBox(Game encapsulatingGame, Rectangle area, Texture2D[] textures, string fontFamily, float fontSize = 10.0f)
-			: base(encapsulatingGame, new Vector2(area.X, area.Y), area)
+		public XNATextBox(Rectangle area, Texture2D[] textures, string fontFamily, float fontSize = 10.0f)
+			: base(new Vector2(area.X, area.Y), area)
 		{
 			if (textures.Length != 4)
 				throw new ArgumentException("The textures array is invalid. Please pass in an array that contains 4 textures.");
@@ -422,8 +421,8 @@ namespace XNAControls
 			drawArea.Height = _textBoxBG.Height;
 		}
 
-		public XNATextBox(Game encapsulatingGame, Rectangle area, Texture2D cursor, string fontFamily, float fontSize = 10.0f)
-			:base(encapsulatingGame, new Vector2(area.X, area.Y), area)
+		public XNATextBox(Rectangle area, Texture2D cursor, string fontFamily, float fontSize = 10.0f)
+			:base(new Vector2(area.X, area.Y), area)
 		{
 			_textBoxBG = null;
 			_textBoxLeft = null;

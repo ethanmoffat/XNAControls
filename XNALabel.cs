@@ -1,11 +1,7 @@
-﻿using System.Windows;
-using System.Windows.Forms.VisualStyles;
-using XNAFramework = Microsoft.Xna.Framework;
+﻿using XNAFramework = Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.IO;
 using System.Drawing;
-using System.Windows.Forms;
 using ContentAlignment = System.Drawing.ContentAlignment;
 using Size = System.Drawing.Size;
 
@@ -149,8 +145,8 @@ namespace XNAControls
 			}
 		}
 
-		public XNALabel(XNAFramework.Game game, XNAFramework.Rectangle area)
-			: base(game, new XNAFramework.Vector2(area.X, area.Y), area)
+		public XNALabel(XNAFramework.Rectangle area)
+			: base(new XNAFramework.Vector2(area.X, area.Y), area)
 		{
 			_autoSize = true;
 			_text = "";
@@ -159,8 +155,8 @@ namespace XNAControls
 			_align = ContentAlignment.TopLeft;
 		}
 
-		public XNALabel(XNAFramework.Game game, XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
-			: base(game, new XNAFramework.Vector2(area.X, area.Y), area)
+		public XNALabel(XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
+			: base(new XNAFramework.Vector2(area.X, area.Y), area)
 		{
 			_autoSize = true;
 			_text = "";
