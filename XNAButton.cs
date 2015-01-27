@@ -166,7 +166,7 @@ namespace XNAControls
 			{
 				_drawTexture = _over;
 			}
-			else /*if (!MouseOver)*/
+			else if(FlashSpeed == null)
 			{
 				_drawTexture = _out;
 			}
