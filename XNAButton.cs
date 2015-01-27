@@ -166,6 +166,10 @@ namespace XNAControls
 			{
 				_drawTexture = _over;
 			}
+			else /*if (!MouseOver)*/
+			{
+				_drawTexture = _out;
+			}
 
 			PreviousMouseState = currentState;
 
