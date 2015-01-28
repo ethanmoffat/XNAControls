@@ -72,11 +72,15 @@ namespace XNAControls
 
 		protected XNADialogButtons whichButtons;
 		
+		private bool m_allowEnter, m_allowEsc;
+
 		public XNADialog(string msgText, string captionText = "", XNADialogButtons whichButtons = XNADialogButtons.Ok)
 		{
 			//specify location of any buttons relative to where control is being drawn
 			dlgButtons = new List<XNAButton>();
 			Visible = true;
+
+			KeyboardState openState = Keyboard.GetState();
 
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			using (System.IO.Stream s = assembly.GetManifestResourceStream(@"XNAControls.img.dlg.png"))
@@ -141,14 +145,22 @@ namespace XNAControls
 
 			_fixDrawOrder();
 
+			m_allowEnter = !openState.IsKeyDown(Keys.Enter);
+			m_allowEsc = !openState.IsKeyDown(Keys.Escape);
+
 			Game.Components.Add(this);
 		}
 
 		protected XNADialog()
 		{
+			KeyboardState openState = Keyboard.GetState();
+
 			//specify location of any buttons relative to where control is being drawn
 			dlgButtons = new List<XNAButton>();
 			Visible = true;
+
+			m_allowEnter = !openState.IsKeyDown(Keys.Enter);
+			m_allowEsc = !openState.IsKeyDown(Keys.Escape);
 		}
 
 		protected void _fixDrawOrder()
@@ -170,22 +182,21 @@ namespace XNAControls
 				return;
 			
 			KeyboardState keyState = Keyboard.GetState();
-			bool enterPressed = keyState.IsKeyUp(Keys.Enter) && PreviousKeyState.IsKeyDown(Keys.Enter);
-			bool escPressed = keyState.IsKeyUp(Keys.Escape) && PreviousKeyState.IsKeyDown(Keys.Escape);
-			//give a time buffer of 50ms so that an enter keypress from a textbox that produces a dialog isn't picked up by the update method here
-			if((gt.TotalGameTime - (openTime ?? (openTime = gt.TotalGameTime))).Value.Duration().Milliseconds > 50)
+
+			bool enterPressed = m_allowEnter && keyState.IsKeyUp(Keys.Enter) && PreviousKeyState.IsKeyDown(Keys.Enter);
+			bool escPressed = m_allowEsc && !enterPressed && keyState.IsKeyUp(Keys.Escape) && PreviousKeyState.IsKeyDown(Keys.Escape);
+			
+			if (enterPressed && (whichButtons == XNADialogButtons.OkCancel || whichButtons == XNADialogButtons.Ok))
 			{
-				if (enterPressed)
-				{
-					Close(dlgButtons[0], whichButtons == XNADialogButtons.Cancel ? XNADialogResult.Cancel : XNADialogResult.OK);
-				}
-				else if (escPressed)
-				{
-					if (whichButtons == XNADialogButtons.Ok)
-						Close(dlgButtons[0], XNADialogResult.OK);
-					else
-						Close(whichButtons == XNADialogButtons.OkCancel ? dlgButtons[1] : dlgButtons[0], XNADialogResult.Cancel);
-				}
+				//enter means "OK" response - so an "OK" button must be on the dialog.
+				//"OK" button is always added to dlgButtons first.
+				Close(dlgButtons[0], XNADialogResult.OK);
+			}
+				
+			if (escPressed && (whichButtons == XNADialogButtons.OkCancel || whichButtons == XNADialogButtons.Cancel))
+			{
+				//send the cancel button as sender, with 'cancel' result (on ESC)
+				Close(dlgButtons[whichButtons == XNADialogButtons.OkCancel ? 1 : 0], XNADialogResult.Cancel);
 			}
 
 			MouseState curState = Mouse.GetState();
@@ -194,7 +205,13 @@ namespace XNAControls
 			{
 				DrawLocation = new Vector2(DrawAreaWithOffset.X + (curState.X - PreviousMouseState.X), DrawAreaWithOffset.Y + (curState.Y - PreviousMouseState.Y));
 			}
-			
+
+			//check to see if the user released the key enter/escape if it was pressed when the dialog was opened
+			if (!m_allowEnter)
+				m_allowEnter = PreviousKeyState.IsKeyDown(Keys.Enter) && keyState.IsKeyUp(Keys.Enter);
+			if (!m_allowEsc)
+				m_allowEsc = PreviousKeyState.IsKeyDown(Keys.Escape) && keyState.IsKeyUp(Keys.Escape);
+
 			base.Update(gt);
 		}
 
