@@ -134,7 +134,8 @@ namespace XNAControls
 
 		protected EventHandler SizeChanged;
 
-		protected List<XNAControl> children = new List<XNAControl>();
+		protected readonly List<XNAControl> children = new List<XNAControl>();
+		protected List<Type> IgnoreDialogs= new List<Type>(); 
 		
 		/// <summary>
 		/// Construct a generic XNAControl with an encapsulating game, a location on screen, and an area.
@@ -245,7 +246,30 @@ namespace XNAControls
 			foreach (XNAControl child in children)
 				child.UpdateOffsets();
 		}
-		
+
+		protected virtual bool ShouldUpdate()
+		{
+			//IgnoreDialogs contains dialogs that if shown, the control will update anyway
+			//This is a special case for EndlessClient but I can see it being useful elsewhere too
+			if (Visible && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
+				return true;
+
+			if (!Visible || (Dialogs.Count > 0 && (Dialogs.Peek() != TopParent as XNADialog || TopParent == null)))
+				return false;
+
+			return true;
+		}
+
+		/// <summary>
+		/// Call this method with the typeof(DialogType) to ignore that type of dialog when checking for modal dialogs during call to ShouldUpdate
+		/// <para>Multiple dialog types can be ignored</para>
+		/// </summary>
+		/// <param name="dlgType">Type of the dialog to ignore</param>
+		public void IgnoreDialog(Type dlgType)
+		{
+			IgnoreDialogs.Add(dlgType);
+		}
+
 		/// <summary>
 		/// Updates base class properties and child controls. Sets previous mouse state. Call this after the derived class does it's update logic.
 		/// </summary>

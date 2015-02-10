@@ -55,7 +55,7 @@ namespace XNAControls
 
 		public override void Update(XNAFramework.GameTime gameTime)
 		{
-			if (!Visible || (Dialogs.Count != 0 && Dialogs.Peek() != TopParent as XNADialog))
+			if (!ShouldUpdate())
 				return;
 
 			if (MouseOver && OnClick != null && PreviousMouseState.LeftButton == ButtonState.Pressed && Mouse.GetState().LeftButton == ButtonState.Released)

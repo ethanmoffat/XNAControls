@@ -438,7 +438,7 @@ namespace XNAControls
 
 		public override void Update(GameTime gameTime)
 		{
-			if (!Visible || (XNAControl.Dialogs.Count != 0 && XNAControl.Dialogs.Peek() != TopParent as XNADialog))
+			if (!ShouldUpdate())
 				return;
 			MouseState mouse = Microsoft.Xna.Framework.Input.Mouse.GetState();
 			Point mousePoint = new Point(mouse.X, mouse.Y);

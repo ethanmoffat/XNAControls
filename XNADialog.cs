@@ -175,10 +175,22 @@ namespace XNAControls
 
 			DrawLocation = new Vector2( (viewWidth / 2) - (bgTexture.Width / 2), (viewHeight / 2) - (bgTexture.Height / 2));
 		}
+
+		//override base implementation: special case for dialogs
+		protected override bool ShouldUpdate()
+		{
+			if (Visible && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
+				return true;
+
+			if(!Visible || (Dialogs.Count > 0 && Dialogs.Peek() != this))
+				return false;
+
+			return true;
+		}
 		
 		public override void Update(GameTime gt)
 		{
-			if (!Visible || (Dialogs.Count > 0 && Dialogs.Peek() != this))
+			if (!ShouldUpdate())
 				return;
 			
 			KeyboardState keyState = Keyboard.GetState();

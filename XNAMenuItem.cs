@@ -35,7 +35,7 @@ namespace XNAControls
 
 		public override void Update(GameTime gameTime)
 		{
-			if (!Visible || (XNAControl.Dialogs.Count != 0 && XNAControl.Dialogs.Peek() != TopParent as XNADialog))
+			if (!ShouldUpdate())
 				return;
 
 			MouseState state = Mouse.GetState();

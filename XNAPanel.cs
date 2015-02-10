@@ -47,7 +47,7 @@ namespace XNAControls
 			List<DrawableGameComponent> tbs = Components.FindAll(x => x is XNATextBox);
 			foreach (DrawableGameComponent tb in tbs)
 			{
-				(tb as XNATextBox).Text = "";
+				((XNATextBox)tb).Text = "";
 			}
 		}
 
