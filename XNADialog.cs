@@ -179,7 +179,7 @@ namespace XNAControls
 		//override base implementation: special case for dialogs
 		protected override bool ShouldUpdate()
 		{
-			if (Visible && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
+			if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
 				return true;
 
 			if(!Visible || (Dialogs.Count > 0 && Dialogs.Peek() != this))

@@ -93,6 +93,9 @@ namespace XNAControls
 		{
 			if(force || ctrl.TopParent == null)
 				ctrl.SetParent(this);
+
+			foreach(Type t in IgnoreDialogs)
+				ctrl.IgnoreDialog(t);
 		}
 
 		/// <summary>

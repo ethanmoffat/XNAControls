@@ -251,7 +251,7 @@ namespace XNAControls
 		{
 			//IgnoreDialogs contains dialogs that if shown, the control will update anyway
 			//This is a special case for EndlessClient but I can see it being useful elsewhere too
-			if (Visible && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
+			if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
 				return true;
 
 			if (!Visible || (Dialogs.Count > 0 && (Dialogs.Peek() != TopParent as XNADialog || TopParent == null)))
@@ -267,6 +267,9 @@ namespace XNAControls
 		/// <param name="dlgType">Type of the dialog to ignore</param>
 		public void IgnoreDialog(Type dlgType)
 		{
+			if(IgnoreDialogs.Contains(dlgType))
+				throw new ArgumentException("That dialog is already a part of the ignored dialogs list for this control.", "dlgType");
+
 			IgnoreDialogs.Add(dlgType);
 		}
 
