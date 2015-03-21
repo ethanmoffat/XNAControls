@@ -16,7 +16,6 @@ namespace XNAControls
 		}
 
 		public EventHandler OnClick;
-		public EventHandler OnMouseOver;
 		public EventHandler OnMouseOut;
 
 		protected bool enableImmediateColorRevert = true;
@@ -53,6 +52,16 @@ namespace XNAControls
 			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
+		public override void Initialize()
+		{
+			OnMouseOver += (o, e) =>
+			{
+				_backupColor = ForeColor;
+				ForeColor = HighlightColor;
+			};
+			base.Initialize();
+		}
+
 		public override void Update(XNAFramework.GameTime gameTime)
 		{
 			if (!ShouldUpdate())
@@ -62,17 +71,6 @@ namespace XNAControls
 				OnClick(this, null);
 
 			base.Update(gameTime);
-		}
-
-		protected override void MouseIsOver()
-		{
-			_backupColor = ForeColor;
-			ForeColor = HighlightColor;
-
-			if (OnMouseOver != null)
-				OnMouseOver(this, null);
-
-			base.MouseIsOver();
 		}
 
 		protected override void MouseIsOut()
