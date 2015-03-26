@@ -29,6 +29,7 @@ namespace XNAControls
 		No,
 		Back,
 		Next,
+		Add,
 		NO_BUTTON_PRESSED
 	}
 
