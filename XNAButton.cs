@@ -183,10 +183,12 @@ namespace XNAControls
 			SpriteBatch.Begin();
 			
 			//draw the background texture
-			//if(_drawTexture != null)
 			try
 			{
-				SpriteBatch.Draw(_drawTexture, new Rectangle((int)DrawLocation.X + xOff, (int)DrawLocation.Y + yOff, DrawArea.Width, DrawArea.Height), Color.White);
+				if(_drawTexture != null)
+					SpriteBatch.Draw(_drawTexture, 
+						new Rectangle((int)DrawLocation.X + xOff, (int)DrawLocation.Y + yOff, DrawArea.Width, DrawArea.Height), 
+						Color.White);
 			}
 			catch(ArgumentException)
 			{
