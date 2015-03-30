@@ -210,10 +210,10 @@ namespace XNAControls
 	}
 	public interface IKeyboardSubscriber
 	{
-		void RecieveTextInput(char inputChar);
-		void RecieveTextInput(string text);
-		void RecieveCommandInput(char command);
-		void RecieveSpecialInput(Keys key);
+		void ReceiveTextInput(char inputChar);
+		void ReceiveTextInput(string text);
+		void ReceiveCommandInput(char command);
+		void ReceiveSpecialInput(Keys key);
 
 		bool Selected { get; set; } //or Focused
 	}
@@ -232,7 +232,7 @@ namespace XNAControls
 			if (_subscriber == null)
 				return;
 
-			_subscriber.RecieveSpecialInput(e.KeyCode);
+			_subscriber.ReceiveSpecialInput(e.KeyCode);
 		}
 
 		void EventInput_CharEntered(object sender, CharacterEventArgs e)
@@ -249,16 +249,16 @@ namespace XNAControls
 					thread.SetApartmentState(ApartmentState.STA);
 					thread.Start();
 					thread.Join();
-					_subscriber.RecieveTextInput(_pasteResult);
+					_subscriber.ReceiveTextInput(_pasteResult);
 				}
 				else
 				{
-					_subscriber.RecieveCommandInput(e.Character);
+					_subscriber.ReceiveCommandInput(e.Character);
 				}
 			}
 			else
 			{
-				_subscriber.RecieveTextInput(e.Character);
+				_subscriber.ReceiveTextInput(e.Character);
 			}
 		}
 
@@ -522,19 +522,19 @@ namespace XNAControls
 			base.Draw(gameTime);
 		}
 
-		public void RecieveTextInput(char inputChar)
+		public virtual void ReceiveTextInput(char inputChar)
 		{
 			Text = Text + inputChar;
 		}
-		public void RecieveTextInput(string text)
+		public virtual void ReceiveTextInput(string text)
 		{
 			Text = Text + text;
 		}
-		public void RecieveCommandInput(char command)
+		public virtual void ReceiveCommandInput(char command)
 		{
 			//ignore command input (ie enter keypresses) when there is a modal dialog up
 			//	and this text box is not a member of the modal dialog that is up
-			if (XNAControl.Dialogs.Count != 0 && XNAControl.Dialogs.Peek() != TopParent as XNADialog)
+			if (Dialogs.Count != 0 && Dialogs.Peek() != TopParent as XNADialog)
 				return;
 
 			switch (command)
@@ -553,7 +553,7 @@ namespace XNAControls
 					break;
 			}
 		}
-		public void RecieveSpecialInput(Keys key)
+		public virtual void ReceiveSpecialInput(Keys key)
 		{
 
 		}
