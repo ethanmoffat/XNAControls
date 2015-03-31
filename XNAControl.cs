@@ -251,6 +251,9 @@ namespace XNAControls
 
 		protected virtual bool ShouldUpdate()
 		{
+			//precondition - update should only happen when the game window is active!
+			if (!Game.IsActive) return false;
+
 			//IgnoreDialogs contains dialogs that if shown, the control will update anyway
 			//This is a special case for EndlessClient but I can see it being useful elsewhere too
 			if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))

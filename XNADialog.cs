@@ -180,6 +180,9 @@ namespace XNAControls
 		//override base implementation: special case for dialogs
 		protected override bool ShouldUpdate()
 		{
+			//precondition - update should only happen when the game window is active!
+			if (!Game.IsActive) return false;
+
 			if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
 				return true;
 
