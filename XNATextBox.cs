@@ -292,8 +292,6 @@ namespace XNAControls
 		}
 	}
 
-	public delegate void TextBoxEvent(object sender, EventArgs e = null);
-
 	public class XNATextBox : XNAControl, IKeyboardSubscriber
 	{
 		Texture2D _textBoxBG;
@@ -302,7 +300,7 @@ namespace XNAControls
 		Texture2D _caretTexture;
 
 		System.Drawing.Font _font;
-		System.Windows.Media.GlyphTypeface _glyphs;
+		GlyphTypeface _glyphs;
 		Texture2D _textTexture;
 		Texture2D _defaultTextTexture;
 
@@ -328,7 +326,7 @@ namespace XNAControls
 
 				_text = value ?? "";
 				if (OnTextChanged != null)
-					OnTextChanged(this);
+					OnTextChanged(this, new EventArgs());
 
 				if (_text != "")
 				{
@@ -386,6 +384,27 @@ namespace XNAControls
 				}
 
 				_defaultTextTexture = Game.DrawText(_defaultText, _font, System.Drawing.Color.FromArgb(80, 80, 80));
+			}
+		}
+
+		public event EventHandler OnFocused;
+
+		public event EventHandler OnEnterPressed;
+		public event EventHandler OnTabPressed;
+		public event EventHandler OnTextChanged;
+		public event EventHandler OnClicked;
+
+		//note: called by dispatcher when the subscriber text box is changed
+		private bool m_selected;
+		public bool Selected
+		{
+			get { return m_selected; }
+			set
+			{
+				bool oldSel = m_selected;
+				m_selected = value;
+				if (!oldSel && m_selected && OnFocused != null)
+					OnFocused(this, new EventArgs());
 			}
 		}
 
@@ -449,7 +468,16 @@ namespace XNAControls
 				if (PreviousMouseState.LeftButton == ButtonState.Released && mouse.LeftButton == ButtonState.Pressed)
 				{
 					if (OnClicked != null)
-						OnClicked(this);
+					{
+						bool prevSel = Selected;
+						OnClicked(this, new EventArgs());
+
+						//if clicking selected the TB
+						if (Selected && !prevSel && OnFocused != null)
+						{
+							OnFocused(this, new EventArgs());
+						}
+					}
 				}
 			}
 			else
@@ -545,28 +573,17 @@ namespace XNAControls
 					break;
 				case '\r': //return
 					if (OnEnterPressed != null)
-						OnEnterPressed(this);
+						OnEnterPressed(this, new EventArgs());
 					break;
 				case '\t': //tab
 					if (OnTabPressed != null)
-						OnTabPressed(this);
+						OnTabPressed(this, new EventArgs());
 					break;
 			}
 		}
 		public virtual void ReceiveSpecialInput(Keys key)
 		{
 
-		}
-
-		public event TextBoxEvent OnEnterPressed;
-		public event TextBoxEvent OnTabPressed;
-		public event TextBoxEvent OnTextChanged;
-		public event TextBoxEvent OnClicked;
-
-		public bool Selected
-		{
-			get;
-			set;
 		}
 
 		public new void Dispose()

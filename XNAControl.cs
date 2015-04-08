@@ -116,6 +116,8 @@ namespace XNAControls
 		protected KeyboardState PreviousKeyState { get; set; }
 
 		public event EventHandler OnMouseOver;
+		public event EventHandler OnMouseEnter;
+		public event EventHandler OnMouseLeave;
 
 		protected Vector2 drawLocation;
 		protected Rectangle drawArea;
@@ -292,6 +294,11 @@ namespace XNAControls
 
 			if (MouseOver && OnMouseOver != null)
 				OnMouseOver(this, new EventArgs());
+
+			if(MouseOver && !MouseOverPreviously && OnMouseEnter != null)
+				OnMouseEnter(this, new EventArgs());
+			else if(!MouseOver && MouseOverPreviously && OnMouseLeave != null)
+				OnMouseLeave(this, new EventArgs());
 
 			for (int i = 0; i < children.Count; ++i)
 				children[i].Update(gameTime);
