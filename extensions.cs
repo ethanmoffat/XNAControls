@@ -66,7 +66,7 @@ namespace XNAControls
 
 					if (textWidth != null && size.Width > textWidth)
 					{
-						int heightfactor = (int)Math.Round((float)size.Width / (textWidth ?? size.Width));
+						int heightfactor = (int)Math.Round((float)size.Width / textWidth.Value);
 						size.Height *= heightfactor;
 					}
 
@@ -91,17 +91,17 @@ namespace XNAControls
 						while (buffer.Length > 0) //keep going until the buffer is empty
 						{
 							//get the next word
-							bool endOfWord = true, lineOverFlow = true; //these are negative logic booleans: will be set to false when flagged
-							while (buffer.Length > 0 && (endOfWord = !whiteSpace.Contains(buffer[0])) &&
-								   (lineOverFlow = tmpGraphics.MeasureString(newLine + nextWord, font).Width < size.Width))
+							bool endOfWord = true, lineOverFlow = true;
+							//keep going until:
+							// - buffer is empty OR
+							// - the end of the word is reached (found white space character) OR
+							// - the line overflows
+							while (buffer.Length > 0 && !(endOfWord = whiteSpace.Contains(buffer[0])) &&
+								   !(lineOverFlow = !(tmpGraphics.MeasureString(newLine + nextWord, font).Width < size.Width)))
 							{
 								nextWord += buffer[0];
 								buffer = buffer.Remove(0, 1);
 							}
-
-							//flip the bools so the program reads more logically
-							endOfWord = !endOfWord;
-							lineOverFlow = !lineOverFlow;
 
 							if (endOfWord)
 							{
@@ -111,6 +111,13 @@ namespace XNAControls
 							}
 							else if (lineOverFlow)
 							{
+								//possible condition where newLine is empty and nextWord is not
+								//results in infinite loop - set newLine to nextWord here
+								if (newLine.Length == 0 && nextWord.Length > 0)
+								{
+									newLine = nextWord;
+									nextWord = "";
+								}
 								drawStrings.Add(newLine);
 								newLine = "";
 							}
@@ -121,9 +128,7 @@ namespace XNAControls
 							}
 						}
 
-						float height = 0;
-						foreach (string s in drawStrings)
-							height += tmpGraphics.MeasureString(s, font).Height + rowSpacing + 2;
+						float height = drawStrings.Sum(s => tmpGraphics.MeasureString(s, font).Height + rowSpacing + 2);
 						size.Height = (int)Math.Round(height);
 					}
 				}
