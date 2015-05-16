@@ -85,51 +85,46 @@ namespace XNAControls
 					}
 					else
 					{
-						string fullMessage = text, nextWord = ""; //copy parameter to temporary variable, instantiate next word outside of loop
-						bool done = false;
-						while (!done)
+						string buffer = text, newLine = "";
+						char[] whiteSpace = { ' ', '\t', '\n' };
+						string nextWord = "";
+						while (buffer.Length > 0) //keep going until the buffer is empty
 						{
-							string toDraw = "";
-							while (tmpGraphics.MeasureString(toDraw + nextWord, font).Width < size.Width && fullMessage.Length > 0)
+							//get the next word
+							bool endOfWord = true, lineOverFlow = true; //these are negative logic booleans: will be set to false when flagged
+							while (buffer.Length > 0 && (endOfWord = !whiteSpace.Contains(buffer[0])) &&
+								   (lineOverFlow = tmpGraphics.MeasureString(newLine + nextWord, font).Width < size.Width))
 							{
-								if (fullMessage[0] == ' ')
-								{
-									toDraw += nextWord;
-									if (toDraw.Length > 0 && toDraw[0] == ' ')
-										toDraw = toDraw.Remove(0, 1);
-									nextWord = " ";
-								}
-								else if (fullMessage[0] == '\n')
-								{
-									toDraw += nextWord;
-									if (toDraw.Length > 0 && toDraw[0] == ' ')
-										toDraw = toDraw.Remove(0, 1);
-									nextWord = " ";
-									fullMessage = fullMessage.Remove(0, 1);
-									break;
-								}
-								else
-								{
-									nextWord += fullMessage[0];
-								}
-								fullMessage = fullMessage.Remove(0, 1);
+								nextWord += buffer[0];
+								buffer = buffer.Remove(0, 1);
 							}
 
-							if (fullMessage.Length == 0)
-							{
-								done = true;
-								if (nextWord.Length > 0)
-								{
-									toDraw += nextWord;
-								}
-							}
+							//flip the bools so the program reads more logically
+							endOfWord = !endOfWord;
+							lineOverFlow = !lineOverFlow;
 
-							if (toDraw.Length > 0 && toDraw[0] == ' ')
-								toDraw = toDraw.Remove(0, 1);
-							drawStrings.Add(toDraw);
+							if (endOfWord)
+							{
+								newLine += nextWord + buffer[0];
+								buffer = buffer.Remove(0, 1);
+								nextWord = "";
+							}
+							else if (lineOverFlow)
+							{
+								drawStrings.Add(newLine);
+								newLine = "";
+							}
+							else
+							{
+								newLine += nextWord;
+								drawStrings.Add(newLine);
+							}
 						}
 
-						size.Height += tmpGraphics.MeasureString(drawStrings[0], font).ToSize().Height;
+						float height = 0;
+						foreach (string s in drawStrings)
+							height += tmpGraphics.MeasureString(s, font).Height + rowSpacing + 2;
+						size.Height = (int)Math.Round(height);
 					}
 				}
 			}
@@ -145,12 +140,12 @@ namespace XNAControls
 					graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
 					graphics.TextRenderingHint = renderingHint;
 
+					int unitHeight = (int)graphics.MeasureString("WygqpTM", font).Height + rowSpacing;
 					using (SolidBrush brush = new SolidBrush(foreColor))
 					{
 						int i = 0;
 						foreach (string drawString in drawStrings)
 						{
-							int unitHeight = (int)graphics.MeasureString("TEST", font).Height + rowSpacing;
 							int yCoord = textWidth == null ? 0 : (i * unitHeight);
 							graphics.DrawString(drawString, font, brush, new Point(0, yCoord));
 							i++;
