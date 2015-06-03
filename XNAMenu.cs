@@ -64,21 +64,6 @@ namespace XNAControls
 					mi.ForeColor = _highlightColor;
 			}
 		}
-		SD.Text.TextRenderingHint _renderingHint;
-		public SD.Text.TextRenderingHint RenderingHint
-		{
-			get
-			{
-				return _renderingHint;
-			}
-			set
-			{
-				_renderingHint = value;
-
-				foreach (XNAMenuItem mi in Items)
-					mi.RenderingHint = _renderingHint;
-			}
-		}
 
 		int selectedIndex = 0;
 		public int SelectedIndex
@@ -160,8 +145,7 @@ namespace XNAControls
 					Text = text,
 					Font = this.Font,
 					RegularColor = this.ForeColor,
-					HighlightColor = this.HighlightColor,
-					RenderingHint = this.RenderingHint
+					HighlightColor = this.HighlightColor
 				};
 			menuItem.OnClick += chooseAction;
 			menuItem.OnMouseOver += MenuItemHovered;
@@ -203,10 +187,7 @@ namespace XNAControls
 
 			if (state.IsKeyDown(Keys.Enter) && !PreviousKeyState.IsKeyDown(Keys.Enter))
 			{
-				XNAMenuItem selectedItem = Items[SelectedIndex];
-
-				if (selectedItem.OnClick != null)
-					selectedItem.OnClick(this, null);
+				Items[SelectedIndex].Click();
 			}
 
 			if (state.IsKeyDown(Keys.Up) && !PreviousKeyState.IsKeyDown(Keys.Up))

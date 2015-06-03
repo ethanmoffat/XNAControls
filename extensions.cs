@@ -51,7 +51,7 @@ namespace XNAControls
 			}
 		}
 
-		public static Texture2D DrawText(this XNAFramework.Game game, string text, Font font, Color foreColor, int? textWidth = null, System.Drawing.Text.TextRenderingHint renderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit, int rowSpacing = 0)
+		public static Texture2D DrawText(this XNAFramework.Game game, string text, Font font, Color foreColor, int? textWidth = null, int rowSpacing = 0)
 		{
 			if (string.IsNullOrEmpty(text))
 				return new Texture2D(game.GraphicsDevice, 1, 1);
@@ -143,7 +143,6 @@ namespace XNAControls
 					graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 					graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 					graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-					graphics.TextRenderingHint = renderingHint;
 
 					int unitHeight = (int)graphics.MeasureString("WygqpTM", font).Height + rowSpacing;
 					using (SolidBrush brush = new SolidBrush(foreColor))

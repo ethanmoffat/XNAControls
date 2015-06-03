@@ -7,7 +7,7 @@ namespace XNAControls
 {
 	public class XNAHyperLink : XNALabel
 	{
-		Color _highlightColor = Color.FromArgb(102, 158, 0);
+		Color _highlightColor;
 		Color _backupColor;
 		public Color HighlightColor
 		{
@@ -15,18 +15,13 @@ namespace XNAControls
 			set { _highlightColor = value; }
 		}
 
-		public EventHandler OnClick;
-		public EventHandler OnMouseOut;
-
-		protected bool enableImmediateColorRevert = true;
+		public event EventHandler OnClick;
 
 		[Obsolete("Passing a font as a parameter is deprecated. Specify font family and font size instead, and set additional parameters using the .Font property.")]
-		public XNAHyperLink(XNAFramework.Rectangle area, Font font, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
+		public XNAHyperLink(XNAFramework.Rectangle area, Font font, FontStyle style)
 			: base(area)
 		{
-			RenderingHint = renderHint;
 			Font = new Font(font, style);
-			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
 		[Obsolete("Passing a font as a parameter is deprecated. Specify font family and font size instead, and set additional parameters using the .Font property.")]
@@ -34,54 +29,53 @@ namespace XNAControls
 			: base(area)
 		{
 			Font = new Font(font, FontStyle.Underline);
-			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
-		public XNAHyperLink(XNAFramework.Rectangle area, string fontFamily, float fontSize, FontStyle style, System.Drawing.Text.TextRenderingHint renderHint)
+		public XNAHyperLink(XNAFramework.Rectangle area, string fontFamily, float fontSize, FontStyle style)
 			: base(area)
 		{
-			RenderingHint = renderHint;
 			Font = new Font(fontFamily, fontSize, style);
-			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
 		public XNAHyperLink(XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
 			: base(area)
 		{
 			Font = new Font(fontFamily, fontSize);
-			ForeColor = Color.FromArgb(13, 158, 17);
 		}
 
 		public override void Initialize()
 		{
-			OnMouseOver += (o, e) =>
+			ForeColor = Color.Blue;
+			HighlightColor = Color.Blue;
+
+			OnMouseEnter += (o, e) =>
 			{
 				_backupColor = ForeColor;
 				ForeColor = HighlightColor;
+			};
+			OnMouseLeave += (o, e) =>
+			{
+				ForeColor = _backupColor;
 			};
 			base.Initialize();
 		}
 
 		public override void Update(XNAFramework.GameTime gameTime)
 		{
-			if (!ShouldUpdate())
+			if (!Visible || !ShouldUpdate())
 				return;
 
-			if (MouseOver && OnClick != null && PreviousMouseState.LeftButton == ButtonState.Pressed && Mouse.GetState().LeftButton == ButtonState.Released)
+			if (MouseOver && MouseOverPreviously && OnClick != null && PreviousMouseState.LeftButton == ButtonState.Pressed &&
+			    Mouse.GetState().LeftButton == ButtonState.Released)
 				OnClick(this, null);
 
 			base.Update(gameTime);
 		}
 
-		protected override void MouseIsOut()
+		public void Click()
 		{
-			if (enableImmediateColorRevert)
-				ForeColor = _backupColor;
-
-			if (OnMouseOut != null)
-				OnMouseOut(this, null);
-
-			base.MouseIsOut();
+			if (OnClick != null)
+				OnClick(this, null);
 		}
 	}
 }

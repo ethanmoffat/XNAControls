@@ -91,21 +91,9 @@ namespace XNAControls
 				GenerateImage();
 			}
 		}
-		public System.Drawing.Text.TextRenderingHint RenderingHint
-		{
-			get
-			{
-				return _renderingHint;
-			}
-			set
-			{
-				_renderingHint = value;
-				GenerateImage();
-			}
-		}
 		
 		/// <summary>
-		/// The text width in pixels
+		/// Get or set the text width in pixels
 		/// </summary> 
 		public int? TextWidth
 		{
@@ -117,7 +105,7 @@ namespace XNAControls
 			}
 		}
 		/// <summary>
-		/// The actual text width in pixels
+		/// Get the actual text width of underlying texture
 		/// </summary> 
 		public int ActualWidth
 		{
@@ -125,7 +113,7 @@ namespace XNAControls
 		}
 
 		/// <summary>
-		/// The text converted as a Texture2D
+		/// The underlying texture of the label
 		/// </summary>
 		public Texture2D Texture
 		{
@@ -145,6 +133,19 @@ namespace XNAControls
 			}
 		}
 
+		public FontStyle Style
+		{
+			get { return _style; }
+			set
+			{
+				_style = value;
+				Font oldfont = _font;
+				_font = new Font(oldfont.FontFamily, oldfont.Size, _style);
+				oldfont.Dispose();
+				GenerateImage();
+			}
+		}
+
 		public XNALabel(XNAFramework.Rectangle area)
 			: base(new XNAFramework.Vector2(area.X, area.Y), area)
 		{
@@ -153,6 +154,7 @@ namespace XNAControls
 			_font = new Font("Arial", 12);
 			_color = Color.Black;
 			_align = ContentAlignment.TopLeft;
+			_style = FontStyle.Regular;
 		}
 
 		public XNALabel(XNAFramework.Rectangle area, string fontFamily, float fontSize = 12.0f)
@@ -163,6 +165,7 @@ namespace XNAControls
 			_font = new Font(fontFamily, fontSize);
 			_color = Color.Black;
 			_align = ContentAlignment.TopLeft;
+			_style = FontStyle.Regular;
 		}
 
 		private int? rowSpacing;
@@ -171,15 +174,22 @@ namespace XNAControls
 		private Font _font;
 		private Color _color, _backColor;
 		private ContentAlignment _align;
-		private System.Drawing.Text.TextRenderingHint _renderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 		private int? _textWidth;
 		private Texture2D _texture, _backGround;
-		private bool _previousMouseOver;
+		private FontStyle _style;
 
 		public override void Initialize()
 		{
 			GenerateImage();
 			base.Initialize();
+		}
+
+		public override void Update(XNAFramework.GameTime gameTime)
+		{
+			if (!Visible || !ShouldUpdate())
+				return;
+
+			base.Update(gameTime);
 		}
 
 		public override void Draw(XNAFramework.GameTime gameTime)
@@ -215,18 +225,6 @@ namespace XNAControls
 			SpriteBatch.Draw(_texture, new XNAFramework.Vector2(DrawAreaWithOffset.X + x, DrawAreaWithOffset.Y + y), XNAFramework.Color.White);
 			SpriteBatch.End();
 
-			if (MouseOver && !_previousMouseOver)
-			{
-				MouseIsOver();
-				_previousMouseOver = true;
-			}
-
-			if (!MouseOver && _previousMouseOver)
-			{
-				_previousMouseOver = false;
-				MouseIsOut();
-			}
-
 			base.Draw(gameTime);
 		}
 
@@ -250,17 +248,9 @@ namespace XNAControls
 			}
 		}
 
-		protected virtual void MouseIsOver()
-		{
-		}
-
-		protected virtual void MouseIsOut()
-		{
-		}
-
 		void GenerateImage()
 		{
-			_texture = Game.DrawText(Text, Font, ForeColor, TextWidth, RenderingHint, rowSpacing ?? 0);
+			_texture = Game.DrawText(Text, Font, ForeColor, TextWidth, rowSpacing ?? 0);
 		}
 
 		public new void Dispose()

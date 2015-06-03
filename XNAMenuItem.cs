@@ -15,14 +15,12 @@ namespace XNAControls
 			: base(area, font)
 		{
 			SelectionChanged(false);
-			enableImmediateColorRevert = false;
 		}
 
 		public XNAMenuItem(Rectangle area, string fontFamily, float fontSize = 12.0f)
 			: base(area, fontFamily, fontSize)
 		{
 			SelectionChanged(false);
-			enableImmediateColorRevert = false;
 		}
 
 		public void SelectionChanged(bool selected)
@@ -31,19 +29,6 @@ namespace XNAControls
 			//assignment in condition is by design
 			ForeColor = (Selected = selected) ? HighlightColor : RegularColor;
 // ReSharper restore CSharpWarnings::CS0665
-		}
-
-		public override void Update(GameTime gameTime)
-		{
-			if (!ShouldUpdate())
-				return;
-
-			MouseState state = Mouse.GetState();
-
-			if (!Selected && MouseOver && (state.X != PreviousMouseState.X || state.Y != PreviousMouseState.Y))
-				MouseIsOver();
-
-			base.Update(gameTime);
 		}
 	}
 }
