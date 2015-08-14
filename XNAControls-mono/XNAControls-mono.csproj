@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{662D8F0D-68FA-496D-BFC8-CC84CD41F764}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>XNAControls_mono</RootNamespace>
+    <AssemblyName>XNAControls-mono</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\ControlsInit.cs">
+      <Link>ControlsInit.cs</Link>
+    </Compile>
+    <Compile Include="..\extensions.cs">
+      <Link>extensions.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAButton.cs">
+      <Link>XNAButton.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAControl.cs">
+      <Link>XNAControl.cs</Link>
+    </Compile>
+    <Compile Include="..\XNADialog.cs">
+      <Link>XNADialog.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAHyperLink.cs">
+      <Link>XNAHyperLink.cs</Link>
+    </Compile>
+    <Compile Include="..\XNALabel.cs">
+      <Link>XNALabel.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAMenu.cs">
+      <Link>XNAMenu.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAMenuItem.cs">
+      <Link>XNAMenuItem.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAPanel.cs">
+      <Link>XNAPanel.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAPictureBox.cs">
+      <Link>XNAPictureBox.cs</Link>
+    </Compile>
+    <Compile Include="..\XNATextBox.cs">
+      <Link>XNATextBox.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="MonoGame.Framework, Version=3.4.0.456, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

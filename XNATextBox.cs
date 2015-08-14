@@ -12,7 +12,7 @@ namespace XNAControls
 {
 	//From top answer on: http://stackoverflow.com/questions/10216757/adding-inputbox-like-control-to-xna-game
 	//Some modifications made by Ethan Moffat and Brian Gradin
-	internal class NativeMethods
+	internal static class NativeMethods
 	{
 		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
 		public static extern IntPtr LoadKeyboardLayout(
