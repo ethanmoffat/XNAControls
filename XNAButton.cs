@@ -112,12 +112,22 @@ namespace XNAControls
 			: base(location, null)
 		{
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-			using (System.IO.Stream s = assembly.GetManifestResourceStream(@"XNAControls.img.button.png"))
+
+#if MONO
+			const string button = @"XNAControls_mono.img.button.png";
+			const string button_hover = @"XNAControls_mono.img.button_hover.png";
+#else
+			const string button = @"XNAControls.img.button.png";
+			const string button_hover = @"XNAControls.img.button_hover.png";
+#endif
+
+
+			using (System.IO.Stream s = assembly.GetManifestResourceStream(button))
 			{
 				_out = Texture2D.FromStream(Game.GraphicsDevice, s);
 			}
 
-			using(System.IO.Stream s = assembly.GetManifestResourceStream(@"XNAControls.img.button_hover.png"))
+			using(System.IO.Stream s = assembly.GetManifestResourceStream(button_hover))
 			{
 				_over = Texture2D.FromStream(Game.GraphicsDevice, s);
 			}

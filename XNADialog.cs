@@ -82,9 +82,13 @@ namespace XNAControls
 			Visible = true;
 
 			KeyboardState openState = Keyboard.GetState();
-
+#if MONO
+			const string dlg = @"XNAControls_mono.img.dlg.png";
+#else
+			const string dlg = @"XNAControls.img.dlg.png";
+#endif
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-			using (System.IO.Stream s = assembly.GetManifestResourceStream(@"XNAControls.img.dlg.png"))
+			using (System.IO.Stream s = assembly.GetManifestResourceStream(dlg))
 			{
 				bgTexture = Texture2D.FromStream(Game.GraphicsDevice, s);
 			}
