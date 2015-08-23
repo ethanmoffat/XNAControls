@@ -121,11 +121,19 @@ namespace XNAControls
 								drawStrings.Add(newLine);
 								newLine = "";
 							}
-							else
+							else //buffer.Length == 0
 							{
 								newLine += nextWord;
 								drawStrings.Add(newLine);
+								newLine = "";
 							}
+						}
+
+						//remainder left in newLine after splitting operation
+						if (newLine.Length > 0)
+						{
+							var split = newLine.Split(new [] {'\n'});
+							drawStrings.AddRange(split);
 						}
 
 						float height = drawStrings.Sum(s => tmpGraphics.MeasureString(s, font).Height + rowSpacing + 2);
