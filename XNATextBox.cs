@@ -560,9 +560,7 @@ namespace XNAControls
 		}
 		public virtual void ReceiveCommandInput(char command)
 		{
-			//ignore command input (ie enter keypresses) when there is a modal dialog up
-			//	and this text box is not a member of the modal dialog that is up
-			if (Dialogs.Count != 0 && Dialogs.Peek() != TopParent as XNADialog)
+			if (!XNAControls.IgnoreEnterForDialogs && Dialogs.Count != 0 && Dialogs.Peek() != TopParent as XNADialog)
 				return;
 
 			switch (command)

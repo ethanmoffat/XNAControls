@@ -16,6 +16,16 @@ namespace XNAControls
 		/// <para>For internal use only.</para>
 		/// </summary>
 		internal static bool IsInitialized { get; private set; }
+
+		/// <summary>
+		/// Set to 'true' to ignore the Enter key in the base dialog class (ie if this behavior is overridden elsewhere)
+		/// </summary>
+		public static bool IgnoreEnterForDialogs { get; set; }
+
+		/// <summary>
+		/// Set to 'true' to ignore the ESC key in the base dialog class (ie if this behavior is overridden elsewhere)
+		/// </summary>
+		public static bool IgnoreEscForDialogs { get; set; }
 		
 		/// <summary>
 		/// Initialize the XNAControls library

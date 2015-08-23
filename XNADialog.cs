@@ -203,20 +203,20 @@ namespace XNAControls
 			
 			KeyboardState keyState = Keyboard.GetState();
 
-			bool enterPressed = m_allowEnter && keyState.IsKeyUp(Keys.Enter) && PreviousKeyState.IsKeyDown(Keys.Enter);
-			bool escPressed = m_allowEsc && !enterPressed && keyState.IsKeyUp(Keys.Escape) && PreviousKeyState.IsKeyDown(Keys.Escape);
+			bool enterPressed = m_allowEnter && keyState.IsKeyUp(Keys.Enter) && PreviousKeyState.IsKeyDown(Keys.Enter) && !XNAControls.IgnoreEnterForDialogs;
+			bool escPressed = m_allowEsc && !enterPressed && keyState.IsKeyUp(Keys.Escape) && PreviousKeyState.IsKeyDown(Keys.Escape) && !XNAControls.IgnoreEscForDialogs;
 			
 			if (enterPressed && (whichButtons == XNADialogButtons.OkCancel || whichButtons == XNADialogButtons.Ok))
 			{
 				//enter means "OK" response - so an "OK" button must be on the dialog.
 				//"OK" button is always added to dlgButtons first.
-				Close(dlgButtons[0], XNADialogResult.OK);
+				Close(dlgButtons.Count == 0 ? null : dlgButtons[0], XNADialogResult.OK);
 			}
 				
 			if (escPressed && (whichButtons == XNADialogButtons.OkCancel || whichButtons == XNADialogButtons.Cancel))
 			{
 				//send the cancel button as sender, with 'cancel' result (on ESC)
-				Close(dlgButtons[whichButtons == XNADialogButtons.OkCancel ? 1 : 0], XNADialogResult.Cancel);
+				Close(dlgButtons.Count == 0 ? null : dlgButtons[whichButtons == XNADialogButtons.OkCancel ? 1 : 0], XNADialogResult.Cancel);
 			}
 
 			MouseState curState = Mouse.GetState();
