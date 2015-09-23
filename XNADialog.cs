@@ -75,7 +75,7 @@ namespace XNAControls
 		
 		private bool m_allowEnter, m_allowEsc;
 
-		public XNADialog(string msgText, string captionText = "", XNADialogButtons whichButtons = XNADialogButtons.Ok)
+		public XNADialog(string spriteFontContentName, string msgText, string captionText = "", XNADialogButtons whichButtons = XNADialogButtons.Ok)
 		{
 			//specify location of any buttons relative to where control is being drawn
 			dlgButtons = new List<XNAButton>();
@@ -95,10 +95,10 @@ namespace XNAControls
 
 			_setSize(bgTexture.Width, bgTexture.Height);
 
-			XNAButton Ok = new XNAButton(new Vector2(196, 116)) {Text = "Ok"};
+			XNAButton Ok = new XNAButton(new Vector2(196, 116), "OK", spriteFontContentName);
 			Ok.OnClick += (x, e) => Close(Ok, XNADialogResult.OK);
 			Ok.SetParent(this);
-			XNAButton Cancel = new XNAButton(new Vector2(196, 116)) {Text = "Cancel"};
+			XNAButton Cancel = new XNAButton(new Vector2(196, 116), "Cancel", spriteFontContentName);
 			Cancel.OnClick += (x, e) => Close(Cancel, XNADialogResult.Cancel);
 			Cancel.SetParent(this);
 
@@ -120,23 +120,19 @@ namespace XNAControls
 			}
 
 			//top left of text: 15, 40
-			message = new XNALabel(new Rectangle(15, 40, DrawArea.Width - 30, DrawArea.Height - 80))
+			message = new XNALabel(new Rectangle(15, 40, DrawArea.Width - 30, DrawArea.Height - 80), spriteFontContentName)
 			{
 				Text = msgText,
 				TextAlign = System.Drawing.ContentAlignment.TopLeft,
-				Font = new System.Drawing.Font("Arial", 12),
-				ForeColor = System.Drawing.Color.Black,
 				TextWidth = 250
 			};
 			message.SetParent(this);
 
 			//top left of cap : 9, 11
-			caption = new XNALabel(new Rectangle(9, 11, DrawArea.Width - 18, DrawArea.Height - 22))
+			caption = new XNALabel(new Rectangle(9, 11, DrawArea.Width - 18, DrawArea.Height - 22), spriteFontContentName)
 			{
 				Text = captionText,
-				TextAlign = System.Drawing.ContentAlignment.TopLeft,
-				Font = new System.Drawing.Font("Arial", 12),
-				ForeColor = System.Drawing.Color.Black
+				TextAlign = System.Drawing.ContentAlignment.TopLeft
 			};
 			caption.SetParent(this);
 

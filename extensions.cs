@@ -30,27 +30,7 @@ namespace XNAControls
 				return Texture2D.FromStream(game.GraphicsDevice, ms);
 			}
 		}
-
-		public static Texture2D DrawRectangle(this XNAFramework.Game game, Size size, Color fillColor, Color? borderColor = null)
-		{
-			using (Bitmap bm = new Bitmap(size.Width, size.Height))
-			{
-				using (Graphics g = Graphics.FromImage(bm))
-				{
-					using (Brush brush = new SolidBrush(fillColor))
-						g.FillRectangle(brush, 0, 0, size.Width, size.Height);
-
-					using (Brush brush = new SolidBrush(borderColor ?? Color.Transparent))
-					{
-						using (Pen pen = new Pen(brush, 1))
-							g.DrawRectangle(pen, 0, 0, size.Width - 1, size.Height - 1);
-					}
-				}
-
-				return bm.ToTexture2D(game);
-			}
-		}
-
+        
 		public static Texture2D DrawText(this XNAFramework.Game game, string text, Font font, Color foreColor, int? textWidth = null, int rowSpacing = 0)
 		{
 			if (string.IsNullOrEmpty(text))

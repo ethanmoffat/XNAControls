@@ -36,6 +36,9 @@
     <Compile Include="..\extensions.cs">
       <Link>extensions.cs</Link>
     </Compile>
+    <Compile Include="..\TextSplitter.cs">
+      <Link>TextSplitter.cs</Link>
+    </Compile>
     <Compile Include="..\XNAButton.cs">
       <Link>XNAButton.cs</Link>
     </Compile>
@@ -50,12 +53,6 @@
     </Compile>
     <Compile Include="..\XNALabel.cs">
       <Link>XNALabel.cs</Link>
-    </Compile>
-    <Compile Include="..\XNAMenu.cs">
-      <Link>XNAMenu.cs</Link>
-    </Compile>
-    <Compile Include="..\XNAMenuItem.cs">
-      <Link>XNAMenuItem.cs</Link>
     </Compile>
     <Compile Include="..\XNAPanel.cs">
       <Link>XNAPanel.cs</Link>

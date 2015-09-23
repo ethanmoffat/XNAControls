@@ -1,30 +1,28 @@
 ﻿using System;
+using System.Drawing;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace XNAControls
 {
 	public class XNAButton : XNAControl
 	{
 		public delegate void ButtonClickEvent(object sender, EventArgs e = null);
-
-		private string _text;
+        
 		public string Text
 		{
-			get { return _text; }
-			set
-			{
-				_text = value;
-				_TEXTture = Game.DrawText(_text, new System.Drawing.Font("Arial", 12), System.Drawing.Color.Black);
-			}
+			get { return _textLabel.Text; }
+			set { _textLabel.Text = value; }
 		}
 
-		private bool m_dragging;
+		private bool _dragging;
 		private readonly Texture2D _out; //texture for mouse out (primary display texture)
 		private readonly Texture2D _over; //texture for mouse over
-		private Texture2D _TEXTture; //get it?
 		private Texture2D _drawTexture; //texture to be drawn, selected based on MouseOver in Update method
+	    private readonly XNALabel _textLabel;
 
 		/// <summary>
 		/// If FlashSpeed is set, the button will change between over/out textures once every 'FlashSpeed' milliseconds
@@ -108,7 +106,7 @@ namespace XNAControls
 			_drawTexture = _out;
 		}
 
-		public XNAButton(Vector2 location, string text = "default")
+		public XNAButton(Vector2 location, string text, string spriteFontContentName)
 			: base(location, null)
 		{
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -133,10 +131,16 @@ namespace XNAControls
 			}
 
 			ClickArea = null;
-			//_setSize(_out.Width, _out.Height);
 			_setSize(80, 30);
 
-			Text = text;
+		    _textLabel = new XNALabel(DrawArea, spriteFontContentName)
+		    {
+                AutoSize = false,
+                ForeColor = Color.Black,
+		        Text = text,
+                TextAlign = ContentAlignment.MiddleCenter
+		    };
+            _textLabel.SetParent(this);
 			_drawTexture = _out;
 		}
 
@@ -152,18 +156,18 @@ namespace XNAControls
 
 			if (MouseOver && OnClickDrag != null
 				&& PreviousMouseState.LeftButton == ButtonState.Pressed && currentState.LeftButton == ButtonState.Pressed
-				&& shouldClickDrag && !m_dragging)
+				&& shouldClickDrag && !_dragging)
 			{
 				SuppressParentClickDrag(true);
-				m_dragging = true;
+				_dragging = true;
 			}
-			else if (PreviousMouseState.LeftButton == ButtonState.Pressed && currentState.LeftButton == ButtonState.Released && m_dragging)
+			else if (PreviousMouseState.LeftButton == ButtonState.Pressed && currentState.LeftButton == ButtonState.Released && _dragging)
 			{
-				m_dragging = false;
+				_dragging = false;
 				SuppressParentClickDrag(false);
 			}
 
-			if (m_dragging) //dragging does not require MouseOver - but starting dragging does
+			if (_dragging && OnClickDrag != null) //dragging does not require MouseOver - but starting dragging does
 			{
 				OnClickDrag(this);
 			}
@@ -210,14 +214,7 @@ namespace XNAControls
 				SpriteBatch.End();
 				return;
 			}
-
-			//draw the text string
-			if (_TEXTture != null)
-			{
-				float xCoord = (DrawAreaWithOffset.Width / 2) - (_TEXTture.Width / 2) + DrawAreaWithOffset.X;
-				float yCoord = (DrawAreaWithOffset.Height / 2) - (_TEXTture.Height / 2) + DrawAreaWithOffset.Y;
-				SpriteBatch.Draw(_TEXTture, new Vector2(xCoord, yCoord), Color.White);
-			}
+            
 			SpriteBatch.End();
 
 			base.Draw(gameTime);

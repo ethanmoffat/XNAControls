@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
-using System.Text;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Threading;
+using Color = Microsoft.Xna.Framework.Color;
+using Point = Microsoft.Xna.Framework.Point;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace XNAControls
 {
@@ -223,8 +225,8 @@ namespace XNAControls
 		public KeyboardDispatcher(GameWindow window)
 		{
 			EventInput.Initialize(window);
-			EventInput.CharEntered += new CharEnteredHandler(EventInput_CharEntered);
-			EventInput.KeyDown += new KeyEventHandler(EventInput_KeyDown);
+			EventInput.CharEntered += EventInput_CharEntered;
+			EventInput.KeyDown += EventInput_KeyDown;
 		}
 
 		void EventInput_KeyDown(object sender, XNAKeyEventArgs e)
@@ -294,130 +296,109 @@ namespace XNAControls
 
 	public class XNATextBox : XNAControl, IKeyboardSubscriber
 	{
-		Texture2D _textBoxBG;
-		Texture2D _textBoxLeft;
-		Texture2D _textBoxRight;
-		Texture2D _caretTexture;
+        private readonly Texture2D _textBoxBG;
+        private readonly Texture2D _textBoxLeft;
+	    private readonly Texture2D _textBoxRight;
+        private readonly Texture2D _caretTexture;
 
-		System.Drawing.Font _font;
-		GlyphTypeface _glyphs;
-		Texture2D _textTexture;
-		Texture2D _defaultTextTexture;
+	    private XNALabel _textLabel, _defaultTextLabel;
+	    private string _actualText;
+        
+        private bool _selected;
+        private int _leftPadding;
 
-		public int MaxChars { get; set; }
+        public int MaxChars { get; set; }
 
 		public bool Highlighted { get; set; }
 
 		public bool PasswordBox { get; set; }
 
-		public int LeftPadding { get; set; }
-		
-		string _text = "";
-		public String Text
+	    public int LeftPadding
+	    {
+	        get { return _leftPadding; }
+	        set
+	        {
+	            _leftPadding = value;
+	            _textLabel.DrawLocation = new Vector2(_leftPadding, 0);
+                _defaultTextLabel.DrawLocation = new Vector2(_leftPadding, 0);
+            }
+	    }
+
+	    public string Text
 		{
 			get
 			{
-				return _text;
-			}
-			set
-			{
-				if (MaxChars  > 0 && value.Length > MaxChars)
-					return;
-
-				_text = value ?? "";
-				if (OnTextChanged != null)
-					OnTextChanged(this, new EventArgs());
-
-				if (_text != "")
-				{
-					//if you attempt to display a character that is not in your font
-					//you will get an exception, so we filter the characters
-					String filtered = "";
-					foreach (char c in _text)
-					{
-						ushort bla;
-						if (_glyphs != null && _glyphs.CharacterToGlyphMap.TryGetValue((int)Convert.ToUInt16(c), out bla))
-							filtered += c;
-					}
-
-					_text = filtered;
-				}
-
-				_textTexture = Game.DrawText(PasswordBox ? new string('*', _text.Length) : _text, _font, TextColor);
-			}
-		}
-
-		System.Drawing.Color textColor = System.Drawing.Color.Black;
-		public System.Drawing.Color TextColor
-		{
-			get { return textColor; }
-			set { textColor = value; }
-		}
-
-		string _defaultText = "";
-		public string DefaultText
-		{
-			get
-			{
-				return _defaultText;
+				return _actualText;
 			}
 			set
 			{
 				if (MaxChars > 0 && value.Length > MaxChars)
 					return;
 
-				_defaultText = value ?? "";
+			    _actualText = value;
+			    _textLabel.Text = PasswordBox ? new string(value.Select(x => '*').ToArray()) : value;
+			    if (OnTextChanged != null)
+			        OnTextChanged(this, new EventArgs());
 
-				if (_defaultText != "")
-				{
-					//if you attempt to display a character that is not in your font
-					//you will get an exception, so we filter the characters
-					String filtered = "";
-					foreach (char c in _defaultText)
-					{
-						ushort bla;
-						if (_glyphs != null && _glyphs.CharacterToGlyphMap.TryGetValue((int)Convert.ToUInt16(c), out bla))
-							filtered += c;
-					}
-
-					_defaultText = filtered;
-				}
-
-				_defaultTextTexture = Game.DrawText(_defaultText, _font, System.Drawing.Color.FromArgb(80, 80, 80));
+			    if (_actualText.Length == 0)
+			    {
+			        _textLabel.Visible = false;
+			        _defaultTextLabel.Visible = true;
+			    }
+			    else
+			    {
+			        _textLabel.Visible = true;
+			        _defaultTextLabel.Visible = false;
+			    }
 			}
 		}
 
-		public event EventHandler OnFocused;
+	    public string DefaultText
+	    {
+	        get { return _defaultTextLabel.Text; }
+	        set
+            {
+                if (MaxChars > 0 && value.Length > MaxChars)
+                    return;
+
+                _defaultTextLabel.Text = value;
+            }
+        }
+
+        public Color TextColor
+        {
+            get { return _textLabel.ForeColor; }
+            set { _textLabel.ForeColor = value; }
+        }
+
+        public event EventHandler OnFocused;
 
 		public event EventHandler OnEnterPressed;
 		public event EventHandler OnTabPressed;
 		public event EventHandler OnTextChanged;
 		public event EventHandler OnClicked;
 
-		//note: called by dispatcher when the subscriber text box is changed
-		private bool m_selected;
-		public bool Selected
+	    public bool Selected
 		{
-			get { return m_selected; }
+			get { return _selected; }
 			set
 			{
-				bool oldSel = m_selected;
-				m_selected = value;
-				if (!oldSel && m_selected && OnFocused != null)
+				bool oldSel = _selected;
+				_selected = value;
+				if (!oldSel && _selected && OnFocused != null)
 					OnFocused(this, new EventArgs());
 			}
 		}
 
-		//accepts array with following:
-		//	length 4: background texture, leftEnd, rightEnd, caret
-		/// <summary>
-		/// Construct an XNATextBox UI control.
-		/// </summary>
-		/// <param name="area">The area of the screen in which the TextBox should be rendered (x, y)</param>
-		/// <param name="textures">Array of four textures. 0=background, 1=leftEdge, 2=rightEdge, 3=caret</param>
-		/// <param name="fontFamily">Font family string</param>
-		/// <param name="fontSize">Font size in points</param>
-		public XNATextBox(Rectangle area, Texture2D[] textures, string fontFamily, float fontSize = 10.0f)
+        //accepts array with following:
+        //	length 4: background texture, leftEnd, rightEnd, caret
+        /// <summary>
+        /// Construct an XNATextBox UI control.
+        /// </summary>
+        /// <param name="area">The area of the screen in which the TextBox should be rendered (x, y)</param>
+        /// <param name="textures">Array of four textures. 0=background, 1=leftEdge, 2=rightEdge, 3=caret</param>
+        /// <param name="spriteFontContentName">Name of the SpriteFont content resource</param>
+        public XNATextBox(Rectangle area, Texture2D[] textures, string spriteFontContentName)
 			: base(new Vector2(area.X, area.Y), area)
 		{
 			if (textures.Length != 4)
@@ -426,40 +407,56 @@ namespace XNAControls
 			_textBoxLeft = textures[1];
 			_textBoxRight = textures[2];
 			_caretTexture = textures[3];
-			_font = new System.Drawing.Font(fontFamily, fontSize);
 
-			// Get glyphs
-			Typeface typeface = new Typeface(_font.OriginalFontName);
-			if (!typeface.TryGetGlyphTypeface(out _glyphs))
-			{
-				throw new ArgumentException("Unable to get typeface for specified font. It may be a font that doesn't exist on this system.");
-			}
+            _setupLabels(area, spriteFontContentName);
 
-			LeftPadding = 0;
-
+            LeftPadding = 0;
 			drawArea.Height = _textBoxBG.Height;
 		}
 
-		public XNATextBox(Rectangle area, Texture2D cursor, string fontFamily, float fontSize = 10.0f)
+		public XNATextBox(Rectangle area, Texture2D cursor, string spriteFontContentName)
 			:base(new Vector2(area.X, area.Y), area)
 		{
 			_textBoxBG = null;
 			_textBoxLeft = null;
 			_textBoxRight = null;
 			_caretTexture = cursor;
-			_font = new System.Drawing.Font(fontFamily, fontSize);
 
-			LeftPadding = 0;
+            _setupLabels(area, spriteFontContentName);
 
-			Typeface typeface = new Typeface(_font.OriginalFontName);
-			typeface.TryGetGlyphTypeface(out _glyphs);
-		}
+            LeftPadding = 0;
+        }
+
+	    private void _setupLabels(Rectangle area, string spriteFontContentName)
+	    {
+            _textLabel = new XNALabel(new Rectangle(0, 0, area.Width, area.Height), spriteFontContentName)
+            {
+                AutoSize = false,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Visible = true,
+                Enabled = true
+            };
+            _textLabel.SetParent(this);
+
+	        _defaultTextLabel = new XNALabel(new Rectangle(0, 0, area.Width, area.Height), spriteFontContentName)
+	        {
+	            AutoSize = false,
+	            BackColor = Color.Transparent,
+	            ForeColor = Color.FromNonPremultiplied(80, 80, 80, 0xff),
+	            TextAlign = ContentAlignment.MiddleLeft,
+	            Visible = true,
+	            Enabled = true
+	        };
+	        _defaultTextLabel.SetParent(this);
+	    }
 
 		public override void Update(GameTime gameTime)
 		{
 			if (!ShouldUpdate())
 				return;
-			MouseState mouse = Microsoft.Xna.Framework.Input.Mouse.GetState();
+			MouseState mouse = Mouse.GetState();
 			Point mousePoint = new Point(mouse.X, mouse.Y);
 
 			if (DrawAreaWithOffset.Contains(mousePoint))
@@ -495,54 +492,31 @@ namespace XNAControls
 
 			bool caretVisible = !((gameTime.TotalGameTime.TotalMilliseconds % 1000) < 500);
 
-			String toDraw = Text;
-
 			SpriteBatch.Begin();
 						
 			//draw bg tiled
 			if(_textBoxBG != null)
-				SpriteBatch.Draw(_textBoxBG, DrawAreaWithOffset, Microsoft.Xna.Framework.Color.White);
+				SpriteBatch.Draw(_textBoxBG, DrawAreaWithOffset, Color.White);
 			
 			//draw left side
 			if (_textBoxLeft != null)
 			{
 				Rectangle leftDrawArea = new Rectangle(DrawArea.X, DrawArea.Y, _textBoxLeft.Width, DrawArea.Height);
-				SpriteBatch.Draw(_textBoxLeft, leftDrawArea, Microsoft.Xna.Framework.Color.White);
+				SpriteBatch.Draw(_textBoxLeft, leftDrawArea, Color.White);
 			}
 
 			//draw right side
 			if (_textBoxRight != null)
 			{
 				Rectangle rightDrawArea = new Rectangle(DrawArea.X + DrawAreaWithOffset.Width - _textBoxRight.Width, DrawAreaWithOffset.Y, _textBoxRight.Width, DrawAreaWithOffset.Height);
-				SpriteBatch.Draw(_textBoxRight, rightDrawArea, Microsoft.Xna.Framework.Color.White);
+				SpriteBatch.Draw(_textBoxRight, rightDrawArea, Color.White);
 			}
-			Texture2D texture = (_textTexture == null || _text == "") ? _defaultTextTexture : _textTexture;
 
-			if (texture != null)
-			{
-				Rectangle? rect = texture.Bounds.Width < DrawAreaWithOffset.Width ? texture.Bounds :
-					new Rectangle(texture.Width - DrawArea.Width, 0, DrawArea.Width, texture.Height);
-
-				if (caretVisible && Selected)
-				{
-					//draw caret
-					int x = texture != _defaultTextTexture && rect.Value.Width > 5 ? rect.Value.Width - 3 : 2;
-
-					SpriteBatch.Draw(_caretTexture,
-						new Vector2(DrawAreaWithOffset.X + x + LeftPadding, DrawAreaWithOffset.Y + 4),
-						Microsoft.Xna.Framework.Color.White);
-				}
-
-				SpriteBatch.Draw(texture,
-					new Rectangle(DrawAreaWithOffset.X + LeftPadding, DrawAreaWithOffset.Y + (DrawArea.Height / 2) - (texture.Height / 2), rect.Value.Width, rect.Value.Height),
-					rect,
-					Microsoft.Xna.Framework.Color.White);
-			}
-			else if(caretVisible && Selected)
+            if (caretVisible && Selected)
 			{
 				SpriteBatch.Draw(_caretTexture,
-					new Vector2(DrawAreaWithOffset.X + LeftPadding, DrawAreaWithOffset.Y + 4),
-					Microsoft.Xna.Framework.Color.White);
+					new Vector2(DrawAreaWithOffset.X + LeftPadding + _textLabel.ActualWidth + 2, DrawAreaWithOffset.Y + 4),
+					Color.White);
 			}
 
 			SpriteBatch.End();
@@ -582,13 +556,6 @@ namespace XNAControls
 		public virtual void ReceiveSpecialInput(Keys key)
 		{
 
-		}
-
-		public new void Dispose()
-		{
-			_font.Dispose();
-
-			base.Dispose();
 		}
 	}
 }
