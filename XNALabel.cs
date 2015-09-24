@@ -94,17 +94,33 @@ namespace XNAControls
 	    /// </summary>
 	    public int? RowSpacing { get; set; }
 
-        /// <summary>
-        /// Get the actual width of the text as measured by the font
-        /// </summary>
-        public float ActualWidth { get { return _font.MeasureString(Text).X; } }
+	    /// <summary>
+	    /// Get the actual width of the text as measured by the font
+	    /// </summary>
+	    public float ActualWidth
+	    {
+	        get
+	        {
+	            return _drawStrings.Count <= 1
+	                ? _font.MeasureString(Text).X
+	                : _drawStrings.Select(x => _font.MeasureString(x).X).Max();
+	        }
+	    }
 
-        /// <summary>
-        /// Get the actual height of the text as measured by the font
-        /// </summary>
-        public float ActualHeight { get { return _font.MeasureString(Text).Y; } }
+	    /// <summary>
+	    /// Get the actual height of the text as measured by the font
+	    /// </summary>
+	    public float ActualHeight
+	    {
+	        get
+	        {
+	            return _drawStrings.Count <= 1
+	                ? _font.MeasureString(Text).Y
+	                : _drawStrings.Count*_font.LineSpacing;
+	        }
+	    }
 
-        /// <summary>
+	    /// <summary>
         /// Turn underlining on or off
         /// </summary>
         public bool Underline { get; set; }
