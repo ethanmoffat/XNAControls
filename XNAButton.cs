@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Drawing;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Color = Microsoft.Xna.Framework.Color;
-using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace XNAControls
 {
 	public class XNAButton : XNAControl
 	{
 		public delegate void ButtonClickEvent(object sender, EventArgs e = null);
-        
+		
 		public string Text
 		{
 			get { return _textLabel.Text; }
@@ -22,7 +19,7 @@ namespace XNAControls
 		private readonly Texture2D _out; //texture for mouse out (primary display texture)
 		private readonly Texture2D _over; //texture for mouse over
 		private Texture2D _drawTexture; //texture to be drawn, selected based on MouseOver in Update method
-	    private readonly XNALabel _textLabel;
+		private readonly XNALabel _textLabel;
 
 		/// <summary>
 		/// If FlashSpeed is set, the button will change between over/out textures once every 'FlashSpeed' milliseconds
@@ -133,14 +130,14 @@ namespace XNAControls
 			ClickArea = null;
 			_setSize(80, 30);
 
-		    _textLabel = new XNALabel(DrawArea, spriteFontContentName)
-		    {
-                AutoSize = false,
-                ForeColor = Color.Black,
-		        Text = text,
-                TextAlign = ContentAlignment.MiddleCenter
-		    };
-            _textLabel.SetParent(this);
+			_textLabel = new XNALabel(DrawArea, spriteFontContentName)
+			{
+				AutoSize = false,
+				ForeColor = Color.Black,
+				Text = text,
+				TextAlign = LabelAlignment.MiddleCenter
+			};
+			_textLabel.SetParent(this);
 			_drawTexture = _out;
 		}
 
@@ -214,7 +211,7 @@ namespace XNAControls
 				SpriteBatch.End();
 				return;
 			}
-            
+			
 			SpriteBatch.End();
 
 			base.Draw(gameTime);

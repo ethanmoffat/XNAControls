@@ -123,7 +123,7 @@ namespace XNAControls
 			message = new XNALabel(new Rectangle(15, 40, DrawArea.Width - 30, DrawArea.Height - 80), spriteFontContentName)
 			{
 				Text = msgText,
-				TextAlign = System.Drawing.ContentAlignment.TopLeft,
+				TextAlign = LabelAlignment.TopLeft,
 				TextWidth = 250
 			};
 			message.SetParent(this);
@@ -132,7 +132,7 @@ namespace XNAControls
 			caption = new XNALabel(new Rectangle(9, 11, DrawArea.Width - 18, DrawArea.Height - 22), spriteFontContentName)
 			{
 				Text = captionText,
-				TextAlign = System.Drawing.ContentAlignment.TopLeft
+				TextAlign = LabelAlignment.TopLeft
 			};
 			caption.SetParent(this);
 

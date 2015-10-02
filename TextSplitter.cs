@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -29,18 +27,9 @@ namespace XNAControls
 		/// </summary>
 		public bool NeedsProcessing { get { return _textIsOverflowFunc(Text); } }
 
-		private Func<string, bool> _textIsOverflowFunc;
-		private Font _font;
 		private SpriteFont _spriteFont;
 
 		public TextSplitter(string text, SpriteFont font)
-		{
-			Text = text;
-			SetFont(font);
-			ResetToDefaults();
-		}
-
-		public TextSplitter(string text, Font font)
 		{
 			Text = text;
 			SetFont(font);
@@ -61,25 +50,7 @@ namespace XNAControls
 // ReSharper disable once MemberCanBePrivate.Global
 		public void SetFont(SpriteFont newFont)
 		{
-			if (_font != null)
-			{
-				_font.Dispose();
-				_font = null;
-			}
 			_spriteFont = newFont;
-			_textIsOverflowFunc = s => _spriteFontOverflow(s, _spriteFont);
-		}
-
-// ReSharper disable once MemberCanBePrivate.Global
-		public void SetFont(Font newFont)
-		{
-			_spriteFont = null;
-			if (_font != null)
-			{
-				_font.Dispose();
-			}
-			_font = newFont;
-			_textIsOverflowFunc = s => _sdFontOverflow(s, _font);
 		}
 
 		/// <summary>
@@ -111,17 +82,17 @@ namespace XNAControls
 					nextWord = "";
 				}
 				else if (lineOverFlow)
-                {
-                    if (nextWord.Length > 0)
-                    {
-                        if (newLine == LineIndent)
-                        {
-                            newLine += nextWord;
-                            nextWord = "";
-                        }
-                    }
+				{
+					if (nextWord.Length > 0)
+					{
+						if (newLine == LineIndent)
+						{
+							newLine += nextWord;
+							nextWord = "";
+						}
+					}
 
-                    if (newLine.Contains('\n'))
+					if (newLine.Contains('\n'))
 					{
 						retList.AddRange(newLine.Split('\n').Select(x => x + (x.Length > 0 ? LineEnd : "")));
 					}
@@ -142,16 +113,9 @@ namespace XNAControls
 			return retList;
 		}
 
-		private bool _spriteFontOverflow(string toMeasure, SpriteFont font)
+		private bool _textIsOverflowFunc(string toMeasure)
 		{
-			return font.MeasureString(toMeasure).X > LineLength;
-		}
-
-		private bool _sdFontOverflow(string toMeasure, Font font)
-		{
-			using(Bitmap b = new Bitmap(LineLength + 20, font.Height))
-			using (Graphics g = Graphics.FromImage(b))
-				return g.MeasureString(toMeasure, font).Width > LineLength;
+			return _spriteFont.MeasureString(toMeasure).X > LineLength;
 		}
 	}
 }
