@@ -270,7 +270,7 @@ namespace XNAControls
 		private void DrawTextLine(string textLine, float adjustedX, float adjustedY)
 		{
 			var textLineWidth = _font.MeasureString(textLine).X;
-			var extraHeightForUnderline = _font.MeasureString(textLine).Y + 1;
+			var extraHeightForUnderline = _font.MeasureString(textLine).Y - 3;
 
 			SpriteBatch.DrawString(_font,
 					textLine,
