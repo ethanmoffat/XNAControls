@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.Design;
+﻿// Original Work Copyright (c) Ethan Moffat 2014-2015
+// This file is subject to the GPL v2 License
+// For additional details, see the LICENSE file
+
+using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,7 +25,7 @@ namespace XNAControls.Test
 		}
 
 		[TestMethod]
-		//[Timeout(2000)]
+		[Timeout(2000)]
 		public void GivenShortMessage_WhenSplittingAt200px_NeedProcessingShouldBeFalse()
 		{
 			_ts.Text = "Test Message";
@@ -121,7 +125,7 @@ namespace XNAControls.Test
 		}
 
 		[TestMethod]
-		//[Timeout(2000)]
+		[Timeout(2000)]
 		public void GivenLongMessageAndLongWordsAndLineIndent_WhenSplittingAt200px_ShouldStartEachLineExceptFirstWithLineIndent()
 		{
 			_ts.Text = "Test messageeeeeeeeeeeeeeeeeeeeeeeeee oneeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";

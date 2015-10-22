@@ -7,6 +7,8 @@
 //-----------------------------------------------------------------------------
 #endregion
 
+//File modified by Ethan Moffat for use in testing
+
 #region Using Statements
 using System;
 using System.Threading;
