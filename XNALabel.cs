@@ -1,4 +1,4 @@
-﻿// Original Work Copyright (c) Ethan Moffat 2014-2015
+﻿// Original Work Copyright (c) Ethan Moffat 2014-2016
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
@@ -20,7 +20,7 @@ namespace XNAControls
 		MiddleRight,
 		BottomLeft,
 		BottomCenter,
-		BottomRight,
+		BottomRight
 	}
 
 	public class XNALabel : XNAControl
@@ -40,7 +40,7 @@ namespace XNAControls
 					_drawStrings.Clear();
 					_drawStrings.AddRange(ts.SplitIntoLines());
 
-					if (AutoSize && _drawStrings.Count > 0)
+					if (AutoSize && _drawStrings.Any())
 					{
 						float largestWidth = _drawStrings.Select(line => _font.MeasureString(line).X).Max();
 						drawArea = new Rectangle(drawArea.X, drawArea.Y, (int) largestWidth, _drawStrings.Count*_font.LineSpacing);
@@ -204,7 +204,6 @@ namespace XNAControls
 				adjustedY = tmpVec.Y;
 			}
 
-
 			SpriteBatch.Begin();
 
 			DrawBackground(totalTextArea);
@@ -233,7 +232,7 @@ namespace XNAControls
 							  _drawStrings.Count > 0 ? _font.LineSpacing*_drawStrings.Count : _font.LineSpacing);
 		}
 
-		private Vector2 CalculatePositionFromAlignment(Vector2 totalArea)
+		private Vector2 CalculatePositionFromAlignment(Vector2 totalTextArea)
 		{
 			float adjustedX = 0;
 			float adjustedY = 0;
@@ -243,16 +242,16 @@ namespace XNAControls
 			if (align.Contains("Left"))
 				adjustedX = 0;
 			else if (align.Contains("Center"))
-				adjustedX = DrawArea.Width / 2f - totalArea.X / 2;
-			else if(align.Contains("Right"))
-				adjustedX = DrawArea.Width - totalArea.X;
+				adjustedX = (int)(DrawArea.Width / 2f - totalTextArea.X / 2);
+			else if (align.Contains("Right"))
+				adjustedX = DrawArea.Width - totalTextArea.X;
 
 			if (align.Contains("Top"))
 				adjustedY = 0;
 			else if (align.Contains("Middle"))
-				adjustedY = DrawArea.Height / 2f - totalArea.Y / 2;
-			else if(align.Contains("Bottom"))
-				adjustedY = DrawArea.Height - totalArea.Y;
+				adjustedY = (int)(DrawArea.Height / 2f - totalTextArea.Y / 2);
+			else if (align.Contains("Bottom"))
+				adjustedY = DrawArea.Height - totalTextArea.Y;
 
 			return new Vector2(adjustedX, adjustedY);
 		}
