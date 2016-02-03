@@ -30,17 +30,32 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\CharEnteredEventArgs.cs">
+      <Link>CharEnteredEventArgs.cs</Link>
+    </Compile>
     <Compile Include="..\ControlsInit.cs">
       <Link>ControlsInit.cs</Link>
     </Compile>
     <Compile Include="..\extensions.cs">
       <Link>extensions.cs</Link>
     </Compile>
+    <Compile Include="..\IKeyboardEvents.cs">
+      <Link>IKeyboardEvents.cs</Link>
+    </Compile>
+    <Compile Include="..\IKeyboardSubscriber.cs">
+      <Link>IKeyboardSubscriber.cs</Link>
+    </Compile>
+    <Compile Include="..\KeyboardDispatcher.cs">
+      <Link>KeyboardDispatcher.cs</Link>
+    </Compile>
     <Compile Include="..\NativeMethods.cs">
       <Link>NativeMethods.cs</Link>
     </Compile>
     <Compile Include="..\TextSplitter.cs">
       <Link>TextSplitter.cs</Link>
+    </Compile>
+    <Compile Include="..\Win32KeyboardEvents.cs">
+      <Link>Win32KeyboardEvents.cs</Link>
     </Compile>
     <Compile Include="..\XNAButton.cs">
       <Link>XNAButton.cs</Link>
@@ -53,6 +68,9 @@
     </Compile>
     <Compile Include="..\XNAHyperLink.cs">
       <Link>XNAHyperLink.cs</Link>
+    </Compile>
+    <Compile Include="..\XNAKeyEventArgs.cs">
+      <Link>XNAKeyEventArgs.cs</Link>
     </Compile>
     <Compile Include="..\XNALabel.cs">
       <Link>XNALabel.cs</Link>
