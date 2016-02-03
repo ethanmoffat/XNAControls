@@ -36,6 +36,9 @@
     <Compile Include="..\extensions.cs">
       <Link>extensions.cs</Link>
     </Compile>
+    <Compile Include="..\NativeMethods.cs">
+      <Link>NativeMethods.cs</Link>
+    </Compile>
     <Compile Include="..\TextSplitter.cs">
       <Link>TextSplitter.cs</Link>
     </Compile>

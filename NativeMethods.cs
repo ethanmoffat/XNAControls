@@ -9,12 +9,6 @@ namespace XNAControls
 {
 	internal static class NativeMethods
 	{
-		[DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
-		public static extern IntPtr ImmGetContext(IntPtr hWnd);
-
-		[DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
-		public static extern IntPtr ImmAssociateContext(IntPtr hWnd, IntPtr hIMC);
-
 		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
 		public static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 

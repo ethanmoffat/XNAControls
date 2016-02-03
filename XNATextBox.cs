@@ -94,7 +94,6 @@ namespace XNAControls
 		public event KeyEventHandler KeyUp;
 
 		private readonly IntPtr _prevWndProc;
-		private readonly IntPtr _hIMC;
 		// ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
 		private readonly NativeMethods.WndProc _hookProcDelegate; //This needs to be kept as a member so the GC doesn't clean it up
 		
@@ -103,8 +102,6 @@ namespace XNAControls
 			_hookProcDelegate = HookProc;
 			_prevWndProc = (IntPtr)NativeMethods.SetWindowLong(window.Handle, NativeMethods.GWL_WNDPROC,
 				(int)Marshal.GetFunctionPointerForDelegate(_hookProcDelegate));
-
-			_hIMC = NativeMethods.ImmGetContext(window.Handle);
 		}
 
 		private IntPtr HookProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
@@ -130,16 +127,6 @@ namespace XNAControls
 				case NativeMethods.WM_CHAR:
 					if (CharEntered != null)
 						CharEntered(null, new Win32CharacterEventArgs((char)wParam, lParam.ToInt32()));
-					break;
-
-				case NativeMethods.WM_IME_SETCONTEXT:
-					if (wParam.ToInt32() == 1)
-						NativeMethods.ImmAssociateContext(hWnd, _hIMC);
-					break;
-
-				case NativeMethods.WM_INPUTLANGCHANGE:
-					NativeMethods.ImmAssociateContext(hWnd, _hIMC);
-					returnCode = (IntPtr)1;
 					break;
 			}
 
