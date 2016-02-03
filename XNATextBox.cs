@@ -1,4 +1,4 @@
-﻿// Original Work Copyright (c) Ethan Moffat 2014-2015
+﻿// Original Work Copyright (c) Ethan Moffat 2014-2016
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
@@ -13,34 +13,23 @@ using System.Threading;
 namespace XNAControls
 {
 	//From top answer on: http://stackoverflow.com/questions/10216757/adding-inputbox-like-control-to-xna-game
-	//Some modifications made by Ethan Moffat and Brian Gradin
-	internal static class NativeMethods
-	{
-		[DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
-		public static extern IntPtr ImmGetContext(IntPtr hWnd);
+	//Modifications made by Ethan Moffat and Brian Gradin
 
-		[DllImport("Imm32.dll", CharSet = CharSet.Unicode)]
-		public static extern IntPtr ImmAssociateContext(IntPtr hWnd, IntPtr hIMC);
+	internal delegate void CharEnteredHandler(object sender, Win32CharacterEventArgs e);
+	internal delegate void KeyEventHandler(object sender, XNAKeyEventArgs e);
 
-		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
-		public static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
-		public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-	}
-
-	public class CharacterEventArgs : EventArgs
+	internal class Win32CharacterEventArgs : EventArgs
 	{
 		private readonly char character;
 		private readonly int lParam;
 
-		public CharacterEventArgs(char character, int lParam)
+		internal Win32CharacterEventArgs(char character, int lParam)
 		{
 			this.character = character;
 			this.lParam = lParam;
 		}
 
-		public char Character
+		internal char Character
 		{
 			get { return character; }
 		}
@@ -91,93 +80,65 @@ namespace XNAControls
 		}
 	}
 
-	public delegate void CharEnteredHandler(object sender, CharacterEventArgs e);
-	public delegate void KeyEventHandler(object sender, XNAKeyEventArgs e);
-
-	public static class EventInput
+	internal interface IKeyboardEvents
 	{
-		/// <summary>
-		/// Event raised when a character has been entered.
-		/// </summary>
-		public static event CharEnteredHandler CharEntered;
+		event CharEnteredHandler CharEntered;
+		event KeyEventHandler KeyDown;
+		event KeyEventHandler KeyUp;
+	}
 
-		/// <summary>
-		/// Event raised when a key has been pressed down. May fire multiple times due to keyboard repeat.
-		/// </summary>
-		public static event KeyEventHandler KeyDown;
+	internal class Win32KeyboardEvents : IKeyboardEvents
+	{
+		public event CharEnteredHandler CharEntered;
+		public event KeyEventHandler KeyDown;
+		public event KeyEventHandler KeyUp;
 
-		/// <summary>
-		/// Event raised when a key has been released.
-		/// </summary>
-		public static event KeyEventHandler KeyUp;
-
-		delegate IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
-
-		static bool initialized;
-		static IntPtr prevWndProc;
-		static WndProc hookProcDelegate;
-		static IntPtr hIMC;
-
-		//various Win32 constants that we need
-		const int GWL_WNDPROC = -4;
-		const int WM_KEYDOWN = 0x100;
-		const int WM_KEYUP = 0x101;
-		const int WM_CHAR = 0x102;
-		const int WM_IME_SETCONTEXT = 0x0281;
-		const int WM_INPUTLANGCHANGE = 0x51;
-		const int WM_GETDLGCODE = 0x87;
-		const int WM_IME_COMPOSITION = 0x10f;
-		const int DLGC_WANTALLKEYS = 4;
+		private readonly IntPtr _prevWndProc;
+		private readonly IntPtr _hIMC;
+		// ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+		private readonly NativeMethods.WndProc _hookProcDelegate; //This needs to be kept as a member so the GC doesn't clean it up
 		
-		/// <summary>
-		/// Initialize the TextInput with the given GameWindow.
-		/// </summary>
-		/// <param name="window">The XNA window to which text input should be linked.</param>
-		public static void Initialize(GameWindow window)
+		public Win32KeyboardEvents(GameWindow window)
 		{
-			if (initialized)
-				throw new InvalidOperationException("TextInput.Initialize can only be called once!");
+			_hookProcDelegate = HookProc;
+			_prevWndProc = (IntPtr)NativeMethods.SetWindowLong(window.Handle, NativeMethods.GWL_WNDPROC,
+				(int)Marshal.GetFunctionPointerForDelegate(_hookProcDelegate));
 
-			hookProcDelegate = HookProc;
-			prevWndProc = (IntPtr)NativeMethods.SetWindowLong(window.Handle, GWL_WNDPROC,
-				(int)Marshal.GetFunctionPointerForDelegate(hookProcDelegate));
-
-			hIMC = NativeMethods.ImmGetContext(window.Handle);
-			initialized = true;
+			_hIMC = NativeMethods.ImmGetContext(window.Handle);
 		}
 
-		static IntPtr HookProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
+		private IntPtr HookProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
 		{
-			IntPtr returnCode = NativeMethods.CallWindowProc(prevWndProc, hWnd, msg, wParam, lParam);
+			IntPtr returnCode = NativeMethods.CallWindowProc(_prevWndProc, hWnd, msg, wParam, lParam);
 
 			switch (msg)
 			{
-				case WM_GETDLGCODE:
-					returnCode = (IntPtr)(returnCode.ToInt32() | DLGC_WANTALLKEYS);
+				case NativeMethods.WM_GETDLGCODE:
+					returnCode = (IntPtr)(returnCode.ToInt32() | NativeMethods.DLGC_WANTALLKEYS);
 					break;
 
-				case WM_KEYDOWN:
+				case NativeMethods.WM_KEYDOWN:
 					if (KeyDown != null)
 						KeyDown(null, new XNAKeyEventArgs((Keys)wParam));
 					break;
 
-				case WM_KEYUP:
+				case NativeMethods.WM_KEYUP:
 					if (KeyUp != null)
 						KeyUp(null, new XNAKeyEventArgs((Keys)wParam));
 					break;
 
-				case WM_CHAR:
+				case NativeMethods.WM_CHAR:
 					if (CharEntered != null)
-						CharEntered(null, new CharacterEventArgs((char)wParam, lParam.ToInt32()));
+						CharEntered(null, new Win32CharacterEventArgs((char)wParam, lParam.ToInt32()));
 					break;
 
-				case WM_IME_SETCONTEXT:
+				case NativeMethods.WM_IME_SETCONTEXT:
 					if (wParam.ToInt32() == 1)
-						NativeMethods.ImmAssociateContext(hWnd, hIMC);
+						NativeMethods.ImmAssociateContext(hWnd, _hIMC);
 					break;
 
-				case WM_INPUTLANGCHANGE:
-					NativeMethods.ImmAssociateContext(hWnd, hIMC);
+				case NativeMethods.WM_INPUTLANGCHANGE:
+					NativeMethods.ImmAssociateContext(hWnd, _hIMC);
 					returnCode = (IntPtr)1;
 					break;
 			}
@@ -185,6 +146,7 @@ namespace XNAControls
 			return returnCode;
 		}
 	}
+
 	public interface IKeyboardSubscriber
 	{
 		void ReceiveTextInput(char inputChar);
@@ -195,16 +157,36 @@ namespace XNAControls
 		bool Selected { get; set; } //or Focused
 	}
 
-	public class KeyboardDispatcher
+	public class KeyboardDispatcher : IDisposable
 	{
-		public KeyboardDispatcher(GameWindow window)
+		private readonly IKeyboardEvents _events;
+
+		IKeyboardSubscriber _subscriber;
+		public IKeyboardSubscriber Subscriber
 		{
-			EventInput.Initialize(window);
-			EventInput.CharEntered += EventInput_CharEntered;
-			EventInput.KeyDown += EventInput_KeyDown;
+			get { return _subscriber; }
+			set
+			{
+				SetSubscriberSelected(false);
+				_subscriber = value;
+				SetSubscriberSelected(true);
+			}
 		}
 
-		void EventInput_KeyDown(object sender, XNAKeyEventArgs e)
+		private void SetSubscriberSelected(bool selected)
+		{
+			if (_subscriber != null)
+				_subscriber.Selected = selected;
+		}
+
+		public KeyboardDispatcher(GameWindow window)
+		{
+			_events = new Win32KeyboardEvents(window);
+			_events.CharEntered += EventInput_CharEntered;
+			_events.KeyDown += EventInput_KeyDown;
+		}
+
+		private void EventInput_KeyDown(object sender, XNAKeyEventArgs e)
 		{
 			if (_subscriber == null)
 				return;
@@ -212,20 +194,17 @@ namespace XNAControls
 			_subscriber.ReceiveSpecialInput(e.KeyCode);
 		}
 
-		void EventInput_CharEntered(object sender, CharacterEventArgs e)
+		private void EventInput_CharEntered(object sender, Win32CharacterEventArgs e)
 		{
 			if (_subscriber == null)
 				return;
+
 			if (char.IsControl(e.Character))
 			{
 				//ctrl-v
 				if (e.Character == 0x16)
 				{
-					//XNA runs in Multiple Thread Apartment state, which cannot recieve clipboard
-					Thread thread = new Thread(PasteThread);
-					thread.SetApartmentState(ApartmentState.STA);
-					thread.Start();
-					thread.Join();
+					GetClipboardInfoFromThread();
 					_subscriber.ReceiveTextInput(_pasteResult);
 				}
 				else
@@ -239,34 +218,49 @@ namespace XNAControls
 			}
 		}
 
-		IKeyboardSubscriber _subscriber;
-		public IKeyboardSubscriber Subscriber
+		#region Clipboard Handling
+
+		//XNA runs in Multiple Thread Apartment state, which cannot recieve clipboard
+		private void GetClipboardInfoFromThread()
 		{
-			get { return _subscriber; }
-			set
-			{
-				if (_subscriber != null)
-					_subscriber.Selected = false;
-				_subscriber = value;
-				if (value != null)
-					value.Selected = true;
-			}
+			Thread thread = new Thread(SetPasteResult);
+			thread.SetApartmentState(ApartmentState.STA);
+			thread.Start();
+			thread.Join();
 		}
 
 		//Thread has to be in Single Thread Apartment state in order to receive clipboard
 		string _pasteResult = "";
 		[STAThread]
-		void PasteThread()
+		void SetPasteResult()
 		{
-			if (System.Windows.Forms.Clipboard.ContainsText())
+			_pasteResult = System.Windows.Forms.Clipboard.ContainsText() ? System.Windows.Forms.Clipboard.GetText() : "";
+		}
+
+		#endregion
+
+		#region IDisposable
+
+		~KeyboardDispatcher()
+		{
+			Dispose(false);
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing)
 			{
-				_pasteResult = System.Windows.Forms.Clipboard.GetText();
-			}
-			else
-			{
-				_pasteResult = "";
+				_events.CharEntered -= EventInput_CharEntered;
+				_events.KeyDown -= EventInput_KeyDown;
 			}
 		}
+
+		#endregion
 	}
 
 	public class XNATextBox : XNAControl, IKeyboardSubscriber
@@ -503,10 +497,12 @@ namespace XNAControls
 		{
 			Text = Text + inputChar;
 		}
+
 		public virtual void ReceiveTextInput(string text)
 		{
 			Text = Text + text;
 		}
+
 		public virtual void ReceiveCommandInput(char command)
 		{
 			if (!XNAControls.IgnoreEnterForDialogs && Dialogs.Count != 0 && Dialogs.Peek() != TopParent as XNADialog)
@@ -528,6 +524,7 @@ namespace XNAControls
 					break;
 			}
 		}
+
 		public virtual void ReceiveSpecialInput(Keys key)
 		{
 
