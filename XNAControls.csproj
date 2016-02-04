@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>9f1791cb</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -56,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlsInit.cs" />
+    <Compile Include="CrossPlatformKeyboardEvents.cs" />
     <Compile Include="extensions.cs" />
     <Compile Include="IKeyboardEvents.cs" />
     <Compile Include="IKeyboardSubscriber.cs" />

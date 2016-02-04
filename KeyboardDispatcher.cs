@@ -10,6 +10,11 @@ namespace XNAControls
 {
 	public class KeyboardDispatcher : IDisposable
 	{
+		private const char CHAR_PASTE_CODE = (char)0x16;
+		internal const char CHAR_RETURNKEY_CODE = '\r';
+		internal const char CHAR_BACKSPACE_CODE = '\b';
+		internal const char CHAR_TAB_CODE = '\t';
+
 		private readonly IKeyboardEvents _events;
 
 		IKeyboardSubscriber _subscriber;
@@ -36,6 +41,11 @@ namespace XNAControls
 			_events = new Win32KeyboardEvents(window);
 			_events.CharEntered += EventInput_CharEntered;
 			_events.KeyDown += EventInput_KeyDown;
+#else
+			
+			_events = new CrossPlatformKeyboardEvents(window);
+			_events.CharEntered += EventInput_CharEntered;
+			_events.KeyDown += EventInput_KeyDown;
 #endif
 		}
 
@@ -55,7 +65,7 @@ namespace XNAControls
 			if (char.IsControl(e.Character))
 			{
 				//ctrl-v
-				if (e.Character == 0x16)
+				if (e.Character == CHAR_PASTE_CODE)
 				{
 					GetClipboardInfoFromThread();
 					_subscriber.ReceiveTextInput(_pasteResult);
@@ -110,6 +120,7 @@ namespace XNAControls
 			{
 				_events.CharEntered -= EventInput_CharEntered;
 				_events.KeyDown -= EventInput_KeyDown;
+				_events.Dispose();
 			}
 		}
 

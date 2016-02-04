@@ -262,15 +262,15 @@ namespace XNAControls
 
 			switch (command)
 			{
-				case '\b': //backspace
+				case KeyboardDispatcher.CHAR_BACKSPACE_CODE:
 					if (Text.Length > 0)
 						Text = Text.Substring(0, Text.Length - 1);
 					break;
-				case '\r': //return
+				case KeyboardDispatcher.CHAR_RETURNKEY_CODE:
 					if (OnEnterPressed != null)
 						OnEnterPressed(this, new EventArgs());
 					break;
-				case '\t': //tab
+				case KeyboardDispatcher.CHAR_TAB_CODE:
 					if (OnTabPressed != null)
 						OnTabPressed(this, new EventArgs());
 					break;
