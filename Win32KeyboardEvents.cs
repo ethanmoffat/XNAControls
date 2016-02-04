@@ -54,5 +54,7 @@ namespace XNAControls
 
 			return returnCode;
 		}
+
+		public void Dispose() { }
 	}
 }
