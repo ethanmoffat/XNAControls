@@ -9,15 +9,16 @@ namespace XNAControls
 	internal sealed class MonoGameKeyboardEvents : IKeyboardEvents
 	{
 		public event CharEnteredHandler CharEntered;
-		public event KeyEventHandler KeyDown;
-		public event KeyEventHandler KeyUp;
 
 		private readonly GameWindow _window;
 
 		public MonoGameKeyboardEvents(GameWindow window)
 		{
 			_window = window;
-#if MONO
+#if !MONO
+			if (CharEntered != null) //hide warning for "member is not used"
+				CharEntered(null, null);
+#else
 			_window.TextInput += GameWindow_TextInput;
 #endif
 		}

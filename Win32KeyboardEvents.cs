@@ -5,15 +5,12 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace XNAControls
 {
 	internal class Win32KeyboardEvents : IKeyboardEvents
 	{
 		public event CharEnteredHandler CharEntered;
-		public event KeyEventHandler KeyDown;
-		public event KeyEventHandler KeyUp;
 
 		private readonly IntPtr _prevWndProc;
 		// ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
@@ -34,16 +31,6 @@ namespace XNAControls
 			{
 				case NativeMethods.WM_GETDLGCODE:
 					returnCode = (IntPtr)(returnCode.ToInt32() | NativeMethods.DLGC_WANTALLKEYS);
-					break;
-
-				case NativeMethods.WM_KEYDOWN:
-					if (KeyDown != null)
-						KeyDown(null, new XNAKeyEventArgs((Keys)wParam));
-					break;
-
-				case NativeMethods.WM_KEYUP:
-					if (KeyUp != null)
-						KeyUp(null, new XNAKeyEventArgs((Keys)wParam));
 					break;
 
 				case NativeMethods.WM_CHAR:

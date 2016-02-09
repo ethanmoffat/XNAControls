@@ -40,20 +40,10 @@ namespace XNAControls
 #if !MONO
 			_events = new Win32KeyboardEvents(window);
 			_events.CharEntered += EventInput_CharEntered;
-			_events.KeyDown += EventInput_KeyDown;
 #else
 			_events = new MonoGameKeyboardEvents(window);
 			_events.CharEntered += EventInput_CharEntered;
-			_events.KeyDown += EventInput_KeyDown;
 #endif
-		}
-
-		private void EventInput_KeyDown(object sender, XNAKeyEventArgs e)
-		{
-			if (_subscriber == null)
-				return;
-
-			_subscriber.ReceiveSpecialInput(e.KeyCode);
 		}
 
 		private void EventInput_CharEntered(object sender, CharEnteredEventArgs e)
@@ -118,7 +108,6 @@ namespace XNAControls
 			if (disposing)
 			{
 				_events.CharEntered -= EventInput_CharEntered;
-				_events.KeyDown -= EventInput_KeyDown;
 				_events.Dispose();
 			}
 		}

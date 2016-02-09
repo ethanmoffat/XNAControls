@@ -9,7 +9,5 @@ namespace XNAControls
 	internal interface IKeyboardEvents : IDisposable
 	{
 		event CharEnteredHandler CharEntered;
-		event KeyEventHandler KeyDown;
-		event KeyEventHandler KeyUp;
 	}
 }

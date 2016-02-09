@@ -4,11 +4,9 @@
 
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
-using System.Threading;
 
 namespace XNAControls
 {
@@ -275,11 +273,6 @@ namespace XNAControls
 						OnTabPressed(this, new EventArgs());
 					break;
 			}
-		}
-
-		public virtual void ReceiveSpecialInput(Keys key)
-		{
-
 		}
 	}
 }
