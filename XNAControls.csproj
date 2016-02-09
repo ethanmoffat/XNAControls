@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlsInit.cs" />
-    <Compile Include="CrossPlatformKeyboardEvents.cs" />
+    <Compile Include="MonoGameKeyboardEvents.cs" />
     <Compile Include="extensions.cs" />
     <Compile Include="IKeyboardEvents.cs" />
     <Compile Include="IKeyboardSubscriber.cs" />

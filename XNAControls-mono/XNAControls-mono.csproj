@@ -37,9 +37,6 @@
     <Compile Include="..\ControlsInit.cs">
       <Link>ControlsInit.cs</Link>
     </Compile>
-    <Compile Include="..\CrossPlatformKeyboardEvents.cs">
-      <Link>CrossPlatformKeyboardEvents.cs</Link>
-    </Compile>
     <Compile Include="..\extensions.cs">
       <Link>extensions.cs</Link>
     </Compile>
@@ -51,6 +48,9 @@
     </Compile>
     <Compile Include="..\KeyboardDispatcher.cs">
       <Link>KeyboardDispatcher.cs</Link>
+    </Compile>
+    <Compile Include="..\MonoGameKeyboardEvents.cs">
+      <Link>MonoGameKeyboardEvents.cs</Link>
     </Compile>
     <Compile Include="..\NativeMethods.cs">
       <Link>NativeMethods.cs</Link>

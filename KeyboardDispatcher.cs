@@ -42,8 +42,7 @@ namespace XNAControls
 			_events.CharEntered += EventInput_CharEntered;
 			_events.KeyDown += EventInput_KeyDown;
 #else
-			
-			_events = new CrossPlatformKeyboardEvents(window);
+			_events = new MonoGameKeyboardEvents(window);
 			_events.CharEntered += EventInput_CharEntered;
 			_events.KeyDown += EventInput_KeyDown;
 #endif

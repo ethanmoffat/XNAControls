@@ -3,11 +3,10 @@
 //// For additional details, see the LICENSE file
 
 using Microsoft.Xna.Framework;
-using Keys = Microsoft.Xna.Framework.Input.Keys;
 
 namespace XNAControls
 {
-	internal sealed class CrossPlatformKeyboardEvents : IKeyboardEvents
+	internal sealed class MonoGameKeyboardEvents : IKeyboardEvents
 	{
 		public event CharEnteredHandler CharEntered;
 		public event KeyEventHandler KeyDown;
@@ -15,12 +14,15 @@ namespace XNAControls
 
 		private readonly GameWindow _window;
 
-		public CrossPlatformKeyboardEvents(GameWindow window)
+		public MonoGameKeyboardEvents(GameWindow window)
 		{
 			_window = window;
+#if MONO
 			_window.TextInput += GameWindow_TextInput;
+#endif
 		}
 
+#if MONO
 		private void GameWindow_TextInput(object sender, TextInputEventArgs e)
 		{
 			if (CharEntered != null)
@@ -29,13 +31,17 @@ namespace XNAControls
 			}
 		}
 
-		~CrossPlatformKeyboardEvents()
+		~MonoGameKeyboardEvents()
 		{
 			Dispose(false);
 		}
+#endif
 
 		public void Dispose()
 		{
+#if !MONO
+		}
+#else
 			Dispose(true);
 		}
 
@@ -45,5 +51,6 @@ namespace XNAControls
 
 			_window.TextInput -= GameWindow_TextInput;
 		}
+#endif
 	}
 }
