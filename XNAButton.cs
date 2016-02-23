@@ -1,4 +1,4 @@
-﻿// Original Work Copyright (c) Ethan Moffat 2014-2015
+﻿// Original Work Copyright (c) Ethan Moffat 2014-2016
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
@@ -112,14 +112,8 @@ namespace XNAControls
 		{
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
-#if MONO
-			const string button = @"XNAControls_mono.img.button.png";
-			const string button_hover = @"XNAControls_mono.img.button_hover.png";
-#else
 			const string button = @"XNAControls.img.button.png";
 			const string button_hover = @"XNAControls.img.button_hover.png";
-#endif
-
 
 			using (System.IO.Stream s = assembly.GetManifestResourceStream(button))
 			{

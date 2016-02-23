@@ -1,4 +1,4 @@
-﻿// Original Work Copyright (c) Ethan Moffat 2014-2015
+﻿// Original Work Copyright (c) Ethan Moffat 2014-2016
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -17,11 +18,30 @@ namespace XNAControls.Test
 	public class TextSplitterTest
 	{
 		private TextSplitter _ts;
+		private static Form _form;
+		private static Game _game;
+		private static GraphicsDeviceManager _gdm;
+		private static SpriteFont _spriteFont;
+
+		[ClassInitialize]
+		public static void ClassInitialize(TestContext ctx)
+		{
+			SetupDependencies();
+			_spriteFont = LoadSpriteFontFromWorkingDirectory();
+		}
+
+		[ClassCleanup]
+		public static void ClassCleanup()
+		{
+			_gdm.Dispose();
+			_game.Dispose();
+			_form.Dispose();
+		}
 
 		[TestInitialize]
 		public void TestInitialize()
 		{
-			_ts = new TextSplitter("", LoadSpriteFontFromWorkingDirectory());
+			_ts = new TextSplitter("", _spriteFont);
 		}
 
 		[TestMethod]
@@ -152,22 +172,25 @@ namespace XNAControls.Test
 			Assert.IsTrue(result.Except(new[] { result.First() }).All(x => x.StartsWith(_ts.LineIndent)));
 		}
 
-		private SpriteFont LoadSpriteFontFromWorkingDirectory()
+		private static void SetupDependencies()
+		{
+			_form = new Form();
+			_game = new Game();
+			_gdm = new GraphicsDeviceManager(_game);
+		}
+
+		private static SpriteFont LoadSpriteFontFromWorkingDirectory()
 		{
 			SpriteFont font;
+			var gds = GraphicsDeviceService.AddRef(_form.Handle, _form.ClientSize.Width, _form.ClientSize.Height);
 
-			using (var form = new Form())
+			using (var services = new ServiceContainer())
 			{
-				var gds = GraphicsDeviceService.AddRef(form.Handle, form.ClientSize.Width, form.ClientSize.Height);
-
-				using (var services = new ServiceContainer())
+				services.AddService(typeof (IGraphicsDeviceService), gds);
+				var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+				using (var content = new ContentManager(services, path))
 				{
-					services.AddService(typeof(IGraphicsDeviceService), gds);
-					var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-					using (var content = new ContentManager(services, path))
-					{
-						font = content.Load<SpriteFont>("font_for_testing");
-					}
+					font = content.Load<SpriteFont>("font_for_testing");
 				}
 			}
 

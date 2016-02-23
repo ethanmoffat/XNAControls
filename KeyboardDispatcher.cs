@@ -37,13 +37,8 @@ namespace XNAControls
 
 		public KeyboardDispatcher(GameWindow window)
 		{
-#if !MONO
-			_events = new Win32KeyboardEvents(window);
+			_events = new KeyboardEvents(window);
 			_events.CharEntered += EventInput_CharEntered;
-#else
-			_events = new MonoGameKeyboardEvents(window);
-			_events.CharEntered += EventInput_CharEntered;
-#endif
 		}
 
 		private void EventInput_CharEntered(object sender, CharEnteredEventArgs e)

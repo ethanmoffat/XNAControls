@@ -1,4 +1,4 @@
-﻿// Original Work Copyright (c) Ethan Moffat 2014-2015
+﻿// Original Work Copyright (c) Ethan Moffat 2014-2016
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
@@ -86,11 +86,8 @@ namespace XNAControls
 			Visible = true;
 
 			KeyboardState openState = Keyboard.GetState();
-#if MONO
-			const string dlg = @"XNAControls_mono.img.dlg.png";
-#else
 			const string dlg = @"XNAControls.img.dlg.png";
-#endif
+
 			System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			using (System.IO.Stream s = assembly.GetManifestResourceStream(dlg))
 			{

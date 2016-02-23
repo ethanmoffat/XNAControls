@@ -6,24 +6,18 @@ using Microsoft.Xna.Framework;
 
 namespace XNAControls
 {
-	internal sealed class MonoGameKeyboardEvents : IKeyboardEvents
+	internal sealed class KeyboardEvents : IKeyboardEvents
 	{
 		public event CharEnteredHandler CharEntered;
 
 		private readonly GameWindow _window;
 
-		public MonoGameKeyboardEvents(GameWindow window)
+		public KeyboardEvents(GameWindow window)
 		{
 			_window = window;
-#if !MONO
-			if (CharEntered != null) //hide warning for "member is not used"
-				CharEntered(null, null);
-#else
 			_window.TextInput += GameWindow_TextInput;
-#endif
 		}
 
-#if MONO
 		private void GameWindow_TextInput(object sender, TextInputEventArgs e)
 		{
 			if (CharEntered != null)
@@ -32,17 +26,13 @@ namespace XNAControls
 			}
 		}
 
-		~MonoGameKeyboardEvents()
+		~KeyboardEvents()
 		{
 			Dispose(false);
 		}
-#endif
 
 		public void Dispose()
 		{
-#if !MONO
-		}
-#else
 			Dispose(true);
 		}
 
@@ -52,6 +42,5 @@ namespace XNAControls
 
 			_window.TextInput -= GameWindow_TextInput;
 		}
-#endif
 	}
 }
