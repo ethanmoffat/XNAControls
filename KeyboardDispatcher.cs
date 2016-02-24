@@ -8,6 +8,12 @@ using Microsoft.Xna.Framework;
 
 namespace XNAControls
 {
+	public enum PlatformTarget
+	{
+		Windows,
+		Linux
+	}
+
 	public class KeyboardDispatcher : IDisposable
 	{
 		private const char CHAR_PASTE_CODE = (char)0x16;
@@ -35,9 +41,15 @@ namespace XNAControls
 				_subscriber.Selected = selected;
 		}
 
-		public KeyboardDispatcher(GameWindow window)
+		public KeyboardDispatcher(GameWindow window, PlatformTarget target)
 		{
-			_events = new KeyboardEvents(window);
+			switch (target)
+			{
+				case PlatformTarget.Windows: _events = new Win32KeyboardEvents(window); break;
+				case PlatformTarget.Linux: _events = new KeyboardEvents(window); break;
+				default: throw new ArgumentOutOfRangeException("target", target, "Invalid platform target. Specify either Windows or Linux.");
+			}
+
 			_events.CharEntered += EventInput_CharEntered;
 		}
 
@@ -78,6 +90,7 @@ namespace XNAControls
 
 		//Thread has to be in Single Thread Apartment state in order to receive clipboard
 		string _pasteResult = "";
+
 		[STAThread]
 		void SetPasteResult()
 		{
