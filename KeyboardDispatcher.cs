@@ -8,12 +8,6 @@ using Microsoft.Xna.Framework;
 
 namespace XNAControls
 {
-	public enum PlatformTarget
-	{
-		Windows,
-		Linux
-	}
-
 	public class KeyboardDispatcher : IDisposable
 	{
 		private const char CHAR_PASTE_CODE = (char)0x16;
@@ -41,15 +35,9 @@ namespace XNAControls
 				_subscriber.Selected = selected;
 		}
 
-		public KeyboardDispatcher(GameWindow window, PlatformTarget target)
+		public KeyboardDispatcher(GameWindow window)
 		{
-			switch (target)
-			{
-				case PlatformTarget.Windows: _events = new Win32KeyboardEvents(window); break;
-				case PlatformTarget.Linux: _events = new KeyboardEvents(window); break;
-				default: throw new ArgumentOutOfRangeException("target", target, "Invalid platform target. Specify either Windows or Linux.");
-			}
-
+			_events = CreateEventsBasedOnPlatformTarget(window);
 			_events.CharEntered += EventInput_CharEntered;
 		}
 
@@ -75,6 +63,15 @@ namespace XNAControls
 			{
 				_subscriber.ReceiveTextInput(e.Character);
 			}
+		}
+
+		private IKeyboardEvents CreateEventsBasedOnPlatformTarget(GameWindow window)
+		{
+#if WINDOWS
+			return new Win32KeyboardEvents(window);
+#else
+			return new KeyboardEvents(window);
+#endif
 		}
 
 		#region Clipboard Handling
