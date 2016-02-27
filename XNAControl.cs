@@ -309,7 +309,7 @@ namespace XNAControls
 
 			if (TopParent == null) //child controls can have negative offsets! only check for TopParents
 			{
-				Rectangle gdm = Game.Window.ClientBounds;
+				Rectangle gdm = Game.Window == null ? Rectangle.Empty : Game.Window.ClientBounds;
 				if (gdm.Width > 0 && gdm.Height > 0) //when the client is minimized, this goes to shit
 				{
 					if (DrawLocation.X < 0)
