@@ -37,7 +37,7 @@ namespace XNAControls
 
 		public KeyboardDispatcher(GameWindow window)
 		{
-			_events = CreateEventsBasedOnPlatformTarget(window);
+			_events = new KeyboardEvents(window);
 			_events.CharEntered += EventInput_CharEntered;
 		}
 
@@ -63,15 +63,6 @@ namespace XNAControls
 			{
 				_subscriber.ReceiveTextInput(e.Character);
 			}
-		}
-
-		private IKeyboardEvents CreateEventsBasedOnPlatformTarget(GameWindow window)
-		{
-#if WINDOWS
-			return new Win32KeyboardEvents(window);
-#else
-			return new KeyboardEvents(window);
-#endif
 		}
 
 		#region Clipboard Handling
