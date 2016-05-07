@@ -226,6 +226,9 @@ namespace XNAControls
 
 		private Vector2 CalculateSizeOfTextArea()
 		{
+			if (Text == null || _font == null || _drawStrings == null)
+				return Vector2.Zero;
+
 			return TextWidth == null
 				? _font.MeasureString(Text)
 				: new Vector2(_drawStrings.Count > 0 ? _drawStrings.Select(line => _font.MeasureString(line).X).Max() : 1f,
