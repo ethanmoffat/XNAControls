@@ -275,6 +275,9 @@ namespace XNAControls
 
 		private void DrawTextLine(string textLine, float adjustedX, float adjustedY)
 		{
+			if (_font == null || textLine == null)
+				return;
+
 			var textLineWidth = _font.MeasureString(textLine).X;
 			var extraHeightForUnderline = _font.MeasureString(textLine).Y - 3;
 
