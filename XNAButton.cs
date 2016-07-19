@@ -180,8 +180,6 @@ namespace XNAControls
 				_drawTexture = _out;
 			}
 
-			PreviousMouseState = currentState;
-
 			base.Update(gt);
 		}
 		

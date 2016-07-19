@@ -116,8 +116,8 @@ namespace XNAControls
 			}
 		}
 
-		protected MouseState PreviousMouseState { get; set; }
-		protected KeyboardState PreviousKeyState { get; set; }
+		protected MouseState PreviousMouseState { get; private set; }
+		protected KeyboardState PreviousKeyState { get; private set; }
 
 		public event EventHandler OnMouseOver;
 		public event EventHandler OnMouseEnter;
