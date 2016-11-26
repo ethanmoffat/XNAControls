@@ -4,7 +4,7 @@
 
 using Microsoft.Xna.Framework;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	internal sealed class KeyboardEvents : IKeyboardEvents
 	{

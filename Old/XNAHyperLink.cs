@@ -6,7 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	public class XNAHyperLink : XNALabel
 	{

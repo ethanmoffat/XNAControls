@@ -5,10 +5,10 @@
 using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	//From top answer on: http://stackoverflow.com/questions/10216757/adding-inputbox-like-control-to-xna-game
 	//Modifications made by Ethan Moffat and Brian Gradin

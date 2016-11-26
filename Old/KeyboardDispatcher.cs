@@ -6,7 +6,7 @@ using System;
 using System.Threading;
 using Microsoft.Xna.Framework;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	public class KeyboardDispatcher : IDisposable
 	{

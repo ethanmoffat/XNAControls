@@ -4,7 +4,7 @@
 
 using System;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	internal interface IKeyboardEvents : IDisposable
 	{

@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	internal static class NativeMethods
 	{

@@ -4,7 +4,7 @@
 
 using System;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	internal delegate void CharEnteredHandler(object sender, CharEnteredEventArgs e);
 

@@ -4,12 +4,11 @@
 
 using System;
 using System.Collections.Generic;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	/// <summary>
 	/// The layer that the control should be drawn on. This is set by default but can be modified by the user.

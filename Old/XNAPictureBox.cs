@@ -5,7 +5,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	public enum StretchMode
 	{

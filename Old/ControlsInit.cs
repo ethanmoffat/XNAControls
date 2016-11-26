@@ -5,7 +5,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	public static class XNAControls
 	{

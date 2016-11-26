@@ -5,7 +5,7 @@
 using System;
 using Microsoft.Xna.Framework.Input;
 
-namespace XNAControls
+namespace XNAControls.Old
 {
 	internal delegate void KeyEventHandler(object sender, XNAKeyEventArgs e);
 
