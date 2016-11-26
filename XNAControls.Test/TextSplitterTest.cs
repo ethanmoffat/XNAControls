@@ -3,18 +3,16 @@
 // For additional details, see the LICENSE file
 
 using System.ComponentModel.Design;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using NUnit.Framework;
 
 namespace XNAControls.Test
 {
-	[TestClass]
+	[TestFixture]
 	public class TextSplitterTest
 	{
 		private TextSplitter _ts;
@@ -23,14 +21,14 @@ namespace XNAControls.Test
 		private static GraphicsDeviceManager _gdm;
 		private static SpriteFont _spriteFont;
 
-		[ClassInitialize]
-		public static void ClassInitialize(TestContext ctx)
+		[OneTimeSetUp]
+		public static void ClassInitialize()
 		{
 			SetupDependencies();
 			_spriteFont = LoadSpriteFontFromWorkingDirectory();
 		}
 
-		[ClassCleanup]
+		[OneTimeTearDown]
 		public static void ClassCleanup()
 		{
 			_gdm.Dispose();
@@ -38,13 +36,13 @@ namespace XNAControls.Test
 			_form.Dispose();
 		}
 
-		[TestInitialize]
-		public void TestInitialize()
+		[SetUp]
+		public void SetUp()
 		{
 			_ts = new TextSplitter("", _spriteFont);
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenShortMessage_WhenSplittingAt200px_NeedProcessingShouldBeFalse()
 		{
@@ -54,7 +52,7 @@ namespace XNAControls.Test
 			Assert.IsFalse(_ts.NeedsProcessing);
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenShortMessage_WhenSplittingAt200px_ShouldBeOneLineOfText()
 		{
@@ -66,7 +64,7 @@ namespace XNAControls.Test
 			Assert.AreEqual(1, result.Count);
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageWithLongWords1_WhenSplittingAt200px_ShouldBe3LinesOfText()
 		{
@@ -78,7 +76,7 @@ namespace XNAControls.Test
 			Assert.AreEqual(3, result.Count);
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageWithLongWords2_WhenSplittingAt200px_ShouldBe5LinesOfText()
 		{
@@ -90,7 +88,7 @@ namespace XNAControls.Test
 			Assert.AreEqual(4, result.Count);
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageWithShortWords_WhenSplittingAt200px_ShouldBe3LinesOfText()
 		{
@@ -102,7 +100,7 @@ namespace XNAControls.Test
 			Assert.AreEqual(3, result.Count);
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageAndLongWordsAndLineEnd_WhenSplittingAt200px_ShouldEndEachLineExceptLastWithLineEnd()
 		{
@@ -116,7 +114,7 @@ namespace XNAControls.Test
 			Assert.IsFalse(result.Last().EndsWith(_ts.LineEnd));
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageAndShortWordsAndLineEnd_WhenSplittingAt200px_ShouldEndEachLineExceptLastWithLineEnd()
 		{
@@ -130,7 +128,7 @@ namespace XNAControls.Test
 			Assert.IsFalse(result.Last().EndsWith(_ts.LineEnd));
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageWithNewLinesAndShortWordsAndLineEnd_WhenSplittingAt200px_ShouldEndEachLineExceptLastWithLineEnd()
 		{
@@ -144,7 +142,7 @@ namespace XNAControls.Test
 			Assert.IsFalse(result.Last().EndsWith(_ts.LineEnd));
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageAndLongWordsAndLineIndent_WhenSplittingAt200px_ShouldStartEachLineExceptFirstWithLineIndent()
 		{
@@ -158,7 +156,7 @@ namespace XNAControls.Test
 			Assert.IsTrue(result.Except(new[] { result.First() }).All(x => x.StartsWith(_ts.LineIndent)));
 		}
 
-		[TestMethod]
+		[Test]
 		[Timeout(2000)]
 		public void GivenLongMessageAndShortWordsAndLineIndent_WhenSplittingAt200px_ShouldStartEachLineExceptFirstWithLineIndent()
 		{
@@ -187,8 +185,7 @@ namespace XNAControls.Test
 			using (var services = new ServiceContainer())
 			{
 				services.AddService(typeof (IGraphicsDeviceService), gds);
-				var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-				using (var content = new ContentManager(services, path))
+				using (var content = new ContentManager(services, TestContext.CurrentContext.TestDirectory))
 				{
 					font = content.Load<SpriteFont>("font_for_testing");
 				}
