@@ -43,6 +43,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameRepository.cs" />
     <Compile Include="Old\ControlsInit.cs" />
     <Compile Include="Old\KeyboardEvents.cs" />
     <Compile Include="Old\extensions.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Old\XNAPanel.cs" />
     <Compile Include="Old\XNAPictureBox.cs" />
     <Compile Include="Old\XNATextBox.cs" />
+    <Compile Include="Singleton.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="img\dlg.png" />
