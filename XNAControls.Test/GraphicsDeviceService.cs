@@ -19,44 +19,44 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace XNAControls.Test
 {
-	class GraphicsDeviceService : IGraphicsDeviceService
-	{
-		#region Fields
+    class GraphicsDeviceService : IGraphicsDeviceService
+    {
+        #region Fields
 
-		static GraphicsDeviceService singletonInstance;
-		static int referenceCount;
+        static GraphicsDeviceService singletonInstance;
+        static int referenceCount;
 
-		#endregion
+        #endregion
 
-		GraphicsDeviceService(IntPtr windowHandle, int width, int height)
-		{
-			var parameters = new PresentationParameters
-			{
-				BackBufferWidth = Math.Max(width, 1),
-				BackBufferHeight = Math.Max(height, 1),
-				BackBufferFormat = SurfaceFormat.Color,
-				DepthStencilFormat = DepthFormat.Depth24,
-				DeviceWindowHandle = windowHandle,
-				PresentationInterval = PresentInterval.Immediate,
-				IsFullScreen = false
-			};
+        GraphicsDeviceService(IntPtr windowHandle, int width, int height)
+        {
+            var parameters = new PresentationParameters
+            {
+                BackBufferWidth = Math.Max(width, 1),
+                BackBufferHeight = Math.Max(height, 1),
+                BackBufferFormat = SurfaceFormat.Color,
+                DepthStencilFormat = DepthFormat.Depth24,
+                DeviceWindowHandle = windowHandle,
+                PresentationInterval = PresentInterval.Immediate,
+                IsFullScreen = false
+            };
 
-			GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, parameters);
-		}
+            GraphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter, GraphicsProfile.HiDef, parameters);
+        }
 
-		public static GraphicsDeviceService AddRef(IntPtr windowHandle, int width, int height)
-		{
-			if (Interlocked.Increment(ref referenceCount) == 1)
-				singletonInstance = new GraphicsDeviceService(windowHandle, width, height);
+        public static GraphicsDeviceService AddRef(IntPtr windowHandle, int width, int height)
+        {
+            if (Interlocked.Increment(ref referenceCount) == 1)
+                singletonInstance = new GraphicsDeviceService(windowHandle, width, height);
 
-			return singletonInstance;
-		}
+            return singletonInstance;
+        }
 
-		public GraphicsDevice GraphicsDevice { get; private set; }
+        public GraphicsDevice GraphicsDevice { get; private set; }
 
-		public event EventHandler<EventArgs> DeviceCreated;
-		public event EventHandler<EventArgs> DeviceDisposing;
-		public event EventHandler<EventArgs> DeviceReset;
-		public event EventHandler<EventArgs> DeviceResetting;
-	}
+        public event EventHandler<EventArgs> DeviceCreated;
+        public event EventHandler<EventArgs> DeviceDisposing;
+        public event EventHandler<EventArgs> DeviceReset;
+        public event EventHandler<EventArgs> DeviceResetting;
+    }
 }
