@@ -240,12 +240,13 @@ namespace XNAControls
                 if (clientBounds.Width > 0 && clientBounds.Height > 0)
                 {
                     var rightBound = clientBounds.Width - DrawArea.Width;
-                    var bottomBound = clientBounds.Height - DrawArea.Height;
                     var newX = DrawArea.X < 0
                         ? 0
                         : DrawArea.X > rightBound
                             ? rightBound
                             : DrawArea.X;
+
+                    var bottomBound = clientBounds.Height - DrawArea.Height;
                     var newY = DrawArea.Y < 0
                         ? 0
                         : DrawArea.Y > bottomBound
