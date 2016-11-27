@@ -45,8 +45,11 @@ namespace XNAControls
         /// <summary>
         /// Get or set the Background Color. Set to 'null' to turn off.
         /// </summary>
-        public Color? BackColor { get; set; }
+        public Color BackColor { get; set; }
 
+        /// <summary>
+        /// Get or set the control's size state. When true, label is automatically sized to text content
+        /// </summary>
         public bool AutoSize { get; set; }
 
         /// <summary>
@@ -117,6 +120,11 @@ namespace XNAControls
             _whitePixel.SetData(new [] {Color.White});
         }
 
+        /// <summary>
+        /// Resize the label based on the contained text, with optional padding
+        /// </summary>
+        /// <param name="xPadding">Number of pixels to pad in the X direction (horizontal)</param>
+        /// <param name="yPadding">Number of pixels to pad in the Y direction (vertical)</param>
         public void ResizeBasedOnText(uint xPadding = 0, uint yPadding = 0)
         {
             if (_font == null || AutoSize) return;
@@ -222,8 +230,6 @@ namespace XNAControls
 
         private void DrawBackground(Vector2 totalArea)
         {
-            if (!BackColor.HasValue) return;
-
             var location = new Vector2(DrawAreaWithParentOffset.X, DrawAreaWithParentOffset.Y);
             var backgroundTargetRectangle = TextWidth == null
                 ? DrawAreaWithParentOffset
@@ -232,7 +238,7 @@ namespace XNAControls
                     (int) totalArea.X,
                     (int) totalArea.Y);
 
-            _spriteBatch.Draw(_whitePixel, backgroundTargetRectangle, BackColor.Value);
+            _spriteBatch.Draw(_whitePixel, backgroundTargetRectangle, BackColor);
         }
 
         private void DrawTextLine(string textLine, float adjustedX, float adjustedY)
@@ -284,10 +290,13 @@ namespace XNAControls
         Color ForeColor { get; set; }
 
         /// <summary>
-        /// Get or set the Background Color. Set to 'null' to turn off.
+        /// Get or set the Background Color. Use Color.Transparent for no color
         /// </summary>
-        Color? BackColor { get; set; }
+        Color BackColor { get; set; }
 
+        /// <summary>
+        /// Get or set the control's size state. When true, label is automatically sized to text content
+        /// </summary>
         bool AutoSize { get; set; }
 
         /// <summary>
@@ -320,6 +329,11 @@ namespace XNAControls
         /// </summary>
         bool Underline { get; set; }
 
+        /// <summary>
+        /// Resize the label based on the contained text, with optional padding
+        /// </summary>
+        /// <param name="xPadding">Number of pixels to pad in the X direction (horizontal)</param>
+        /// <param name="yPadding">Number of pixels to pad in the Y direction (vertical)</param>
         void ResizeBasedOnText(uint xPadding = 0, uint yPadding = 0);
     }
 }
