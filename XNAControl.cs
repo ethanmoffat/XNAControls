@@ -6,12 +6,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace XNAControls
 {
     public abstract class XNAControl : DrawableGameComponent, IXNAControl
     {
         private readonly List<IXNAControl> _children;
+        private MouseState _currentMouseState, _previousMouseState;
+        private KeyboardState _currentKeyState, _previousKeyState;
+
+        protected MouseState CurrentMouseState { get { return _currentMouseState; } }
+        protected MouseState PreviousMouseState { get { return _previousMouseState; } }
+
+        protected KeyboardState CurrentKeyState { get { return _currentKeyState; } }
+        protected KeyboardState PreviousKeyState { get { return _previousKeyState; } }
 
         /// <summary>
         /// The X,Y coordinates of this control, based on DrawArea
@@ -78,11 +87,20 @@ namespace XNAControls
         /// </summary>
         public IReadOnlyList<IXNAControl> ChildControls { get { return _children; } }
 
+        public event EventHandler OnMouseOver = delegate { };
+        public event EventHandler OnMouseEnter = delegate { };
+        public event EventHandler OnMouseLeave = delegate { };
+
         protected XNAControl()
             : base(GameRepository.GetGame())
         {
             _children = new List<IXNAControl>();
+
+            _currentKeyState = _previousKeyState = Keyboard.GetState();
+            _currentMouseState = _previousMouseState = Mouse.GetState();
         }
+
+        #region Public Interface
 
         /// <summary>
         /// Add this control to the components of the default game. 
@@ -142,6 +160,63 @@ namespace XNAControls
                 UpdateDrawOrderBasedOnParent(this, childControl);
         }
 
+        #endregion
+
+        #region GameComponent overrides
+
+        /// <summary>
+        /// Default game component Update() method. To override, use OnUpdateControl in derived classes
+        /// </summary>
+        public override void Update(GameTime gameTime)
+        {
+            if (!ShouldUpdate()) return;
+
+            _currentKeyState = Keyboard.GetState();
+            _currentMouseState = Mouse.GetState();
+
+            OnUpdateControl(gameTime);
+
+            _previousKeyState = _currentKeyState;
+            _previousMouseState = _currentMouseState;
+
+            base.Update(gameTime);
+        }
+
+        /// <summary>
+        /// Default game component Draw() method. To override, use OnDrawControl in derived classes
+        /// </summary>
+        public override void Draw(GameTime gameTime)
+        {
+            if (!Visible) return;
+
+            OnDrawControl(gameTime);
+
+            base.Draw(gameTime);
+        }
+
+        protected virtual void OnUpdateControl(GameTime gameTime)
+        {
+            //todo: check and invoke MouseEnter, MouseLeave, MouseOver events
+        }
+
+        protected virtual void OnDrawControl(GameTime gameTime)
+        {
+            foreach (var child in _children)
+                child.Draw(gameTime);
+        }
+
+        #endregion
+
+        #region Helper methods
+
+        private bool ShouldUpdate()
+        {
+            if (!Game.IsActive) return false;
+
+            //todo: check if any dialogs are open
+            return true;
+        }
+
         private void AddToGameComponents(IXNAControl control)
         {
             if (!Game.Components.Contains(control))
@@ -158,5 +233,7 @@ namespace XNAControls
         {
             child.SetDrawOrder(parent.DrawOrder + 1);
         }
+
+        #endregion
     }
 }
