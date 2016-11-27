@@ -26,9 +26,7 @@ namespace XNAControls
     public class XNALabel : XNAControl
     {
         private readonly SpriteFont _font;
-        private Color? _backColor;
-        private Texture2D _backgroundTexture;
-        private Texture2D _underlineTexture;
+        private readonly Texture2D _whitePixel;
 
         private string _lastText;
         private readonly List<string> _drawStrings;
@@ -47,20 +45,7 @@ namespace XNAControls
         /// <summary>
         /// Get or set the Background Color. Set to 'null' to turn off.
         /// </summary>
-        public Color? BackColor
-        {
-            get { return _backColor; }
-            set
-            {
-                _backColor = value;
-                if (_backColor != null)
-                {
-                    if (_backgroundTexture == null)
-                        _backgroundTexture = new Texture2D(Game.GraphicsDevice, 1, 1);
-                    _backgroundTexture.SetData(new[] {_backColor.Value}, 0, 1);
-                }
-            }
-        }
+        public Color? BackColor { get; set; }
 
         public bool AutoSize { get; set; }
 
@@ -143,8 +128,8 @@ namespace XNAControls
 
             _font = Game.Content.Load<SpriteFont>(spriteFontName);
 
-            _underlineTexture = new Texture2D(Game.GraphicsDevice, 1, 1);
-            _underlineTexture.SetData(new [] {Color.White});
+            _whitePixel = new Texture2D(Game.GraphicsDevice, 1, 1);
+            _whitePixel.SetData(new [] {Color.White});
         }
 
         public void ResizeBasedOnText(uint xPadding = 0, uint yPadding = 0)
@@ -251,16 +236,17 @@ namespace XNAControls
 
         private void DrawBackground(Vector2 totalArea)
         {
-            var location = new Vector2(DrawAreaWithParentOffset.X, DrawAreaWithParentOffset.Y);
+            if (!BackColor.HasValue) return;
 
-            if (BackColor.HasValue && _backgroundTexture != null)
-                _spriteBatch.Draw(_backgroundTexture,
-                                  TextWidth == null ? DrawAreaWithParentOffset
-                                                    : new Rectangle((int) location.X,
-                                                                    (int) location.Y,
-                                                                    (int) totalArea.X,
-                                                                    (int) totalArea.Y),
-                                  Color.White);
+            var location = new Vector2(DrawAreaWithParentOffset.X, DrawAreaWithParentOffset.Y);
+            var backgroundTargetRectangle = TextWidth == null
+                ? DrawAreaWithParentOffset
+                : new Rectangle((int) location.X,
+                    (int) location.Y,
+                    (int) totalArea.X,
+                    (int) totalArea.Y);
+
+            _spriteBatch.Draw(_whitePixel, backgroundTargetRectangle, BackColor.Value);
         }
 
         private void DrawTextLine(string textLine, float adjustedX, float adjustedY)
@@ -284,7 +270,7 @@ namespace XNAControls
                     (int) textLineWidth,
                     1);
 
-                _spriteBatch.Draw(_underlineTexture, underlineDestRect, null, ForeColor);
+                _spriteBatch.Draw(_whitePixel, underlineDestRect, null, ForeColor);
             }
         }
 
@@ -292,17 +278,9 @@ namespace XNAControls
         {
             if (disposing)
             {
-                if (_backgroundTexture != null)
-                {
-                    _backgroundTexture.Dispose();
-                    _backgroundTexture = null;
-                }
-                if (_underlineTexture != null)
-                {
-                    _underlineTexture.Dispose();
-                    _underlineTexture = null;
-                }
+                _whitePixel.Dispose();
             }
+
             base.Dispose(disposing);
         }
     }
