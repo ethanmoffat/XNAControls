@@ -102,18 +102,17 @@ namespace XNAControls
                 && CurrentMouseState.LeftButton == ButtonState.Released)
                 OnClick(this, EventArgs.Empty);
 
-            //todo: handle dragging
-            //if (MouseOver && PreviousMouseState.LeftButton == ButtonState.Pressed && CurrentMouseState.LeftButton == ButtonState.Pressed
-            //    && shouldClickDrag && !_dragging)
-            //{
-            //    SuppressParentClickDrag(true);
-            //    _dragging = true;
-            //}
-            //else if (PreviousMouseState.LeftButton == ButtonState.Pressed && CurrentMouseState.LeftButton == ButtonState.Released && _dragging)
-            //{
-            //    _dragging = false;
-            //    SuppressParentClickDrag(false);
-            //}
+            if (MouseOver && PreviousMouseState.LeftButton == ButtonState.Pressed && CurrentMouseState.LeftButton == ButtonState.Pressed
+                && ShouldClickDrag && !_dragging)
+            {
+                SuppressParentClickDragEvent(true);
+                _dragging = true;
+            }
+            else if (PreviousMouseState.LeftButton == ButtonState.Pressed && CurrentMouseState.LeftButton == ButtonState.Released && _dragging)
+            {
+                _dragging = false;
+                SuppressParentClickDragEvent(false);
+            }
 
             if (_dragging)
                 OnClickDrag(this, EventArgs.Empty);

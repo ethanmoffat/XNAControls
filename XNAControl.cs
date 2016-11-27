@@ -17,6 +17,10 @@ namespace XNAControls
         private readonly List<IXNAControl> _children;
         protected readonly SpriteBatch _spriteBatch;
 
+        private bool _shouldClickDrag;
+
+        protected bool ShouldClickDrag { get { return _shouldClickDrag; } }
+
         private MouseState _currentMouseState, _previousMouseState;
         private KeyboardState _currentKeyState, _previousKeyState;
 
@@ -167,6 +171,19 @@ namespace XNAControls
 
             ((List<IXNAControl>) ImmediateParent.ChildControls).Remove(this);
             ImmediateParent = null;
+        }
+
+        /// <summary>
+        /// Called when a child control is being dragged and the parent should not respond to click drag.  Example: scroll bar being dragged within a dialog
+        /// </summary>
+        /// <param name="suppress">True if parent dragging should be disabled (suppressed), false to enable dragging</param>
+        public void SuppressParentClickDragEvent(bool suppress)
+        {
+            if (ImmediateParent == null)
+                return;
+
+            ((XNAControl)ImmediateParent)._shouldClickDrag = !suppress;
+            ImmediateParent.SuppressParentClickDragEvent(suppress);
         }
 
         /// <summary>

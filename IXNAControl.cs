@@ -28,5 +28,6 @@ namespace XNAControls
         void SetParentControl(IXNAControl parent);
         void SetControlUnparented();
         void SetDrawOrder(int drawOrder);
+        void SuppressParentClickDragEvent(bool suppress);
     }
 }
