@@ -303,6 +303,16 @@ namespace XNAControls
             return Visible;
         }
 
+        protected void SetSize(int newWidth, int newHeight)
+        {
+            DrawArea = new Rectangle(DrawArea.X, DrawArea.Y, newWidth, newHeight);
+        }
+
+        protected void SetPosition(int newX, int newY)
+        {
+            DrawArea = new Rectangle(newX, newY, DrawArea.Width, DrawArea.Height);
+        }
+
         private void AddToGameComponents(IXNAControl control)
         {
             if (!Game.Components.Contains(control))
