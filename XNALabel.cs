@@ -32,6 +32,9 @@ namespace XNAControls
         private int? _lastTextWidth;
         private readonly List<string> _drawStrings;
 
+        private Vector2 _alignmentOffset, _totalTextArea;
+        private LabelAlignment _lastAlignment;
+
         /// <summary>
         /// Get or set the text to display in the label.
         /// </summary>
@@ -159,23 +162,64 @@ namespace XNAControls
                 }
             }
 
+            if (_lastAlignment != TextAlign)
+            {
+                _lastAlignment = TextAlign;
+                _alignmentOffset = CalculatePositionFromAlignment();
+            }
+
+            _totalTextArea = CalculateSizeOfTextArea();
+
             base.OnUpdateControl(gameTime);
+        }
+
+        private Vector2 CalculatePositionFromAlignment()
+        {
+            float adjustedX = 0;
+            float adjustedY = 0;
+
+            var align = Enum.GetName(typeof(LabelAlignment), TextAlign) ?? "";
+
+            if (align.Contains("Left"))
+                adjustedX = 0;
+            else if (align.Contains("Center"))
+                adjustedX = (int)(DrawArea.Width / 2f - _totalTextArea.X / 2);
+            else if (align.Contains("Right"))
+                adjustedX = DrawArea.Width - _totalTextArea.X;
+
+            if (align.Contains("Top"))
+                adjustedY = 0;
+            else if (align.Contains("Middle"))
+                adjustedY = (int)(DrawArea.Height / 2f - _totalTextArea.Y / 2);
+            else if (align.Contains("Bottom"))
+                adjustedY = DrawArea.Height - _totalTextArea.Y;
+
+            return new Vector2(adjustedX, adjustedY);
+        }
+
+        private Vector2 CalculateSizeOfTextArea()
+        {
+            if (Text == null || _font == null || _drawStrings == null)
+                return Vector2.Zero;
+
+            return TextWidth == null
+                ? _font.MeasureString(Text)
+                : new Vector2(_drawStrings.Count > 0 ? _drawStrings.Select(line => _font.MeasureString(line).X).Max() : 1f,
+                              _drawStrings.Count > 0 ? _font.LineSpacing * _drawStrings.Count : _font.LineSpacing);
         }
 
         protected override void OnDrawControl(GameTime gameTime)
         {
-            var totalTextArea = CalculateSizeOfTextArea();
             float adjustedX = 0, adjustedY = 0;
             if (!AutoSize)
             {
-                var tmpVec = CalculatePositionFromAlignment(totalTextArea);
-                adjustedX = tmpVec.X;
-                adjustedY = tmpVec.Y;
+                adjustedX = _alignmentOffset.X;
+                adjustedY = _alignmentOffset.Y;
             }
 
             _spriteBatch.Begin();
 
-            DrawBackground(totalTextArea);
+            DrawBackground();
 
             if (TextWidth == null)
                 DrawTextLine(Text, adjustedX, adjustedY);
@@ -193,50 +237,15 @@ namespace XNAControls
             base.OnDrawControl(gameTime);
         }
 
-        private Vector2 CalculateSizeOfTextArea()
-        {
-            if (Text == null || _font == null || _drawStrings == null)
-                return Vector2.Zero;
-
-            return TextWidth == null
-                ? _font.MeasureString(Text)
-                : new Vector2(_drawStrings.Count > 0 ? _drawStrings.Select(line => _font.MeasureString(line).X).Max() : 1f,
-                              _drawStrings.Count > 0 ? _font.LineSpacing*_drawStrings.Count : _font.LineSpacing);
-        }
-
-        private Vector2 CalculatePositionFromAlignment(Vector2 totalTextArea)
-        {
-            float adjustedX = 0;
-            float adjustedY = 0;
-
-            var align = Enum.GetName(typeof(LabelAlignment), TextAlign) ?? "";
-
-            if (align.Contains("Left"))
-                adjustedX = 0;
-            else if (align.Contains("Center"))
-                adjustedX = (int)(DrawArea.Width / 2f - totalTextArea.X / 2);
-            else if (align.Contains("Right"))
-                adjustedX = DrawArea.Width - totalTextArea.X;
-
-            if (align.Contains("Top"))
-                adjustedY = 0;
-            else if (align.Contains("Middle"))
-                adjustedY = (int)(DrawArea.Height / 2f - totalTextArea.Y / 2);
-            else if (align.Contains("Bottom"))
-                adjustedY = DrawArea.Height - totalTextArea.Y;
-
-            return new Vector2(adjustedX, adjustedY);
-        }
-
-        private void DrawBackground(Vector2 totalArea)
+        private void DrawBackground()
         {
             var location = new Vector2(DrawAreaWithParentOffset.X, DrawAreaWithParentOffset.Y);
             var backgroundTargetRectangle = TextWidth == null
                 ? DrawAreaWithParentOffset
                 : new Rectangle((int) location.X,
                     (int) location.Y,
-                    (int) totalArea.X,
-                    (int) totalArea.Y);
+                    (int) _totalTextArea.X,
+                    (int) _totalTextArea.Y);
 
             _spriteBatch.Draw(_whitePixel, backgroundTargetRectangle, BackColor);
         }
