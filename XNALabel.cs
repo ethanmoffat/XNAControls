@@ -25,12 +25,14 @@ namespace XNAControls
 
     public class XNALabel : XNAControl, IXNALabel
     {
-        private readonly SpriteFont _font;
-        private readonly Texture2D _whitePixel;
+        private readonly string _spriteFontName;
+        private readonly List<string> _drawStrings;
+
+        private SpriteFont _font;
+        private Texture2D _whitePixel;
 
         private string _lastText;
         private int? _lastTextWidth;
-        private readonly List<string> _drawStrings;
 
         private Vector2 _alignmentOffset, _totalTextArea;
         private LabelAlignment _lastAlignment;
@@ -112,15 +114,31 @@ namespace XNAControls
 
         public XNALabel(string spriteFontName)
         {
+            _spriteFontName = spriteFontName;
             _drawStrings = new List<string>();
+
             Text = "";
+            _lastText = null;
+
             ForeColor = Color.Black;
+
             TextAlign = LabelAlignment.TopLeft;
+            _lastAlignment = LabelAlignment.MiddleCenter;
+        }
 
-            _font = Game.Content.Load<SpriteFont>(spriteFontName);
-
+        public override void Initialize()
+        {
             _whitePixel = new Texture2D(Game.GraphicsDevice, 1, 1);
-            _whitePixel.SetData(new [] {Color.White});
+            _whitePixel.SetData(new[] { Color.White });
+
+            base.Initialize();
+        }
+
+        protected override void LoadContent()
+        {
+            _font = Game.Content.Load<SpriteFont>(_spriteFontName);
+
+            base.LoadContent();
         }
 
         /// <summary>
@@ -279,7 +297,11 @@ namespace XNAControls
         {
             if (disposing)
             {
-                _whitePixel.Dispose();
+                if (_whitePixel != null)
+                {
+                    _whitePixel.Dispose();
+                    _whitePixel = null;
+                }
             }
 
             base.Dispose(disposing);
