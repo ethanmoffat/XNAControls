@@ -25,33 +25,19 @@ namespace XNAControls
 
     public class XNALabel : XNAControl
     {
+        private readonly SpriteFont _font;
+        private Color? _backColor;
+        private Texture2D _backgroundTexture;
+        private Texture2D _underlineTexture;
+
+        private string _lastText;
+        private readonly List<string> _drawStrings;
+        private int? _textWidth;
+
         /// <summary>
         /// Get or set the text to display in the label.
         /// </summary>
-        public string Text
-        {
-            get { return _text; }
-            set
-            {
-                _text = value;
-                if (TextWidth != null)
-                {
-                    var ts = new TextSplitter(_text, _font) { LineLength = TextWidth.Value };
-                    _drawStrings.Clear();
-                    _drawStrings.AddRange(ts.SplitIntoLines());
-
-                    if (AutoSize && _drawStrings.Any())
-                    {
-                        var largestWidth = _drawStrings.Select(line => _font.MeasureString(line).X).Max();
-                        SetSize((int) largestWidth, _drawStrings.Count*_font.LineSpacing);
-                    }
-                }
-                else
-                {
-                    _drawStrings.Clear();
-                }
-            }
-        }
+        public string Text { get; set; }
 
         /// <summary>
         /// Get or set the Foreground Color.
@@ -148,15 +134,6 @@ namespace XNAControls
         /// </summary>
         public bool Underline { get; set; }
 
-        private readonly SpriteFont _font;
-        private Color? _backColor;
-        private Texture2D _backgroundTexture;
-        private Texture2D _underlineTexture;
-
-        private string _text;
-        private readonly List<string> _drawStrings;
-        private int? _textWidth;
-
         public XNALabel(string spriteFontName)
         {
             _drawStrings = new List<string>();
@@ -177,6 +154,33 @@ namespace XNAControls
             var sz = _font.MeasureString(Text);
             SetSize((int)Math.Round(sz.X) + (int)xPadding,
                     (int)Math.Round(sz.Y) + (int)yPadding);
+        }
+
+        protected override void OnUpdateControl(GameTime gameTime)
+        {
+            if (_lastText != Text)
+            {
+                _lastText = Text;
+
+                if (TextWidth != null)
+                {
+                    var ts = new TextSplitter(Text, _font) {LineLength = TextWidth.Value};
+                    _drawStrings.Clear();
+                    _drawStrings.AddRange(ts.SplitIntoLines());
+
+                    if (AutoSize && _drawStrings.Any())
+                    {
+                        var largestWidth = _drawStrings.Select(line => _font.MeasureString(line).X).Max();
+                        SetSize((int) largestWidth, _drawStrings.Count*_font.LineSpacing);
+                    }
+                }
+                else
+                {
+                    _drawStrings.Clear();
+                }
+            }
+
+            base.OnUpdateControl(gameTime);
         }
 
         protected override void OnDrawControl(GameTime gameTime)
