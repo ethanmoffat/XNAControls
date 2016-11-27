@@ -11,43 +11,46 @@ namespace XNAControls
 {
     public class XNAButton : XNAControl
     {
+        private readonly Texture2D _out;
+        private readonly Texture2D _over;
+        private readonly XNALabel _textLabel;
+
+        private Rectangle _clickArea;
+        private bool _dragging;
+        private Texture2D _drawTexture;
+
+        /// <summary>
+        /// Invoked when the button control is clicked once
+        /// </summary>
+        public event EventHandler OnClick = delegate { };
+
+        /// <summary>
+        /// Invoked when the button control is being dragged
+        /// </summary>
+        public event EventHandler OnClickDrag = delegate { };
+
+        /// <summary>
+        /// Get or set optional text for the button that is displayed over the button textures
+        /// </summary>
         public string Text
         {
             get { return _textLabel.Text; }
             set { _textLabel.Text = value; }
         }
 
-        private bool _dragging;
-        private readonly Texture2D _out; //texture for mouse out (primary display texture)
-        private readonly Texture2D _over; //texture for mouse over
-        private Texture2D _drawTexture; //texture to be drawn, selected based on MouseOver in Update method
-        private readonly XNALabel _textLabel;
-
         /// <summary>
-        /// If FlashSpeed is set, the button will change between over/out textures once every 'FlashSpeed' milliseconds
+        /// Set the FlashSpeed which causes the over/out textures to cycle once every 'FlashSpeed' milliseconds
         /// </summary>
         public int? FlashSpeed { get; set; }
 
-        private Rectangle? area; //nullable rectangle for optional area that will respond to mouse click/hover
         /// <summary>
-        /// Get/set the area that should respond to a click event.
-        /// If null, the entire button area responds to a click event.
+        /// Get/set the area that should respond to a click event relative to the top-left corner of this control. 
+        /// Parent offsets are adjusted automatically
         /// </summary>
-        public Rectangle? ClickArea
+        public Rectangle ClickArea
         {
-            get { return area; }
-            set
-            {
-                area = value;
-                if(area != null)
-                {
-                    //factor in the draw coordinates and the offset from the parent to the new click area
-                    area = new Rectangle(area.Value.X + DrawAreaWithParentOffset.X,
-                        area.Value.Y + DrawAreaWithParentOffset.Y,
-                        area.Value.Width,
-                        area.Value.Height);
-                }
-            }
+            get { return _clickArea; }
+            set { _clickArea = CreateRectangleFromParentOffset(value); }
         }
 
         /// <summary>
@@ -74,7 +77,7 @@ namespace XNAControls
                 (int) location.Y,
                 largerArea.Width, largerArea.Height);
 
-            ClickArea = null;
+            ClickArea = largerArea;
 
             var outData = new Color[outSource.Width * outSource.Height];
             _out = new Texture2D(sheet.GraphicsDevice, outSource.Width, outSource.Height);
@@ -87,6 +90,18 @@ namespace XNAControls
             _over.SetData(overData);
 
             _drawTexture = _out;
+        }
+
+        public override void SetParentControl(IXNAControl parent)
+        {
+            base.SetParentControl(parent);
+            ClickArea = CreateRectangleFromParentOffset(ClickArea);
+        }
+
+        public override void SetControlUnparented()
+        {
+            base.SetControlUnparented();
+            ClickArea = CreateRectangleFromParentOffset(ClickArea);
         }
 
         protected override void OnUpdateControl(GameTime gameTime)
@@ -132,7 +147,12 @@ namespace XNAControls
             base.OnDrawControl(gameTime);
         }
 
-        public event EventHandler OnClick = delegate { };
-        public event EventHandler OnClickDrag = delegate { };
+        private Rectangle CreateRectangleFromParentOffset(Rectangle value)
+        {
+            return new Rectangle(
+                value.X + (int)DrawPositionWithParentOffset.X,
+                value.Y + (int)DrawPositionWithParentOffset.Y,
+                value.Width, value.Height);
+        }
     }
 }

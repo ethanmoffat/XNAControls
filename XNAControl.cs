@@ -139,7 +139,7 @@ namespace XNAControls
         /// Set the immediate parent control of this control. XNAControl parents take ownership of Draw()ing, Update()ing, and Dispose()ing their children.
         /// </summary>
         /// <param name="parent">The parent control to set. Must not be null.</param>
-        public void SetParentControl(IXNAControl parent)
+        public virtual void SetParentControl(IXNAControl parent)
         {
             if (parent == null)
                 throw new ArgumentNullException("parent", "Parent should not be null. To unset a parent, use the method SetControlUnparented()");
@@ -161,7 +161,7 @@ namespace XNAControls
         /// Note: this method will not automatically add the control back to the game's components. 
         ///       The user is responsible for re-adding this component to the Game's controls if they desire to have it automatically drawn/updated by the framework.
         /// </summary>
-        public void SetControlUnparented()
+        public virtual void SetControlUnparented()
         {
             if (ImmediateParent == null) return;
 
