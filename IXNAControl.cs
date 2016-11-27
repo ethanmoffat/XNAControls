@@ -10,6 +10,8 @@ namespace XNAControls
 {
     public interface IXNAControl : IGameComponent, IDrawable, IUpdateable, IDisposable
     {
+        bool MouseOver { get; }
+        bool MouseOverPreviously { get; }
         Vector2 DrawPosition { get; }
         Vector2 DrawPositionWithParentOffset { get; }
         Rectangle DrawArea { get; set; }

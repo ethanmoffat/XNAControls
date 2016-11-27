@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using XNAControls.Old;
 
 namespace XNAControls
 {
@@ -21,6 +22,22 @@ namespace XNAControls
 
         protected KeyboardState CurrentKeyState { get { return _currentKeyState; } }
         protected KeyboardState PreviousKeyState { get { return _previousKeyState; } }
+
+        public bool MouseOver
+        {
+            get
+            {
+                return DrawAreaWithParentOffset.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y);
+            }
+        }
+
+        public bool MouseOverPreviously
+        {
+            get
+            {
+                return DrawAreaWithParentOffset.ContainsPoint(PreviousMouseState.X, PreviousMouseState.Y);
+            }
+        }
 
         /// <summary>
         /// The X,Y coordinates of this control, based on DrawArea
@@ -197,11 +214,43 @@ namespace XNAControls
 
         /// <summary>
         /// Does the update logic for the control if the Update should occur (see ShouldUpdate() method) 
-        /// Base class update logic checks and fires events MouseEnter, MouseLeave, and MouseOver
+        /// Base class update logic checks and fires events MouseEnter, MouseLeave, and MouseOver 
+        /// It also updates all child controls and ensures parent controls stay within bounds of the window
         /// </summary>
         protected virtual void OnUpdateControl(GameTime gameTime)
         {
-            //todo: check and invoke MouseEnter, MouseLeave, MouseOver events
+            if (MouseOver)
+                OnMouseOver(this, EventArgs.Empty);
+
+            if (MouseOver && !MouseOverPreviously)
+                OnMouseEnter(this, EventArgs.Empty);
+            else if (!MouseOver && MouseOverPreviously)
+                OnMouseLeave(this, EventArgs.Empty);
+
+            foreach (var child in _children)
+                child.Update(gameTime);
+
+            if (TopParent == null && Game.Window != null)
+            {
+                var clientBounds = Game.Window.ClientBounds;
+                if (clientBounds.Width > 0 && clientBounds.Height > 0)
+                {
+                    var rightBound = clientBounds.Width - DrawArea.Width;
+                    var bottomBound = clientBounds.Height - DrawArea.Height;
+                    var newX = DrawArea.X < 0
+                        ? 0
+                        : DrawArea.X > rightBound
+                            ? rightBound
+                            : DrawArea.X;
+                    var newY = DrawArea.Y < 0
+                        ? 0
+                        : DrawArea.Y > bottomBound
+                            ? bottomBound
+                            : DrawArea.Y;
+
+                    DrawArea = new Rectangle(newX, newY, DrawArea.Width, DrawArea.Height);
+                }
+            }
         }
 
         /// <summary>
