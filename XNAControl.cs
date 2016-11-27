@@ -165,7 +165,8 @@ namespace XNAControls
         #region GameComponent overrides
 
         /// <summary>
-        /// Default game component Update() method. To override, use OnUpdateControl in derived classes
+        /// Default game component Update() method. To override, use OnUpdateControl in derived classes. 
+        /// Default logic of this method captures begin/end keyboard and mouse state and assigns the protected members
         /// </summary>
         public override void Update(GameTime gameTime)
         {
@@ -183,22 +184,30 @@ namespace XNAControls
         }
 
         /// <summary>
-        /// Default game component Draw() method. To override, use OnDrawControl in derived classes
+        /// Default game component Draw() method. To override, use OnDrawControl in derived classes.
         /// </summary>
         public override void Draw(GameTime gameTime)
         {
-            if (!Visible) return;
+            if (!ShouldDraw()) return;
 
             OnDrawControl(gameTime);
 
             base.Draw(gameTime);
         }
 
+        /// <summary>
+        /// Does the update logic for the control if the Update should occur (see ShouldUpdate() method) 
+        /// Base class update logic checks and fires events MouseEnter, MouseLeave, and MouseOver
+        /// </summary>
         protected virtual void OnUpdateControl(GameTime gameTime)
         {
             //todo: check and invoke MouseEnter, MouseLeave, MouseOver events
         }
 
+        /// <summary>
+        /// Does the draw logic for the control if the Draw should occur (see ShouldDraw method)
+        /// Base class draw logic calls draw for all immediate child controls
+        /// </summary>
         protected virtual void OnDrawControl(GameTime gameTime)
         {
             foreach (var child in _children)
@@ -209,12 +218,25 @@ namespace XNAControls
 
         #region Helper methods
 
-        private bool ShouldUpdate()
+        /// <summary>
+        /// Returns true if the control should be updated 
+        /// Returns false if: Game is inactive, or any dialogs are open and this control is not part of the dialog.
+        /// </summary>
+        protected virtual bool ShouldUpdate()
         {
             if (!Game.IsActive) return false;
 
             //todo: check if any dialogs are open
             return true;
+        }
+
+        /// <summary>
+        /// Returns true if the control should be drawn 
+        /// Returns false if: control is not visible
+        /// </summary>
+        protected virtual bool ShouldDraw()
+        {
+            return Visible;
         }
 
         private void AddToGameComponents(IXNAControl control)
