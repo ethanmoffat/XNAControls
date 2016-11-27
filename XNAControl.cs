@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using XNAControls.Old;
 
@@ -14,6 +15,8 @@ namespace XNAControls
     public abstract class XNAControl : DrawableGameComponent, IXNAControl
     {
         private readonly List<IXNAControl> _children;
+        protected readonly SpriteBatch _spriteBatch;
+
         private MouseState _currentMouseState, _previousMouseState;
         private KeyboardState _currentKeyState, _previousKeyState;
 
@@ -113,6 +116,7 @@ namespace XNAControls
         {
             _children = new List<IXNAControl>();
 
+            _spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             _currentKeyState = _previousKeyState = Keyboard.GetState();
             _currentMouseState = _previousMouseState = Mouse.GetState();
         }
@@ -132,7 +136,7 @@ namespace XNAControls
         }
 
         /// <summary>
-        /// Set the immediate parent control of this control. XNAControls take ownership of Draw()ing, and Update()ing their children.
+        /// Set the immediate parent control of this control. XNAControl parents take ownership of Draw()ing, Update()ing, and Dispose()ing their children.
         /// </summary>
         /// <param name="parent">The parent control to set. Must not be null.</param>
         public void SetParentControl(IXNAControl parent)
@@ -306,5 +310,18 @@ namespace XNAControls
         }
 
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _spriteBatch.Dispose();
+
+                foreach (var child in _children)
+                    child.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 }
