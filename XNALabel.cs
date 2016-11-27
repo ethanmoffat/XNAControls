@@ -23,7 +23,7 @@ namespace XNAControls
         BottomRight
     }
 
-    public class XNALabel : XNAControl
+    public class XNALabel : XNAControl, IXNALabel
     {
         private readonly SpriteFont _font;
         private readonly Texture2D _whitePixel;
@@ -269,5 +269,57 @@ namespace XNAControls
 
             base.Dispose(disposing);
         }
+    }
+
+    public interface IXNALabel : IXNAControl
+    {
+        /// <summary>
+        /// Get or set the text to display in the label.
+        /// </summary>
+        string Text { get; set; }
+
+        /// <summary>
+        /// Get or set the Foreground Color.
+        /// </summary>
+        Color ForeColor { get; set; }
+
+        /// <summary>
+        /// Get or set the Background Color. Set to 'null' to turn off.
+        /// </summary>
+        Color? BackColor { get; set; }
+
+        bool AutoSize { get; set; }
+
+        /// <summary>
+        /// Set the alignment of the text in the label. Only evaluated when <see cref="AutoSize">AutoSize</see> is false.
+        /// </summary>
+        LabelAlignment TextAlign { get; set; }
+
+        /// <summary>
+        /// Get or set the text width in pixels
+        /// </summary> 
+        int? TextWidth { get; set; }
+
+        /// <summary>
+        /// Get or set the spacing between rows, in pixels. Includes the height of the text.
+        /// </summary>
+        int? RowSpacing { get; set; }
+
+        /// <summary>
+        /// Get the actual width of the text as measured by the font
+        /// </summary>
+        float ActualWidth { get; }
+
+        /// <summary>
+        /// Get the actual height of the text as measured by the font
+        /// </summary>
+        float ActualHeight { get; }
+
+        /// <summary>
+        /// Turn underlining on or off
+        /// </summary>
+        bool Underline { get; set; }
+
+        void ResizeBasedOnText(uint xPadding = 0, uint yPadding = 0);
     }
 }
