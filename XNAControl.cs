@@ -325,6 +325,8 @@ namespace XNAControls
         {
             if (disposing)
             {
+                RemoveFromGameComponents(this);
+
                 _spriteBatch.Dispose();
 
                 foreach (var child in _children)
