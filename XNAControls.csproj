@@ -66,6 +66,7 @@
     <Compile Include="Old\XNAPictureBox.cs" />
     <Compile Include="Old\XNATextBox.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="XNAButton.cs" />
     <Compile Include="XNAControl.cs" />
     <Compile Include="XNALabel.cs" />
   </ItemGroup>
