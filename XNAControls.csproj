@@ -65,6 +65,7 @@
     <Compile Include="Old\XNAPictureBox.cs" />
     <Compile Include="Old\XNATextBox.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="XNAControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="img\dlg.png" />
