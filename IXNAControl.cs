@@ -11,8 +11,10 @@ namespace XNAControls
     public interface IXNAControl : IGameComponent, IDrawable, IUpdateable, IDisposable
     {
         Vector2 DrawPosition { get; }
+        
+        Vector2 DrawPositionWithParentOffset { get; }
 
-        Rectangle DrawArea { get; }
+        Rectangle DrawArea { get; set; }
 
         Rectangle DrawAreaWithParentOffset { get; }
 
@@ -24,8 +26,10 @@ namespace XNAControls
 
         void AddControlToDefaultGame();
 
-        void AddControlToSpecificGame(Game game);
-
         void SetParentControl(IXNAControl parent);
+
+        void SetControlUnparented();
+
+        void SetDrawOrder(int drawOrder);
     }
 }
