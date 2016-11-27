@@ -29,8 +29,8 @@ namespace XNAControls
         private readonly Texture2D _whitePixel;
 
         private string _lastText;
+        private int? _lastTextWidth;
         private readonly List<string> _drawStrings;
-        private int? _textWidth;
 
         /// <summary>
         /// Get or set the text to display in the label.
@@ -57,22 +57,7 @@ namespace XNAControls
         /// <summary>
         /// Get or set the text width in pixels
         /// </summary> 
-        public int? TextWidth
-        {
-            get { return _textWidth; }
-            set
-            {
-                if (_textWidth.HasValue != value.HasValue)
-                {
-                    _textWidth = value;
-                    Text = Text; //regenerate
-                }
-                else
-                {
-                    _textWidth = value;
-                }
-            }
-        }
+        public int? TextWidth { get; set; }
 
         /// <summary>
         /// Get or set the spacing between rows, in pixels. Includes the height of the text.
@@ -143,9 +128,10 @@ namespace XNAControls
 
         protected override void OnUpdateControl(GameTime gameTime)
         {
-            if (_lastText != Text)
+            if (_lastText != Text || _lastTextWidth != TextWidth)
             {
                 _lastText = Text;
+                _lastTextWidth = TextWidth;
 
                 if (TextWidth != null)
                 {
