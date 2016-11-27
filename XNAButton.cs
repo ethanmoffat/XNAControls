@@ -6,6 +6,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using XNAControls.Old;
 
 namespace XNAControls
 {
@@ -13,7 +14,6 @@ namespace XNAControls
     {
         private readonly Texture2D _out;
         private readonly Texture2D _over;
-        private readonly XNALabel _textLabel;
 
         private Rectangle _clickArea;
         private bool _dragging;
@@ -28,15 +28,6 @@ namespace XNAControls
         /// Invoked when the button control is being dragged
         /// </summary>
         public event EventHandler OnClickDrag = delegate { };
-
-        /// <summary>
-        /// Get or set optional text for the button that is displayed over the button textures
-        /// </summary>
-        public string Text
-        {
-            get { return _textLabel.Text; }
-            set { _textLabel.Text = value; }
-        }
 
         /// <summary>
         /// Set the FlashSpeed which causes the over/out textures to cycle once every 'FlashSpeed' milliseconds
@@ -73,23 +64,23 @@ namespace XNAControls
                 ? outSource
                 : overSource;
 
-            DrawArea = new Rectangle((int) location.X,
-                (int) location.Y,
-                largerArea.Width, largerArea.Height);
-
-            ClickArea = largerArea;
-
             var outData = new Color[outSource.Width * outSource.Height];
             _out = new Texture2D(sheet.GraphicsDevice, outSource.Width, outSource.Height);
             sheet.GetData(0, outSource, outData, 0, outData.Length);
             _out.SetData(outData);
+
+            _drawTexture = _out;
 
             var overData = new Color[overSource.Width * overSource.Height];
             _over = new Texture2D(sheet.GraphicsDevice, overSource.Width, overSource.Height);
             sheet.GetData(0, overSource, overData, 0, overData.Length);
             _over.SetData(overData);
 
-            _drawTexture = _out;
+            DrawArea = new Rectangle((int)location.X,
+                (int)location.Y,
+                largerArea.Width, largerArea.Height);
+
+            ClickArea = largerArea;
         }
 
         public override void SetParentControl(IXNAControl parent)
@@ -106,7 +97,9 @@ namespace XNAControls
 
         protected override void OnUpdateControl(GameTime gameTime)
         {
-            if (MouseOver && PreviousMouseState.LeftButton == ButtonState.Pressed && CurrentMouseState.LeftButton == ButtonState.Released)
+            if (MouseOver && ClickArea.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y)
+                && PreviousMouseState.LeftButton == ButtonState.Pressed
+                && CurrentMouseState.LeftButton == ButtonState.Released)
                 OnClick(this, EventArgs.Empty);
 
             //todo: handle dragging
@@ -153,6 +146,19 @@ namespace XNAControls
                 value.X + (int)DrawPositionWithParentOffset.X,
                 value.Y + (int)DrawPositionWithParentOffset.Y,
                 value.Width, value.Height);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_over != null)
+                    _over.Dispose();
+                if (_out != null)
+                    _out.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
