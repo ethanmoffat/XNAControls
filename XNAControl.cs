@@ -130,9 +130,16 @@ namespace XNAControls
             ImmediateParent = null;
         }
 
+        /// <summary>
+        /// Set the DrawOrder property for this control. Updates all child controls of this control with the new draw order.
+        /// </summary>
+        /// <param name="drawOrder">The new draw order.</param>
         public void SetDrawOrder(int drawOrder)
         {
             DrawOrder = drawOrder;
+
+            foreach (var childControl in ChildControls)
+                UpdateDrawOrderBasedOnParent(this, childControl);
         }
 
         private void AddToGameComponents(IXNAControl control)
@@ -150,9 +157,6 @@ namespace XNAControls
         private static void UpdateDrawOrderBasedOnParent(IXNAControl parent, IXNAControl child)
         {
             child.SetDrawOrder(parent.DrawOrder + 1);
-
-            foreach (var childControl in child.ChildControls)
-                UpdateDrawOrderBasedOnParent(child, childControl);
         }
     }
 }
