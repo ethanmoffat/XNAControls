@@ -10,7 +10,7 @@ using XNAControls.Old;
 
 namespace XNAControls
 {
-    public class XNAButton : XNAControl
+    public class XNAButton : XNAControl, IXNAButton
     {
         private readonly Texture2D _out;
         private readonly Texture2D _over;
@@ -159,5 +159,29 @@ namespace XNAControls
 
             base.Dispose(disposing);
         }
+    }
+
+    public interface IXNAButton
+    {
+        /// <summary>
+        /// Invoked when the button control is clicked once
+        /// </summary>
+        event EventHandler OnClick;
+
+        /// <summary>
+        /// Invoked when the button control is being dragged
+        /// </summary>
+        event EventHandler OnClickDrag;
+
+        /// <summary>
+        /// Set the FlashSpeed which causes the over/out textures to cycle once every 'FlashSpeed' milliseconds
+        /// </summary>
+        int? FlashSpeed { get; set; }
+
+        /// <summary>
+        /// Get/set the area that should respond to a click event relative to the top-left corner of this control. 
+        /// Parent offsets are adjusted automatically
+        /// </summary>
+        Rectangle ClickArea { get; set; }
     }
 }
