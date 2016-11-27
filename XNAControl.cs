@@ -277,10 +277,20 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
-            if (!Game.IsActive) return false;
+            if (!Game.IsActive || !Visible) return false;
 
-            //todo: check if any dialogs are open
-            return true;
+            var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
+
+            if (dialogStack.Count <= 0) return true;
+
+            //todo: ignore dialogs? old logic:
+            //if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
+            //    return true;
+
+            //return false if:
+            //dialog is open and this control is a top parent OR
+            //dialog is open and this control does not belong to it
+            return TopParent != null && TopParent == dialogStack.Peek();
         }
 
         /// <summary>
