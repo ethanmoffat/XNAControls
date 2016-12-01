@@ -17,11 +17,25 @@ namespace XNAControls
         private readonly Texture2D _textBoxRight;
         private readonly Texture2D _caretTexture;
 
-        private readonly XNALabel _textLabel, _defaultTextLabel;
+        private readonly XNALabel _textLabel;
+        private readonly XNALabel _defaultTextLabel;
+
+        private Rectangle _drawArea;
         private string _actualText;
-        
         private bool _selected;
-        private int _leftPadding;
+
+        private int _lastLeftPadding;
+
+        public override Rectangle DrawArea
+        {
+            get { return _drawArea; }
+            set
+            {
+                _drawArea = value;
+                _textLabel.DrawArea = new Rectangle(LeftPadding, 0, _drawArea.Width, _drawArea.Height);
+                _defaultTextLabel.DrawArea = new Rectangle(LeftPadding, 0, _drawArea.Width, _drawArea.Height);
+            }
+        }
 
         public int MaxChars { get; set; }
 
@@ -29,16 +43,7 @@ namespace XNAControls
 
         public bool PasswordBox { get; set; }
 
-        public int LeftPadding
-        {
-            get { return _leftPadding; }
-            set
-            {
-                _leftPadding = value;
-                _textLabel.DrawPosition = new Vector2(_leftPadding, 0);
-                _defaultTextLabel.DrawPosition = new Vector2(_leftPadding, 0);
-            }
-        }
+        public int LeftPadding { get; set; }
 
         public string Text
         {
@@ -177,6 +182,13 @@ namespace XNAControls
             else
             {
                 Highlighted = false;
+            }
+
+            if (_lastLeftPadding != LeftPadding)
+            {
+                _lastLeftPadding = LeftPadding;
+                _textLabel.DrawPosition = new Vector2(LeftPadding, 0);
+                _defaultTextLabel.DrawPosition = new Vector2(LeftPadding, 0);
             }
 
             base.OnUpdateControl(gameTime);
