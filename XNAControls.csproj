@@ -69,6 +69,7 @@
     <Compile Include="XNAHyperLink.cs" />
     <Compile Include="XNALabel.cs" />
     <Compile Include="XNAPanel.cs" />
+    <Compile Include="XNAPictureBox.cs" />
     <Compile Include="XNATextBox.cs" />
   </ItemGroup>
   <ItemGroup>
