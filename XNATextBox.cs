@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace XNAControls
 {
-    public class XNATextBox : XNAControl, Old.IKeyboardSubscriber
+    public class XNATextBox : XNAControl, IKeyboardSubscriber
     {
         private readonly Texture2D _textBoxBG;
         private readonly Texture2D _textBoxLeft;
@@ -232,15 +232,15 @@ namespace XNAControls
 
             switch (command)
             {
-                case Old.KeyboardDispatcher.CHAR_BACKSPACE_CODE:
+                case KeyboardDispatcher.CHAR_BACKSPACE_CODE:
                     if (Text.Length > 0)
                         Text = Text.Substring(0, Text.Length - 1);
                     break;
-                case Old.KeyboardDispatcher.CHAR_RETURNKEY_CODE:
+                case KeyboardDispatcher.CHAR_RETURNKEY_CODE:
                     if (OnEnterPressed != null)
                         OnEnterPressed(this, new EventArgs());
                     break;
-                case Old.KeyboardDispatcher.CHAR_TAB_CODE:
+                case KeyboardDispatcher.CHAR_TAB_CODE:
                     if (OnTabPressed != null)
                         OnTabPressed(this, new EventArgs());
                     break;
