@@ -133,7 +133,6 @@ namespace XNAControls
             {
                 AutoSize = false,
                 BackColor = Color.Transparent,
-                DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 TextAlign = LabelAlignment.MiddleLeft
             };
 
@@ -141,7 +140,6 @@ namespace XNAControls
             {
                 AutoSize = false,
                 BackColor = Color.Transparent,
-                DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 TextAlign = LabelAlignment.MiddleLeft
             };
 
