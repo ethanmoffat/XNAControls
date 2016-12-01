@@ -58,32 +58,17 @@ namespace XNAControls
 
                 _actualText = value;
                 _textLabel.Text = PasswordBox ? new string(value.Select(x => '*').ToArray()) : value;
-                if (OnTextChanged != null)
-                    OnTextChanged(this, new EventArgs());
+                OnTextChanged(this, EventArgs.Empty);
 
-                if (_actualText.Length == 0)
-                {
-                    _textLabel.Visible = false;
-                    _defaultTextLabel.Visible = true;
-                }
-                else
-                {
-                    _textLabel.Visible = true;
-                    _defaultTextLabel.Visible = false;
-                }
+                _textLabel.Visible = _actualText.Length > 0;
+                _defaultTextLabel.Visible = _actualText.Length == 0;
             }
         }
 
         public string DefaultText
         {
             get { return _defaultTextLabel.Text; }
-            set
-            {
-                if (MaxChars > 0 && value.Length > MaxChars)
-                    return;
-
-                _defaultTextLabel.Text = value;
-            }
+            set { _defaultTextLabel.Text = value; }
         }
 
         public Color TextColor
