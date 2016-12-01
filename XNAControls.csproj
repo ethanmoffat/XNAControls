@@ -48,7 +48,7 @@
     <Compile Include="IXNAControl.cs" />
     <Compile Include="Old\ControlsInit.cs" />
     <Compile Include="Old\KeyboardEvents.cs" />
-    <Compile Include="Old\extensions.cs" />
+    <Compile Include="RectangleExtensions.cs" />
     <Compile Include="Old\IKeyboardEvents.cs" />
     <Compile Include="Old\IKeyboardSubscriber.cs" />
     <Compile Include="Old\KeyboardDispatcher.cs" />

@@ -4,9 +4,9 @@
 
 using Microsoft.Xna.Framework;
 
-namespace XNAControls.Old
+namespace XNAControls
 {
-	public static class ExtensionMethods
+	public static class RectangleExtensions
 	{
 		public static bool ContainsPoint(this Rectangle rect, int x, int y)
 		{
