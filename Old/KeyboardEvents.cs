@@ -6,41 +6,41 @@ using Microsoft.Xna.Framework;
 
 namespace XNAControls.Old
 {
-	internal sealed class KeyboardEvents : IKeyboardEvents
-	{
-		public event CharEnteredHandler CharEntered;
+    internal sealed class KeyboardEvents : IKeyboardEvents
+    {
+        public event CharEnteredHandler CharEntered;
 
-		private readonly GameWindow _window;
+        private readonly GameWindow _window;
 
-		public KeyboardEvents(GameWindow window)
-		{
-			_window = window;
-			_window.TextInput += GameWindow_TextInput;
-		}
+        public KeyboardEvents(GameWindow window)
+        {
+            _window = window;
+            _window.TextInput += GameWindow_TextInput;
+        }
 
-		private void GameWindow_TextInput(object sender, TextInputEventArgs e)
-		{
-			if (CharEntered != null)
-			{
-				CharEntered(null, new CharEnteredEventArgs(e.Character));
-			}
-		}
+        private void GameWindow_TextInput(object sender, TextInputEventArgs e)
+        {
+            if (CharEntered != null)
+            {
+                CharEntered(null, new CharEnteredEventArgs(e.Character));
+            }
+        }
 
-		~KeyboardEvents()
-		{
-			Dispose(false);
-		}
+        ~KeyboardEvents()
+        {
+            Dispose(false);
+        }
 
-		public void Dispose()
-		{
-			Dispose(true);
-		}
+        public void Dispose()
+        {
+            Dispose(true);
+        }
 
-		private void Dispose(bool disposing)
-		{
-			if (!disposing) return;
+        private void Dispose(bool disposing)
+        {
+            if (!disposing) return;
 
-			_window.TextInput -= GameWindow_TextInput;
-		}
-	}
+            _window.TextInput -= GameWindow_TextInput;
+        }
+    }
 }

@@ -6,8 +6,8 @@ using System;
 
 namespace XNAControls.Old
 {
-	internal interface IKeyboardEvents : IDisposable
-	{
-		event CharEnteredHandler CharEntered;
-	}
+    internal interface IKeyboardEvents : IDisposable
+    {
+        event CharEnteredHandler CharEntered;
+    }
 }
