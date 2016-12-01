@@ -63,7 +63,6 @@ namespace XNAControls.Old
         }
     }
 
-        
     /// <summary>
     /// Note: I've changed XNAPanel to act more like an actual panel of controls, as in WinForms
     /// It derives from control so we have a lot of the convenience functions and can specify an
