@@ -17,7 +17,7 @@ namespace XNAControls.Old
 
         private readonly IKeyboardEvents _events;
 
-        IKeyboardSubscriber _subscriber;
+        private IKeyboardSubscriber _subscriber;
         public IKeyboardSubscriber Subscriber
         {
             get { return _subscriber; }
@@ -48,7 +48,6 @@ namespace XNAControls.Old
 
             if (char.IsControl(e.Character))
             {
-                //ctrl-v
                 if (e.Character == CHAR_PASTE_CODE)
                 {
                     GetClipboardInfoFromThread();
@@ -67,17 +66,15 @@ namespace XNAControls.Old
 
         #region Clipboard Handling
 
-        //XNA runs in Multiple Thread Apartment state, which cannot recieve clipboard
+        private string _pasteResult = "";
+
         private void GetClipboardInfoFromThread()
         {
-            Thread thread = new Thread(SetPasteResult);
+            var thread = new Thread(SetPasteResult);
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             thread.Join();
         }
-
-        //Thread has to be in Single Thread Apartment state in order to receive clipboard
-        string _pasteResult = "";
 
         [STAThread]
         void SetPasteResult()
