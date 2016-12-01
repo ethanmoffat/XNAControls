@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace XNAControls
 {
-    public class XNATextBox : XNAControl, IKeyboardSubscriber
+    public class XNATextBox : XNAControl, IXNATextBox
     {
         private readonly Texture2D _textBoxBG;
         private readonly Texture2D _textBoxLeft;
@@ -241,5 +241,23 @@ namespace XNAControls
                     break;
             }
         }
+    }
+
+    public interface IXNATextBox : IXNAControl, IKeyboardSubscriber
+    {
+        int MaxChars { get; set; }
+        bool Highlighted { get; set; }
+        bool PasswordBox { get; set; }
+        int LeftPadding { get; set; }
+        string Text { get; set; }
+        string DefaultText { get; set; }
+        Color TextColor { get; set; }
+        Color DefaultTextColor { get; set; }
+
+        event EventHandler OnFocused;
+        event EventHandler OnEnterPressed;
+        event EventHandler OnTabPressed;
+        event EventHandler OnTextChanged;
+        event EventHandler OnClicked;
     }
 }
