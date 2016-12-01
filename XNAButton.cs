@@ -75,11 +75,8 @@ namespace XNAControls
             sheet.GetData(0, overSource, overData, 0, overData.Length);
             _over.SetData(overData);
 
-            DrawArea = new Rectangle((int)location.X,
-                (int)location.Y,
-                largerArea.Width, largerArea.Height);
-
-            ClickArea = largerArea;
+            DrawArea = new Rectangle((int)location.X, (int)location.Y, largerArea.Width, largerArea.Height);
+            ClickArea = new Rectangle(0, 0, largerArea.Width, largerArea.Height);
         }
 
         public override void SetParentControl(IXNAControl parent)
