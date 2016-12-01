@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace XNAControls
 {
-    public class XNAPanel : XNAControl
+    public class XNAPanel : XNAControl, IXNAPanel
     {
         public Texture2D BackgroundImage { get; set; }
 
@@ -29,5 +29,12 @@ namespace XNAControls
 
             base.OnDrawControl(gameTime);
         }
+    }
+
+    public interface IXNAPanel
+    {
+        Texture2D BackgroundImage { get; set; }
+
+        void ClearTextBoxes();
     }
 }
