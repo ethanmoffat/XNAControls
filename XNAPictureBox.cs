@@ -13,7 +13,7 @@ namespace XNAControls
         Stretch
     }
 
-    public class XNAPictureBox : XNAControl
+    public class XNAPictureBox : XNAControl, IXNAPictureBox
     {
         public StretchMode StretchMode { get; set; }
 
@@ -44,5 +44,11 @@ namespace XNAControls
 
             base.OnDrawControl(gameTime);
         }
+    }
+
+    public interface IXNAPictureBox
+    {
+        StretchMode StretchMode { get; set; }
+        Texture2D Texture { get; set; }
     }
 }
