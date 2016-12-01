@@ -59,7 +59,6 @@
     <Compile Include="Old\XNAControl.cs" />
     <Compile Include="Old\XNADialog.cs" />
     <Compile Include="Old\XNAHyperLink.cs" />
-    <Compile Include="Old\XNAKeyEventArgs.cs" />
     <Compile Include="Old\XNALabel.cs" />
     <Compile Include="Old\XNAPanel.cs" />
     <Compile Include="Old\XNAPictureBox.cs" />
