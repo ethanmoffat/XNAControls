@@ -52,6 +52,7 @@ namespace XNAControls
         public Vector2 DrawPosition
         {
             get { return new Vector2(DrawArea.X, DrawArea.Y); }
+            set { DrawArea = new Rectangle((int) value.X, (int) value.Y, DrawArea.Width, DrawArea.Height); }
         }
 
         /// <summary>
