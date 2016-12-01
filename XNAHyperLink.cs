@@ -64,7 +64,7 @@ namespace XNAControls
         }
     }
 
-    public interface IXNAHyperLink
+    public interface IXNAHyperLink : IXNALabel
     {
         /// <summary>
         /// Color for the link when the mouse is over the link

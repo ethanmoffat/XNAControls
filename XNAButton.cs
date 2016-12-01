@@ -160,7 +160,7 @@ namespace XNAControls
         }
     }
 
-    public interface IXNAButton
+    public interface IXNAButton : IXNAControl
     {
         /// <summary>
         /// Invoked when the button control is clicked once
