@@ -1,0 +1,250 @@
+﻿// Original Work Copyright (c) Ethan Moffat 2014-2016
+// This file is subject to the GPL v2 License
+// For additional details, see the LICENSE file
+
+using System;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+namespace XNAControls
+{
+    public class XNATextBox : XNAControl, Old.IKeyboardSubscriber
+    {
+        private readonly Texture2D _textBoxBG;
+        private readonly Texture2D _textBoxLeft;
+        private readonly Texture2D _textBoxRight;
+        private readonly Texture2D _caretTexture;
+
+        private readonly XNALabel _textLabel, _defaultTextLabel;
+        private string _actualText;
+        
+        private bool _selected;
+        private int _leftPadding;
+
+        public int MaxChars { get; set; }
+
+        public bool Highlighted { get; set; }
+
+        public bool PasswordBox { get; set; }
+
+        public int LeftPadding
+        {
+            get { return _leftPadding; }
+            set
+            {
+                _leftPadding = value;
+                _textLabel.DrawPosition = new Vector2(_leftPadding, 0);
+                _defaultTextLabel.DrawPosition = new Vector2(_leftPadding, 0);
+            }
+        }
+
+        public string Text
+        {
+            get
+            {
+                return _actualText;
+            }
+            set
+            {
+                if (MaxChars > 0 && value.Length > MaxChars)
+                    return;
+
+                _actualText = value;
+                _textLabel.Text = PasswordBox ? new string(value.Select(x => '*').ToArray()) : value;
+                if (OnTextChanged != null)
+                    OnTextChanged(this, new EventArgs());
+
+                if (_actualText.Length == 0)
+                {
+                    _textLabel.Visible = false;
+                    _defaultTextLabel.Visible = true;
+                }
+                else
+                {
+                    _textLabel.Visible = true;
+                    _defaultTextLabel.Visible = false;
+                }
+            }
+        }
+
+        public string DefaultText
+        {
+            get { return _defaultTextLabel.Text; }
+            set
+            {
+                if (MaxChars > 0 && value.Length > MaxChars)
+                    return;
+
+                _defaultTextLabel.Text = value;
+            }
+        }
+
+        public Color TextColor
+        {
+            get { return _textLabel.ForeColor; }
+            set { _textLabel.ForeColor = value; }
+        }
+
+        public Color DefaultTextColor
+        {
+            get { return _defaultTextLabel.ForeColor; }
+            set { _defaultTextLabel.ForeColor = value; }
+        }
+
+        public event EventHandler OnFocused = delegate { };
+
+        public event EventHandler OnEnterPressed = delegate { };
+        public event EventHandler OnTabPressed = delegate { };
+        public event EventHandler OnTextChanged = delegate { };
+        public event EventHandler OnClicked = delegate { };
+
+        public bool Selected
+        {
+            get { return _selected; }
+            set
+            {
+                bool oldSel = _selected;
+                _selected = value;
+                if (!oldSel && _selected)
+                    OnFocused(this, EventArgs.Empty);
+            }
+        }
+
+        public XNATextBox(Rectangle area, 
+                          string spriteFontContentName,
+                          Texture2D backgroundTexture = null,
+                          Texture2D leftSideTexture = null,
+                          Texture2D rightSideTexture = null,
+                          Texture2D caretTexture = null)
+        {
+            _textBoxBG = backgroundTexture;
+            _textBoxLeft = leftSideTexture;
+            _textBoxRight = rightSideTexture;
+            _caretTexture = caretTexture;
+
+            _textLabel = new XNALabel(spriteFontContentName)
+            {
+                AutoSize = false,
+                BackColor = Color.Transparent,
+                DrawArea = new Rectangle(0, 0, area.Width, area.Height),
+                TextAlign = LabelAlignment.MiddleLeft
+            };
+
+            _defaultTextLabel = new XNALabel(spriteFontContentName)
+            {
+                AutoSize = false,
+                BackColor = Color.Transparent,
+                DrawArea = new Rectangle(0, 0, area.Width, area.Height),
+                TextAlign = LabelAlignment.MiddleLeft
+            };
+
+            DrawArea = area;
+        }
+
+        public override void Initialize()
+        {
+            _textLabel.Initialize();
+            _textLabel.SetParentControl(this);
+
+            _defaultTextLabel.Initialize();
+            _defaultTextLabel.SetParentControl(this);
+
+            base.Initialize();
+        }
+
+        protected override void OnUpdateControl(GameTime gameTime)
+        {
+            if (!ShouldUpdate())
+                return;
+
+            if (DrawAreaWithParentOffset.Contains(CurrentMouseState.Position))
+            {
+                Highlighted = true;
+                if (PreviousMouseState.LeftButton == ButtonState.Released &&
+                    CurrentMouseState.LeftButton == ButtonState.Pressed)
+                {
+                    var wasSelectedBeforeOnClick = Selected;
+                    OnClicked(this, new EventArgs());
+
+                    if (Selected && !wasSelectedBeforeOnClick)
+                    {
+                        OnFocused(this, new EventArgs());
+                    }
+                }
+            }
+            else
+            {
+                Highlighted = false;
+            }
+
+            base.OnUpdateControl(gameTime);
+        }
+
+        protected override void OnDrawControl(GameTime gameTime)
+        {
+            _spriteBatch.Begin();
+
+            if(_textBoxBG != null)
+                _spriteBatch.Draw(_textBoxBG, DrawAreaWithParentOffset, Color.White);
+
+            if (_textBoxLeft != null)
+                _spriteBatch.Draw(_textBoxLeft, DrawPositionWithParentOffset, Color.White);
+
+            if (_textBoxRight != null)
+            {
+                var drawPosition = new Vector2(DrawArea.X + (int)DrawPositionWithParentOffset.X - _textBoxRight.Width,
+                                               DrawPositionWithParentOffset.Y);
+
+                _spriteBatch.Draw(_textBoxRight, drawPosition, Color.White);
+            }
+
+            if (_caretTexture != null && Selected)
+            {
+                var caretVisible = !(gameTime.TotalGameTime.TotalMilliseconds % 1000 < 500);
+                if (caretVisible)
+                    _spriteBatch.Draw(_caretTexture,
+                                      new Vector2(DrawAreaWithParentOffset.X + LeftPadding + _textLabel.ActualWidth + 2,
+                                                  DrawAreaWithParentOffset.Y + 4),
+                                      Color.White);
+            }
+
+            _spriteBatch.End();
+
+            base.OnDrawControl(gameTime);
+        }
+
+        public virtual void ReceiveTextInput(char inputChar)
+        {
+            Text = Text + inputChar;
+        }
+
+        public virtual void ReceiveTextInput(string text)
+        {
+            Text = Text + text;
+        }
+
+        public virtual void ReceiveCommandInput(char command)
+        {
+            if (!ShouldUpdate())
+                return;
+
+            switch (command)
+            {
+                case Old.KeyboardDispatcher.CHAR_BACKSPACE_CODE:
+                    if (Text.Length > 0)
+                        Text = Text.Substring(0, Text.Length - 1);
+                    break;
+                case Old.KeyboardDispatcher.CHAR_RETURNKEY_CODE:
+                    if (OnEnterPressed != null)
+                        OnEnterPressed(this, new EventArgs());
+                    break;
+                case Old.KeyboardDispatcher.CHAR_TAB_CODE:
+                    if (OnTabPressed != null)
+                        OnTabPressed(this, new EventArgs());
+                    break;
+            }
+        }
+    }
+}
