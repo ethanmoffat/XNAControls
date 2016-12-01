@@ -48,7 +48,7 @@ namespace XNAControls
         /// <summary>
         /// The X,Y coordinates of this control, based on DrawArea
         /// </summary>
-        public Vector2 DrawPosition
+        public virtual Vector2 DrawPosition
         {
             get { return new Vector2(DrawArea.X, DrawArea.Y); }
             set { DrawArea = new Rectangle((int) value.X, (int) value.Y, DrawArea.Width, DrawArea.Height); }
@@ -65,7 +65,7 @@ namespace XNAControls
         /// <summary>
         /// The draw area of this control. Use to set position and size of this control relative to the parent.
         /// </summary>
-        public Rectangle DrawArea { get; set; }
+        public virtual Rectangle DrawArea { get; set; }
 
         /// <summary>
         /// The draw area of this control, based on the parent control's X,Y coordinates (if any)
