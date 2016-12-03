@@ -87,7 +87,13 @@ namespace XNAControls
         /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
         public async Task<XNADialogResult> ShowDialogAsync()
         {
-            return await _showTaskCompletionSource.Task;
+            AddControlToDefaultGame();
+            BringToTop();
+
+            var result = await _showTaskCompletionSource.Task;
+
+            Dispose();
+            return result;
         }
 
         /// <summary>
