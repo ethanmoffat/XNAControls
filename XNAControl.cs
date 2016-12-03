@@ -16,9 +16,7 @@ namespace XNAControls
         private readonly List<IXNAControl> _children;
         protected readonly SpriteBatch _spriteBatch;
 
-        private bool _shouldClickDrag;
-
-        protected bool ShouldClickDrag { get { return _shouldClickDrag; } }
+        protected bool ShouldClickDrag { get; private set; }
 
         private MouseState _currentMouseState, _previousMouseState;
         private KeyboardState _currentKeyState, _previousKeyState;
@@ -182,7 +180,7 @@ namespace XNAControls
             if (ImmediateParent == null)
                 return;
 
-            ((XNAControl)ImmediateParent)._shouldClickDrag = !suppress;
+            ((XNAControl)ImmediateParent).ShouldClickDrag = !suppress;
             ImmediateParent.SuppressParentClickDragEvent(suppress);
         }
 
