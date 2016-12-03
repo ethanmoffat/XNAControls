@@ -46,7 +46,7 @@ namespace XNAControls
         /// <summary>
         /// Adjust the draw order of the dialog such that it is brought to the top of the draw order
         /// </summary>
-        public void BringToTop()
+        public virtual void BringToTop()
         {
             var dialogsCount = Singleton<DialogRepository>.Instance.OpenDialogs.Count;
             SetDrawOrder((dialogsCount+1) * 5 + DIALOG_LAYER_OFFSET);
