@@ -66,6 +66,7 @@
     <Compile Include="Singleton.cs" />
     <Compile Include="XNAButton.cs" />
     <Compile Include="XNAControl.cs" />
+    <Compile Include="XNADialog.cs" />
     <Compile Include="XNAHyperLink.cs" />
     <Compile Include="XNALabel.cs" />
     <Compile Include="XNAPanel.cs" />
