@@ -63,8 +63,18 @@ namespace XNAControls
                                        viewport.Height/2 - BackgroundTexture.Height/2);
         }
 
+
         /// <summary>
-        /// The the dialog
+        /// Show the dialog and do processing until the user makes a choice
+        /// </summary>
+        /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
+        public XNADialogResult ShowDialog()
+        {
+            return ShowDialogAsync().Result;
+        }
+
+        /// <summary>
+        /// Show the dialog asynchronously and do processing until the user makes a choice
         /// </summary>
         /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
         public async Task<XNADialogResult> ShowDialogAsync()
@@ -125,7 +135,13 @@ namespace XNAControls
         void CenterInGameView();
 
         /// <summary>
-        /// The the dialog
+        /// Show the dialog and do processing until the user makes a choice
+        /// </summary>
+        /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
+        XNADialogResult ShowDialog();
+
+        /// <summary>
+        /// Show the dialog asynchronously and do processing until the user makes a choice
         /// </summary>
         /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
         Task<XNADialogResult> ShowDialogAsync();
