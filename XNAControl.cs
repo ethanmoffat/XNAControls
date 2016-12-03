@@ -138,6 +138,8 @@ namespace XNAControls
             _spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             _currentKeyState = _previousKeyState = Keyboard.GetState();
             _currentMouseState = _previousMouseState = Mouse.GetState();
+
+            ShouldClickDrag = true;
         }
 
         #region Public Interface
@@ -315,7 +317,7 @@ namespace XNAControls
 
             var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
 
-            if (dialogStack.Count <= 0) return true;
+            if (dialogStack.Count <= 0 || this == dialogStack.Peek()) return true;
 
             //todo: ignore dialogs? old logic:
             //if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
