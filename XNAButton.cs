@@ -14,7 +14,6 @@ namespace XNAControls
         private readonly Texture2D _out;
         private readonly Texture2D _over;
 
-        private Rectangle _clickArea;
         private bool _dragging;
         private Texture2D _drawTexture;
 
@@ -34,13 +33,22 @@ namespace XNAControls
         public int? FlashSpeed { get; set; }
 
         /// <summary>
-        /// Get/set the area that should respond to a click event relative to the top-left corner of this control. 
-        /// Parent offsets are adjusted automatically
+        /// Get/set the area that should respond to a click event relative to the top-left corner of this control.
         /// </summary>
-        public Rectangle ClickArea
+        public Rectangle ClickArea { get; set; }
+
+        /// <summary>
+        /// Gets the click area of the control offset based on the control and all parent's X,Y coordinates
+        /// </summary>
+        protected Rectangle ClickAreaWithOffset
         {
-            get { return _clickArea; }
-            set { _clickArea = CreateRectangleFromParentOffset(value); }
+            get
+            {
+                return new Rectangle(ClickArea.X + DrawAreaWithParentOffset.X,
+                                     ClickArea.Y + DrawAreaWithParentOffset.Y,
+                                     ClickArea.Width,
+                                     ClickArea.Height);
+            }
         }
 
         /// <summary>
@@ -76,24 +84,12 @@ namespace XNAControls
             _over.SetData(overData);
 
             DrawArea = new Rectangle((int)location.X, (int)location.Y, largerArea.Width, largerArea.Height);
-            ClickArea = new Rectangle(0, 0, largerArea.Width, largerArea.Height);
-        }
-
-        public override void SetParentControl(IXNAControl parent)
-        {
-            base.SetParentControl(parent);
-            ClickArea = CreateRectangleFromParentOffset(ClickArea);
-        }
-
-        public override void SetControlUnparented()
-        {
-            base.SetControlUnparented();
-            ClickArea = CreateRectangleFromParentOffset(ClickArea);
+            ClickArea = new Rectangle(0, 0, DrawArea.Width, DrawArea.Height);
         }
 
         protected override void OnUpdateControl(GameTime gameTime)
         {
-            if (MouseOver && ClickArea.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y)
+            if (MouseOver && ClickAreaWithOffset.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y)
                 && PreviousMouseState.LeftButton == ButtonState.Pressed
                 && CurrentMouseState.LeftButton == ButtonState.Released)
                 OnClick(this, EventArgs.Empty);
@@ -133,14 +129,6 @@ namespace XNAControls
             _spriteBatch.End();
 
             base.OnDrawControl(gameTime);
-        }
-
-        private Rectangle CreateRectangleFromParentOffset(Rectangle value)
-        {
-            return new Rectangle(
-                value.X + (int)DrawPositionWithParentOffset.X,
-                value.Y + (int)DrawPositionWithParentOffset.Y,
-                value.Width, value.Height);
         }
 
         protected override void Dispose(bool disposing)
