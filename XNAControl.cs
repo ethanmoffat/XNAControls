@@ -27,6 +27,9 @@ namespace XNAControls
         protected KeyboardState CurrentKeyState { get { return _currentKeyState; } }
         protected KeyboardState PreviousKeyState { get { return _previousKeyState; } }
 
+        /// <summary>
+        /// Returns true if the mouse is currently over this control
+        /// </summary>
         public bool MouseOver
         {
             get
@@ -35,6 +38,9 @@ namespace XNAControls
             }
         }
 
+        /// <summary>
+        /// Returns true if the mouse was over the control during the last Update()
+        /// </summary>
         public bool MouseOverPreviously
         {
             get
@@ -109,8 +115,19 @@ namespace XNAControls
         /// </summary>
         public IReadOnlyList<IXNAControl> ChildControls { get { return _children; } }
 
+        /// <summary>
+        /// Event that is invoked when the mouse is over the control
+        /// </summary>
         public event EventHandler OnMouseOver = delegate { };
+
+        /// <summary>
+        /// Event that is invoked when the mouse first enters the control
+        /// </summary>
         public event EventHandler OnMouseEnter = delegate { };
+
+        /// <summary>
+        /// Event that is invoked when the mouse first leaves the control
+        /// </summary>
         public event EventHandler OnMouseLeave = delegate { };
 
         protected XNAControl()
@@ -127,7 +144,8 @@ namespace XNAControls
 
         /// <summary>
         /// Add this control to the components of the default game. 
-        /// Prerequisite: game must be registered using GameRepository.SetGame()
+        /// Prerequisite: game must be registered using GameRepository.SetGame(). 
+        /// NOTE: Adding to the game's components automatically calls Initialize()
         /// </summary>
         public void AddControlToDefaultGame()
         {
@@ -172,6 +190,18 @@ namespace XNAControls
         }
 
         /// <summary>
+        /// Set the DrawOrder property for this control. Updates all child controls of this control with the new draw order.
+        /// </summary>
+        /// <param name="drawOrder">The new draw order.</param>
+        public void SetDrawOrder(int drawOrder)
+        {
+            DrawOrder = drawOrder;
+
+            foreach (var childControl in ChildControls)
+                UpdateDrawOrderBasedOnParent(this, childControl);
+        }
+
+        /// <summary>
         /// Called when a child control is being dragged and the parent should not respond to click drag.  Example: scroll bar being dragged within a dialog
         /// </summary>
         /// <param name="suppress">True if parent dragging should be disabled (suppressed), false to enable dragging</param>
@@ -182,18 +212,6 @@ namespace XNAControls
 
             ((XNAControl)ImmediateParent).ShouldClickDrag = !suppress;
             ImmediateParent.SuppressParentClickDragEvent(suppress);
-        }
-
-        /// <summary>
-        /// Set the DrawOrder property for this control. Updates all child controls of this control with the new draw order.
-        /// </summary>
-        /// <param name="drawOrder">The new draw order.</param>
-        public void SetDrawOrder(int drawOrder)
-        {
-            DrawOrder = drawOrder;
-
-            foreach (var childControl in ChildControls)
-                UpdateDrawOrderBasedOnParent(this, childControl);
         }
 
         #endregion
