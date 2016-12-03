@@ -19,6 +19,8 @@ namespace XNAControls
 
         public Texture2D Texture { get; set; }
 
+        public Rectangle? SourceRectangle { get; set; }
+
         protected override void OnDrawControl(GameTime gameTime)
         {
             if (Texture != null)
@@ -30,9 +32,10 @@ namespace XNAControls
                     case StretchMode.CenterInFrame:
                         _spriteBatch.Draw(Texture,
                             new Rectangle(DrawAreaWithParentOffset.X + DrawArea.Width / 2 - Texture.Width / 2,
-                                          DrawAreaWithParentOffset.Y + DrawArea.Height / 2 - Texture.Width / 2,
+                                          DrawAreaWithParentOffset.Y + DrawArea.Height / 2 - Texture.Height / 2,
                                           Texture.Width,
                                           Texture.Height),
+                            SourceRectangle,
                             Color.White);
                         break;
                     case StretchMode.Stretch:
@@ -46,9 +49,10 @@ namespace XNAControls
         }
     }
 
-    public interface IXNAPictureBox
+    public interface IXNAPictureBox : IXNAControl
     {
         StretchMode StretchMode { get; set; }
         Texture2D Texture { get; set; }
+        Rectangle? SourceRectangle { get; set; }
     }
 }
