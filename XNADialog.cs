@@ -17,7 +17,7 @@ namespace XNAControls
         NO_BUTTON_PRESSED
     }
 
-    public abstract class XNADialog : XNAControl
+    public abstract class XNADialog : XNAControl, IXNADialog
     {
         private const int DIALOG_LAYER_OFFSET = 30;
 
@@ -110,5 +110,24 @@ namespace XNAControls
             Singleton<DialogRepository>.Instance.OpenDialogs.Pop();
             _showTaskCompletionSource.SetResult(result);
         }
+    }
+
+    public interface IXNADialog : IXNAControl
+    {
+        /// <summary>
+        /// Adjust the draw order of the dialog such that it is brought to the top of the draw order
+        /// </summary>
+        void BringToTop();
+
+        /// <summary>
+        /// Center the dialog in the Game's default graphics device
+        /// </summary>
+        void CenterInGameView();
+
+        /// <summary>
+        /// The the dialog
+        /// </summary>
+        /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
+        Task<XNADialogResult> ShowDialogAsync();
     }
 }

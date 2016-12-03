@@ -8,11 +8,11 @@ namespace XNAControls
 {
     internal class DialogRepository
     {
-        public Stack<IXNAControl> OpenDialogs { get; private set; }
+        public Stack<IXNADialog> OpenDialogs { get; private set; }
 
         public DialogRepository()
         {
-            OpenDialogs = new Stack<IXNAControl>();
+            OpenDialogs = new Stack<IXNADialog>();
         }
     }
 }
