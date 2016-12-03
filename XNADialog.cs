@@ -2,7 +2,6 @@
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
-using System;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -22,16 +21,25 @@ namespace XNAControls
         private const int DIALOG_LAYER_OFFSET = 30;
 
         private readonly TaskCompletionSource<XNADialogResult> _showTaskCompletionSource;
-        private readonly Texture2D _backgroundTexture;
 
-        protected XNADialog(Texture2D backgroundTexture)
+        private Texture2D _backgroundTexture;
+
+        /// <summary>
+        /// The background texture of the dialog. Setting the background texture automatically sets the dialog size
+        /// </summary>
+        protected Texture2D BackgroundTexture
         {
-            if (backgroundTexture == null)
-                throw new ArgumentNullException("backgroundTexture", "The background texture must be specified");
+            get { return _backgroundTexture; }
+            set
+            {
+                _backgroundTexture = value;
+                SetSize(_backgroundTexture.Width, _backgroundTexture.Height);
+            }
+        }
 
+        protected XNADialog()
+        {
             _showTaskCompletionSource = new TaskCompletionSource<XNADialogResult>();
-            _backgroundTexture = backgroundTexture;
-            SetSize(_backgroundTexture.Width, _backgroundTexture.Height);
         }
 
         /// <summary>
@@ -105,7 +113,7 @@ namespace XNAControls
         protected override void OnDrawControl(GameTime gameTime)
         {
             _spriteBatch.Begin();
-            _spriteBatch.Draw(_backgroundTexture, DrawAreaWithParentOffset, Color.White);
+            _spriteBatch.Draw(BackgroundTexture, DrawAreaWithParentOffset, Color.White);
             _spriteBatch.End();
 
             base.OnDrawControl(gameTime);
