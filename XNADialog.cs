@@ -55,12 +55,12 @@ namespace XNAControls
         /// <summary>
         /// Center the dialog in the Game's default graphics device
         /// </summary>
-        public void CenterInGameView()
+        public virtual void CenterInGameView()
         {
             var viewport = Game.GraphicsDevice.Viewport;
 
-            DrawPosition = new Vector2(viewport.Width/2 - _backgroundTexture.Width/2,
-                                       viewport.Height/2 - _backgroundTexture.Height/2);
+            DrawPosition = new Vector2(viewport.Width/2 - BackgroundTexture.Width/2,
+                                       viewport.Height/2 - BackgroundTexture.Height/2);
         }
 
         /// <summary>
