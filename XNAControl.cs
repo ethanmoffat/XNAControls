@@ -165,6 +165,8 @@ namespace XNAControls
         {
             if (parent == null)
                 throw new ArgumentNullException("parent", "Parent should not be null. To unset a parent, use the method SetControlUnparented()");
+            if (parent == this)
+                throw new ArgumentException("Error: cannot set a control as its own parent!", "parent");
 
             if (ImmediateParent != null && ImmediateParent.ChildControls.Contains(this))
             {
