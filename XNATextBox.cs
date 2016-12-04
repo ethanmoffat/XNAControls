@@ -32,8 +32,8 @@ namespace XNAControls
             set
             {
                 _drawArea = value;
-                _textLabel.DrawArea = new Rectangle(LeftPadding, 0, _drawArea.Width, _drawArea.Height);
-                _defaultTextLabel.DrawArea = new Rectangle(LeftPadding, 0, _drawArea.Width, _drawArea.Height);
+                _textLabel.DrawArea = new Rectangle(LeftPadding, -4, _drawArea.Width, _drawArea.Height);
+                _defaultTextLabel.DrawArea = new Rectangle(LeftPadding, -4, _drawArea.Width, _drawArea.Height);
             }
         }
 
