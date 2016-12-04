@@ -31,7 +31,7 @@ namespace XNAControls
         }
     }
 
-    public interface IXNAPanel
+    public interface IXNAPanel : IXNAControl
     {
         Texture2D BackgroundImage { get; set; }
 
