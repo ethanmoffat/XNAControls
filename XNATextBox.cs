@@ -189,7 +189,7 @@ namespace XNAControls
 
             if (_textBoxRight != null)
             {
-                var drawPosition = new Vector2(DrawArea.X + (int)DrawPositionWithParentOffset.X - _textBoxRight.Width,
+                var drawPosition = new Vector2(DrawPositionWithParentOffset.X + DrawArea.Width - _textBoxRight.Width,
                                                DrawPositionWithParentOffset.Y);
 
                 _spriteBatch.Draw(_textBoxRight, drawPosition, Color.White);
