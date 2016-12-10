@@ -71,18 +71,19 @@ namespace XNAControls
                                        viewport.Height/2 - BackgroundTexture.Height/2);
         }
 
-
         /// <summary>
-        /// Show the dialog and do processing until the user makes a choice
+        /// Show the modal dialog and do processing until the dialog is closed
         /// </summary>
-        /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
-        public XNADialogResult ShowDialog()
+        public void ShowDialog()
         {
-            return ShowDialogAsync().Result;
+            //Run the ShowDialogAsync() method on a Threadpool Thread
+            //Use ConfigureAwait(false) to ignore the captured context when starting the async operation
+            //See http://blog.stephencleary.com/2012/02/async-and-await.html for more info
+            Task.Run(async () => await ShowDialogAsync().ConfigureAwait(false));
         }
 
         /// <summary>
-        /// Show the dialog asynchronously and do processing until the user makes a choice
+        /// Show the modal dialog asynchronously and do processing until the user makes a choice
         /// </summary>
         /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
         public async Task<XNADialogResult> ShowDialogAsync()
@@ -149,13 +150,12 @@ namespace XNAControls
         void CenterInGameView();
 
         /// <summary>
-        /// Show the dialog and do processing until the user makes a choice
+        /// Show the modal dialog and do processing until the dialog is closed
         /// </summary>
-        /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
-        XNADialogResult ShowDialog();
+        void ShowDialog();
 
         /// <summary>
-        /// Show the dialog asynchronously and do processing until the user makes a choice
+        /// Show the modal dialog asynchronously and do processing until the user makes a choice
         /// </summary>
         /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
         Task<XNADialogResult> ShowDialogAsync();
