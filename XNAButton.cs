@@ -133,6 +133,8 @@ namespace XNAControls
 
         protected override void Dispose(bool disposing)
         {
+            PrepareForDisposal();
+
             if (disposing)
             {
                 if (_over != null)

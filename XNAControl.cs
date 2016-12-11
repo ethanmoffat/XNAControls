@@ -16,6 +16,8 @@ namespace XNAControls
         private readonly List<IXNAControl> _children;
         protected readonly SpriteBatch _spriteBatch;
 
+        private bool _disposed;
+
         protected bool ShouldClickDrag { get; private set; }
 
         private MouseState _currentMouseState, _previousMouseState;
@@ -315,7 +317,7 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
-            if (!Game.IsActive || !Visible) return false;
+            if (!Game.IsActive || !Visible || _disposed) return false;
 
             var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
 
@@ -337,7 +339,7 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldDraw()
         {
-            return Visible;
+            return Visible && !_disposed;
         }
 
         protected void SetSize(int newWidth, int newHeight)
@@ -366,6 +368,8 @@ namespace XNAControls
 
         protected override void Dispose(bool disposing)
         {
+            PrepareForDisposal();
+
             if (disposing)
             {
                 RemoveFromGameComponents(this);
@@ -377,6 +381,11 @@ namespace XNAControls
             }
 
             base.Dispose(disposing);
+        }
+
+        protected void PrepareForDisposal()
+        {
+            _disposed = true;
         }
     }
 }
