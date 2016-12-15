@@ -119,9 +119,12 @@ namespace XNAControls
         /// </summary>
         protected override void OnDrawControl(GameTime gameTime)
         {
-            _spriteBatch.Begin();
-            _spriteBatch.Draw(BackgroundTexture, DrawAreaWithParentOffset, Color.White);
-            _spriteBatch.End();
+            if (BackgroundTexture != null)
+            {
+                _spriteBatch.Begin();
+                _spriteBatch.Draw(BackgroundTexture, DrawAreaWithParentOffset, Color.White);
+                _spriteBatch.End();
+            }
 
             base.OnDrawControl(gameTime);
         }
