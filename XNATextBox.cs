@@ -144,9 +144,6 @@ namespace XNAControls
 
         protected override void OnUpdateControl(GameTime gameTime)
         {
-            if (!ShouldUpdate())
-                return;
-
             if (DrawAreaWithParentOffset.Contains(CurrentMouseState.Position))
             {
                 Highlighted = true;
