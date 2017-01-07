@@ -123,7 +123,8 @@ namespace XNAControls
             ForeColor = Color.Black;
 
             TextAlign = LabelAlignment.TopLeft;
-            _lastAlignment = LabelAlignment.MiddleCenter;
+            _lastAlignment = LabelAlignment.TopLeft;
+            _alignmentOffset = CalculatePositionFromAlignment();
         }
 
         public override void Initialize()
@@ -180,13 +181,13 @@ namespace XNAControls
                 }
             }
 
+            _totalTextArea = CalculateSizeOfTextArea();
+
             if (_lastAlignment != TextAlign)
             {
                 _lastAlignment = TextAlign;
                 _alignmentOffset = CalculatePositionFromAlignment();
             }
-
-            _totalTextArea = CalculateSizeOfTextArea();
 
             base.OnUpdateControl(gameTime);
         }
