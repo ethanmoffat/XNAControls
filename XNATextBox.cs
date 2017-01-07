@@ -83,6 +83,16 @@ namespace XNAControls
             set { _defaultTextLabel.ForeColor = value; }
         }
 
+        public LabelAlignment TextAlignment
+        {
+            get { return _textLabel.TextAlign; }
+            set
+            {
+                _textLabel.TextAlign = value;
+                _defaultTextLabel.TextAlign = value;
+            }
+        }
+
         public event EventHandler OnFocused = delegate { };
 
         public event EventHandler OnEnterPressed = delegate { };
@@ -118,14 +128,16 @@ namespace XNAControls
             {
                 AutoSize = false,
                 BackColor = Color.Transparent,
-                TextAlign = LabelAlignment.MiddleLeft
+                TextAlign = LabelAlignment.MiddleLeft,
+                DrawArea = new Rectangle(0, 0, area.Width, area.Height)
             };
 
             _defaultTextLabel = new XNALabel(spriteFontContentName)
             {
                 AutoSize = false,
                 BackColor = Color.Transparent,
-                TextAlign = LabelAlignment.MiddleLeft
+                TextAlign = LabelAlignment.MiddleLeft,
+                DrawArea = new Rectangle(0, 0, area.Width, area.Height)
             };
 
             DrawArea = area;
@@ -192,13 +204,13 @@ namespace XNAControls
                 _spriteBatch.Draw(_textBoxRight, drawPosition, Color.White);
             }
 
-            if (_caretTexture != null && Selected)
+            if (_caretTexture != null && _textLabel != null && Selected)
             {
                 var caretVisible = !(gameTime.TotalGameTime.TotalMilliseconds % 1000 < 500);
                 if (caretVisible)
                     _spriteBatch.Draw(_caretTexture,
-                                      new Vector2(DrawAreaWithParentOffset.X + LeftPadding + _textLabel.ActualWidth + 2,
-                                                  DrawAreaWithParentOffset.Y + 4),
+                                      new Vector2(_textLabel.AdjustedDrawPosition.X + _textLabel.ActualWidth + 2,
+                                                  _textLabel.AdjustedDrawPosition.Y),
                                       Color.White);
             }
 
@@ -250,6 +262,7 @@ namespace XNAControls
         string DefaultText { get; set; }
         Color TextColor { get; set; }
         Color DefaultTextColor { get; set; }
+        LabelAlignment TextAlignment { get; set; }
 
         event EventHandler OnFocused;
         event EventHandler OnEnterPressed;

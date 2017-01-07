@@ -107,6 +107,14 @@ namespace XNAControls
             }
         }
 
+        internal Vector2 AdjustedDrawPosition
+        {
+            get
+            {
+                return AutoSize ? Vector2.Zero : _alignmentOffset + DrawPositionWithParentOffset;
+            }
+        }
+
         /// <summary>
         /// Turn underlining on or off
         /// </summary>
