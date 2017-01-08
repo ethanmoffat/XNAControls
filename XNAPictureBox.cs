@@ -31,15 +31,15 @@ namespace XNAControls
                 {
                     case StretchMode.CenterInFrame:
                         _spriteBatch.Draw(Texture,
-                            new Rectangle(DrawAreaWithParentOffset.X + DrawArea.Width / 2 - Texture.Width / 2,
-                                          DrawAreaWithParentOffset.Y + DrawArea.Height / 2 - Texture.Height / 2,
-                                          Texture.Width,
-                                          Texture.Height),
+                            new Rectangle(DrawAreaWithParentOffset.X + DrawArea.Width / 2 - (SourceRectangle ?? Texture.Bounds).Width / 2,
+                                          DrawAreaWithParentOffset.Y + DrawArea.Height / 2 - (SourceRectangle ?? Texture.Bounds).Height / 2,
+                                          (SourceRectangle ?? Texture.Bounds).Width,
+                                          (SourceRectangle ?? Texture.Bounds).Height),
                             SourceRectangle,
                             Color.White);
                         break;
                     case StretchMode.Stretch:
-                        _spriteBatch.Draw(Texture, DrawAreaWithParentOffset, Color.White);
+                        _spriteBatch.Draw(Texture, DrawAreaWithParentOffset, SourceRectangle, Color.White);
                         break;
                 }
                 _spriteBatch.End();
