@@ -111,7 +111,7 @@ namespace XNAControls
         {
             get
             {
-                return AutoSize ? Vector2.Zero : _alignmentOffset + DrawPositionWithParentOffset;
+                return DrawPositionWithParentOffset + (AutoSize ? Vector2.Zero : _alignmentOffset);
             }
         }
 

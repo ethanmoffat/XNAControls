@@ -32,8 +32,8 @@ namespace XNAControls
             set
             {
                 _drawArea = value;
-                _textLabel.DrawArea = new Rectangle(LeftPadding, -4, _drawArea.Width, _drawArea.Height);
-                _defaultTextLabel.DrawArea = new Rectangle(LeftPadding, -4, _drawArea.Width, _drawArea.Height);
+                _textLabel.DrawArea = new Rectangle(LeftPadding, 0, _drawArea.Width, _drawArea.Height);
+                _defaultTextLabel.DrawArea = new Rectangle(LeftPadding, 0, _drawArea.Width, _drawArea.Height);
             }
         }
 
@@ -210,7 +210,7 @@ namespace XNAControls
                 if (caretVisible)
                     _spriteBatch.Draw(_caretTexture,
                                       new Vector2(_textLabel.AdjustedDrawPosition.X + _textLabel.ActualWidth + 2,
-                                                  _textLabel.AdjustedDrawPosition.Y),
+                                                  DrawAreaWithParentOffset.Y + (int)Math.Round((DrawArea.Height - _caretTexture.Height) / 2.0)),
                                       Color.White);
             }
 
