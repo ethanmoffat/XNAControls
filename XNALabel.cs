@@ -35,7 +35,6 @@ namespace XNAControls
         private int? _lastTextWidth;
 
         private Vector2 _alignmentOffset, _totalTextArea;
-        private LabelAlignment _lastAlignment;
 
         /// <summary>
         /// Get or set the text to display in the label.
@@ -131,7 +130,6 @@ namespace XNAControls
             ForeColor = Color.Black;
 
             TextAlign = LabelAlignment.TopLeft;
-            _lastAlignment = LabelAlignment.TopLeft;
             _alignmentOffset = CalculatePositionFromAlignment();
         }
 
@@ -190,12 +188,7 @@ namespace XNAControls
             }
 
             _totalTextArea = CalculateSizeOfTextArea();
-
-            if (_lastAlignment != TextAlign)
-            {
-                _lastAlignment = TextAlign;
-                _alignmentOffset = CalculatePositionFromAlignment();
-            }
+            _alignmentOffset = CalculatePositionFromAlignment();
 
             base.OnUpdateControl(gameTime);
         }
