@@ -10,17 +10,25 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace XNAControls
 {
+    [Flags]
     public enum LabelAlignment
     {
-        TopLeft,
-        TopCenter,
-        TopRight,
-        MiddleLeft,
-        MiddleCenter,
-        MiddleRight,
-        BottomLeft,
-        BottomCenter,
-        BottomRight
+        Top = 1,
+        Middle = 2,
+        Bottom = 4,
+        Left = 8,
+        Right = 16,
+        Center = 32,
+
+        TopLeft = Top | Left,
+        MiddleLeft = Middle | Left,
+        BottomLeft = Bottom | Left,
+        TopCenter = Top | Center,
+        MiddleCenter = Middle | Center,
+        BottomCenter = Bottom | Center,
+        TopRight = Top | Right,
+        MiddleRight = Middle | Right,
+        BottomRight = Bottom | Right
     }
 
     public class XNALabel : XNAControl, IXNALabel
@@ -198,20 +206,18 @@ namespace XNAControls
             float adjustedX = 0;
             float adjustedY = 0;
 
-            var align = Enum.GetName(typeof(LabelAlignment), TextAlign) ?? "";
-
-            if (align.Contains("Left"))
+            if ((TextAlign & LabelAlignment.Left) == LabelAlignment.Left)
                 adjustedX = 0;
-            else if (align.Contains("Center"))
+            else if ((TextAlign & LabelAlignment.Center) == LabelAlignment.Center)
                 adjustedX = (int)(DrawArea.Width / 2f - _totalTextArea.X / 2);
-            else if (align.Contains("Right"))
+            else if ((TextAlign & LabelAlignment.Right) == LabelAlignment.Right)
                 adjustedX = DrawArea.Width - _totalTextArea.X;
 
-            if (align.Contains("Top"))
+            if ((TextAlign & LabelAlignment.Top) == LabelAlignment.Top)
                 adjustedY = 0;
-            else if (align.Contains("Middle"))
+            else if ((TextAlign & LabelAlignment.Middle) == LabelAlignment.Middle)
                 adjustedY = (int)(DrawArea.Height / 2f - _totalTextArea.Y / 2);
-            else if (align.Contains("Bottom"))
+            else if ((TextAlign & LabelAlignment.Bottom) == LabelAlignment.Bottom)
                 adjustedY = DrawArea.Height - _totalTextArea.Y;
 
             return new Vector2(adjustedX, adjustedY);
