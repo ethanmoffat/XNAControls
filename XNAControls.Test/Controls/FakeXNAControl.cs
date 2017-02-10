@@ -6,5 +6,6 @@ namespace XNAControls.Test.Controls
 {
     internal class FakeXNAControl : XNAControl
     {
+        internal new bool ShouldClickDrag => base.ShouldClickDrag;
     }
 }
