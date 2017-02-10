@@ -70,6 +70,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Helpers\TestGameManager.cs" />
     <Compile Include="GraphicsDeviceService.cs" />
     <Compile Include="TextSplitterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
