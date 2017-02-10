@@ -2,14 +2,11 @@
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
-using System.ComponentModel.Design;
 using System.Linq;
-using System.Windows.Forms;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using NUnit.Framework;
-using XNAControls.Old;
+using XNAControls.Test.Helpers;
 
 namespace XNAControls.Test
 {
@@ -17,24 +14,20 @@ namespace XNAControls.Test
     public class TextSplitterTest
     {
         private TextSplitter _ts;
-        private static Form _form;
-        private static Game _game;
-        private static GraphicsDeviceManager _gdm;
+        private static TestGameManager _gameManager;
         private static SpriteFont _spriteFont;
 
         [OneTimeSetUp]
         public static void ClassInitialize()
         {
-            SetupDependencies();
+            _gameManager = new TestGameManager();
             _spriteFont = LoadSpriteFontFromWorkingDirectory();
         }
 
         [OneTimeTearDown]
         public static void ClassCleanup()
         {
-            _gdm.Dispose();
-            _game.Dispose();
-            _form.Dispose();
+            _gameManager.Dispose();
         }
 
         [SetUp]
@@ -171,28 +164,12 @@ namespace XNAControls.Test
             Assert.IsTrue(result.Except(new[] { result.First() }).All(x => x.StartsWith(_ts.LineIndent)));
         }
 
-        private static void SetupDependencies()
-        {
-            _form = new Form();
-            _game = new Game();
-            _gdm = new GraphicsDeviceManager(_game);
-        }
-
         private static SpriteFont LoadSpriteFontFromWorkingDirectory()
         {
-            SpriteFont font;
-            var gds = GraphicsDeviceService.AddRef(_form.Handle, _form.ClientSize.Width, _form.ClientSize.Height);
-
-            using (var services = new ServiceContainer())
+            using (var content = new ContentManager(_gameManager.Game.Services, TestContext.CurrentContext.TestDirectory))
             {
-                services.AddService(typeof (IGraphicsDeviceService), gds);
-                using (var content = new ContentManager(services, TestContext.CurrentContext.TestDirectory))
-                {
-                    font = content.Load<SpriteFont>("font_for_testing");
-                }
+                return content.Load<SpriteFont>("font_for_testing");
             }
-
-            return font;
         }
     }
 }
