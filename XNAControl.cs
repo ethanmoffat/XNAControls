@@ -169,9 +169,7 @@ namespace XNAControls
                 throw new ArgumentException("Error: cannot set a control as its own parent!", "parent");
 
             if (ImmediateParent != null && ImmediateParent.ChildControls.Contains(this))
-            {
-                ImmediateParent.SetControlUnparented();
-            }
+                SetControlUnparented();
 
             ImmediateParent = parent;
             ((List<IXNAControl>) ImmediateParent.ChildControls).Add(this);
