@@ -4,6 +4,8 @@
 
 using System;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using NUnit.Framework;
 using XNAControls.Test.Helpers;
 
@@ -227,6 +229,103 @@ namespace XNAControls.Test.Controls
             Assert.IsTrue(_control.ShouldClickDrag);
             Assert.IsFalse(child.ShouldClickDrag);
             Assert.IsFalse(parent.ShouldClickDrag);
+        }
+
+        [Test]
+        public void Update_DoesNotUpdateControl_IfGameIsInactive()
+        {
+            GivenGameIsInactive(_control);
+
+            _control.Update(new GameTime());
+
+            Assert.IsFalse(_control.Updated);
+        }
+
+        [Test]
+        public void Update_DoesNotUpdateControl_IfControlIsNotVisible()
+        {
+            GivenGameIsActive(_control);
+            _control.Visible = false;
+
+            _control.Update(new GameTime());
+
+            Assert.IsFalse(_control.Updated);
+        }
+
+        [Test]
+        public void Update_DoesNotUpdateControl_IfControlIsDisposed()
+        {
+            GivenGameIsActive(_control);
+            _control.Visible = true;
+            _control.Dispose();
+
+            _control.Update(new GameTime());
+
+            Assert.IsFalse(_control.Updated);
+        }
+
+        [Test]
+        public void Update_UpdatesControl_WhenGameActive_AndControlVisible_AndNotDisposed()
+        {
+            GivenGameIsActive(_control);
+            _control.Visible = true;
+
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(_control.Updated);
+        }
+
+        [Test]
+        public void Draw_DoesNotDrawControl_IfControlIsNotVisible()
+        {
+            _control.Visible = false;
+
+            _control.Draw(new GameTime());
+
+            Assert.IsFalse(_control.Drawn);
+        }
+
+        [Test]
+        public void Draw_DoesNotDrawControl_IfControlIsDisposed()
+        {
+            _control.Visible = true;
+            _control.Dispose();
+
+            _control.Draw(new GameTime());
+
+            Assert.IsFalse(_control.Drawn);
+        }
+
+        [Test]
+        public void Draw_DrawsControl_WhenGameActive_AndControlVisible_AndNotDisposed()
+        {
+            GivenGameIsActive(_control);
+            _control.Visible = true;
+
+            _control.Draw(new GameTime());
+
+            Assert.IsTrue(_control.Drawn);
+        }
+
+        [Test]
+        public void Draw_DrawsControl_WhenGameIsInActive()
+        {
+            GivenGameIsInactive(_control);
+            _control.Visible = true;
+
+            _control.Draw(new GameTime());
+
+            Assert.IsTrue(_control.Drawn);
+        }
+
+        private static void GivenGameIsActive(FakeXNAControl control)
+        {
+            control.SetIsActive(true);
+        }
+
+        private static void GivenGameIsInactive(FakeXNAControl control)
+        {
+            control.SetIsActive(false);
         }
     }
 }

@@ -23,11 +23,11 @@ namespace XNAControls
         private MouseState _currentMouseState, _previousMouseState;
         private KeyboardState _currentKeyState, _previousKeyState;
 
-        protected MouseState CurrentMouseState { get { return _currentMouseState; } }
-        protected MouseState PreviousMouseState { get { return _previousMouseState; } }
+        protected MouseState CurrentMouseState => _currentMouseState;
+        protected MouseState PreviousMouseState => _previousMouseState;
 
-        protected KeyboardState CurrentKeyState { get { return _currentKeyState; } }
-        protected KeyboardState PreviousKeyState { get { return _previousKeyState; } }
+        protected KeyboardState CurrentKeyState => _currentKeyState;
+        protected KeyboardState PreviousKeyState => _previousKeyState;
 
         /// <summary>
         /// Returns true if the default game is active (i.e. has focus), false otherwise
