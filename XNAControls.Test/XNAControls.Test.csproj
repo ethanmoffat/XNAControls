@@ -70,7 +70,9 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Controls\FakeXNAControl.cs" />
     <Compile Include="Helpers\TestGameManager.cs" />
+    <Compile Include="Controls\XNAControlTest.cs" />
     <Compile Include="GraphicsDeviceService.cs" />
     <Compile Include="TextSplitterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

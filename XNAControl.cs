@@ -153,10 +153,8 @@ namespace XNAControls
         /// </summary>
         public void AddControlToDefaultGame()
         {
+            SetControlUnparented();
             AddToGameComponents(this);
-
-            foreach (var child in ChildControls)
-                RemoveFromGameComponents(child);
         }
 
         /// <summary>
