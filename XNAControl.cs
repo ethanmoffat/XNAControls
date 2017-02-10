@@ -30,6 +30,11 @@ namespace XNAControls
         protected KeyboardState PreviousKeyState { get { return _previousKeyState; } }
 
         /// <summary>
+        /// Returns true if the default game is active (i.e. has focus), false otherwise
+        /// </summary>
+        public virtual bool GameIsActive => Game.IsActive;
+
+        /// <summary>
         /// Returns true if the mouse is currently over this control
         /// </summary>
         public bool MouseOver
@@ -313,7 +318,7 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
-            if (!Game.IsActive || !Visible || _disposed) return false;
+            if (!GameIsActive || !Visible || _disposed) return false;
 
             var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
 

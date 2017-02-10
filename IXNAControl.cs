@@ -11,6 +11,11 @@ namespace XNAControls
     public interface IXNAControl : IGameComponent, IDrawable, IUpdateable, IDisposable
     {
         /// <summary>
+        /// Returns true if the default game is active (i.e. has focus), false otherwise
+        /// </summary>
+        bool GameIsActive { get; }
+
+        /// <summary>
         /// Returns true if the mouse is currently over this control
         /// </summary>
         bool MouseOver { get; }
