@@ -23,6 +23,17 @@ namespace XNAControls
         }
     }
 
+    internal class Singleton<T, U> : Singleton where U : class, T, new()
+    {
+        public static void Map()
+        {
+            var typeKey = typeof(T);
+            if (!_typeMap.ContainsKey(typeKey) || _typeMap[typeKey] == null)
+                _typeMap.Remove(typeKey);
+            _typeMap.Add(typeKey, new U());
+        }
+    }
+
     internal class Singleton
     {
         protected static readonly Dictionary<Type, object> _typeMap = new Dictionary<Type, object>();
