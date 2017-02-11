@@ -10,7 +10,7 @@ namespace XNAControls
     {
         static DialogRepository()
         {
-            Singleton<DialogRepository>.Map(new DialogRepository());
+            Singleton<DialogRepository>.MapIfMissing(new DialogRepository());
         }
 
         public Stack<IXNADialog> OpenDialogs { get; } = new Stack<IXNADialog>();

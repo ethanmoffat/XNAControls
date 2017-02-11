@@ -8,11 +8,6 @@ namespace XNAControls.Adapters
 {
     internal class MouseAdapter : IMouseAdapter
     {
-        static MouseAdapter()
-        {
-            Singleton<IMouseAdapter, MouseAdapter>.Map();
-        }
-
         public MouseState State => Mouse.GetState();
     }
 

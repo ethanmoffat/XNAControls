@@ -10,7 +10,7 @@ namespace XNAControls
     {
         static GameRepository()
         {
-            Singleton<GameRepository>.Map(new GameRepository());
+            Singleton<GameRepository>.MapIfMissing(new GameRepository());
         }
 
         private Game Game { get; set; }

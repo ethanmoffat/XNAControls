@@ -14,9 +14,15 @@ namespace XNAControls
         public static void Map(T instance)
         {
             var typeKey = typeof(T);
-            if (!_typeMap.ContainsKey(typeKey) || _typeMap[typeKey] == null)
+            if (_typeMap.ContainsKey(typeKey))
                 _typeMap.Remove(typeKey);
             _typeMap.Add(typeKey, instance);
+        }
+
+        public static void MapIfMissing(T instance)
+        {
+            if (!_typeMap.ContainsKey(typeof(T)))
+                Map(instance);
         }
     }
 
@@ -25,7 +31,7 @@ namespace XNAControls
         public static void Map()
         {
             var typeKey = typeof(T);
-            if (!_typeMap.ContainsKey(typeKey) || _typeMap[typeKey] == null)
+            if (_typeMap.ContainsKey(typeKey))
                 _typeMap.Remove(typeKey);
             _typeMap.Add(typeKey, new U());
         }

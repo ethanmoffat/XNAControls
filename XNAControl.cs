@@ -8,11 +8,20 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using XNAControls.Adapters;
 
 namespace XNAControls
 {
     public abstract class XNAControl : DrawableGameComponent, IXNAControl
     {
+        static XNAControl()
+        {
+            Singleton<GameRepository>.MapIfMissing(new GameRepository());
+            Singleton<DialogRepository>.MapIfMissing(new DialogRepository());
+            Singleton<IKeyboardAdapter, KeyboardAdapter>.Map();
+            Singleton<IMouseAdapter, MouseAdapter>.Map();
+        }
+
         private readonly List<IXNAControl> _children;
         protected readonly SpriteBatch _spriteBatch;
 

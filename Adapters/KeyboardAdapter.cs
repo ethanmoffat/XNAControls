@@ -8,11 +8,6 @@ namespace XNAControls.Adapters
 {
     internal class KeyboardAdapter : IKeyboardAdapter
     {
-        static KeyboardAdapter()
-        {
-            Singleton<IKeyboardAdapter, KeyboardAdapter>.Map();
-        }
-
         public KeyboardState State => Keyboard.GetState();
     }
 
