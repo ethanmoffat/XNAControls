@@ -7,19 +7,16 @@ using System.Collections.Generic;
 
 namespace XNAControls
 {
-    internal class Singleton<T> : Singleton where T : class, new()
+    internal class Singleton<T> : Singleton where T : class
     {
-        public static T Instance
+        public static T Instance => (T)_typeMap[typeof(T)];
+
+        public static void Map(T instance)
         {
-            get
-            {
-                var typeKey = typeof(T);
-
-                if(!_typeMap.ContainsKey(typeKey) || _typeMap[typeKey] == null)
-                    _typeMap.Add(typeKey, new T());
-
-                return (T)_typeMap[typeKey];
-            }
+            var typeKey = typeof(T);
+            if (!_typeMap.ContainsKey(typeKey) || _typeMap[typeKey] == null)
+                _typeMap.Remove(typeKey);
+            _typeMap.Add(typeKey, instance);
         }
     }
 

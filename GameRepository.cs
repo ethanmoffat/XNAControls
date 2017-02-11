@@ -8,6 +8,11 @@ namespace XNAControls
 {
     public class GameRepository
     {
+        static GameRepository()
+        {
+            Singleton<GameRepository>.Map(new GameRepository());
+        }
+
         private Game Game { get; set; }
 
         public static void SetGame(Game game)
