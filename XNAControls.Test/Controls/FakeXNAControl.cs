@@ -2,6 +2,7 @@
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
+using System.Reflection;
 using Microsoft.Xna.Framework;
 
 namespace XNAControls.Test.Controls
@@ -17,7 +18,16 @@ namespace XNAControls.Test.Controls
 
         public override bool GameIsActive => _isActive;
 
-        public void SetIsActive(bool value)
+        internal bool IsDisposed
+        {
+            get
+            {
+                var disposedProperty = typeof(XNAControl).GetField("_disposed", BindingFlags.Instance | BindingFlags.NonPublic);
+                return (bool) disposedProperty.GetValue(this);
+            }
+        }
+
+        internal void SetIsActive(bool value)
         {
             _isActive = value;
         }

@@ -3,9 +3,9 @@
 // For additional details, see the LICENSE file
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using NUnit.Framework;
 using XNAControls.Test.Helpers;
 
@@ -14,6 +14,8 @@ namespace XNAControls.Test.Controls
     [TestFixture]
     public class XNAControlTest
     {
+        private List<IXNAControl> _createdControls;
+
         private static TestGameManager _gameManager;
         private FakeXNAControl _control;
 
@@ -28,12 +30,17 @@ namespace XNAControls.Test.Controls
         public void SetUp()
         {
             _control = new FakeXNAControl();
+            _createdControls = new List<IXNAControl>();
         }
 
         [TearDown]
         public void TearDown()
         {
             _control.Dispose();
+
+            foreach (var control in _createdControls)
+                control.Dispose();
+            _createdControls.Clear();
         }
 
         [OneTimeTearDown]
@@ -60,8 +67,8 @@ namespace XNAControls.Test.Controls
         [Test]
         public void AddToDefaultGame_UnsetsParentControl()
         {
-            var child1 = new FakeXNAControl();
-            var parent = new FakeXNAControl();
+            var child1 = CreateFakeControl();
+            var parent = CreateFakeControl();
 
             child1.SetParentControl(parent);
             _control.SetParentControl(parent);
@@ -87,10 +94,10 @@ namespace XNAControls.Test.Controls
         [Test]
         public void SetParentControl_ExistingParentRelationshipIsBroken()
         {
-            var oldParent = new FakeXNAControl();
+            var oldParent = CreateFakeControl();
             _control.SetParentControl(oldParent);
 
-            var newParent = new FakeXNAControl();
+            var newParent = CreateFakeControl();
             _control.SetParentControl(newParent);
 
             Assert.AreNotEqual(oldParent, _control.ImmediateParent);
@@ -100,10 +107,10 @@ namespace XNAControls.Test.Controls
         [Test]
         public void SetParentControl_NewParentRelationshipIsMade()
         {
-            var oldParent = new FakeXNAControl();
+            var oldParent = CreateFakeControl();
             _control.SetParentControl(oldParent);
 
-            var newParent = new FakeXNAControl();
+            var newParent = CreateFakeControl();
             _control.SetParentControl(newParent);
 
             Assert.AreEqual(newParent, _control.ImmediateParent);
@@ -116,7 +123,7 @@ namespace XNAControls.Test.Controls
             _control.AddControlToDefaultGame();
             Assert.IsTrue(_gameManager.Game.Components.Contains(_control));
 
-            var parent = new FakeXNAControl();
+            var parent = CreateFakeControl();
             _control.SetParentControl(parent);
 
             Assert.IsFalse(_gameManager.Game.Components.Contains(_control));
@@ -126,7 +133,8 @@ namespace XNAControls.Test.Controls
         public void SetParentControl_SetsChildDrawOrderBasedOnParentDrawOrder()
         {
             _control.DrawOrder = 321;
-            var parent = new FakeXNAControl {DrawOrder = 123};
+            var parent = CreateFakeControl();
+            parent.DrawOrder = 123;
 
             _control.SetParentControl(parent);
 
@@ -136,7 +144,7 @@ namespace XNAControls.Test.Controls
         [Test]
         public void SetControlUnparented_BreaksParentRelationship()
         {
-            var parent = new FakeXNAControl();
+            var parent = CreateFakeControl();
             _control.SetParentControl(parent);
             Assert.AreEqual(parent, _control.ImmediateParent);
             Assert.IsTrue(parent.ChildControls.Contains(_control));
@@ -157,9 +165,11 @@ namespace XNAControls.Test.Controls
         [Test]
         public void SetDrawOrder_UpdatesChildControlDrawOrders()
         {
-            var parent = new FakeXNAControl {DrawOrder = 10};
-            var child = new FakeXNAControl();
-            var child2 = new FakeXNAControl();
+            var parent = CreateFakeControl();
+            parent.DrawOrder = 10;
+
+            var child = CreateFakeControl();
+            var child2 = CreateFakeControl();
 
             child.SetParentControl(parent);
             child2.SetParentControl(parent);
@@ -173,11 +183,13 @@ namespace XNAControls.Test.Controls
         [Test]
         public void SetDrawOrder_UpdatesChildControlDrawOrders_InHierarchy()
         {
-            var parent = new FakeXNAControl { DrawOrder = 10 };
-            var child = new FakeXNAControl();
-            var child2 = new FakeXNAControl();
-            var nestedChild = new FakeXNAControl();
-            var nestedChild2 = new FakeXNAControl();
+            var parent = CreateFakeControl();
+            parent.DrawOrder = 10;
+
+            var child = CreateFakeControl();
+            var child2 = CreateFakeControl();
+            var nestedChild = CreateFakeControl();
+            var nestedChild2 = CreateFakeControl();
 
             nestedChild.SetParentControl(child);
             nestedChild2.SetParentControl(child2);
@@ -197,7 +209,7 @@ namespace XNAControls.Test.Controls
         [Test]
         public void SuppressParentClickDragEvent_SetsParentClickDrag_False()
         {
-            var parent = new FakeXNAControl();
+            var parent = CreateFakeControl();
             _control.SetParentControl(parent);
             Assert.IsTrue(parent.ShouldClickDrag);
 
@@ -209,11 +221,11 @@ namespace XNAControls.Test.Controls
         [Test]
         public void SuppressParentClickDragEvent_SetsParentClickDrag_False_InHierarchy()
         {
-            var parent = new FakeXNAControl();
-            var child = new FakeXNAControl();
-            var child2 = new FakeXNAControl();
-            var nestedChild = new FakeXNAControl();
-            var nestedChild2 = new FakeXNAControl();
+            var parent = CreateFakeControl();
+            var child = CreateFakeControl();
+            var child2 = CreateFakeControl();
+            var nestedChild = CreateFakeControl();
+            var nestedChild2 = CreateFakeControl();
 
             nestedChild.SetParentControl(child);
             nestedChild2.SetParentControl(child2);
@@ -318,6 +330,41 @@ namespace XNAControls.Test.Controls
             Assert.IsTrue(_control.Drawn);
         }
 
+        [Test]
+        public void Dispose_SetsValueForDisposed_ToTrue()
+        {
+            Assert.IsFalse(_control.IsDisposed);
+
+            _control.Dispose();
+
+            Assert.IsTrue(_control.IsDisposed);
+        }
+
+        [Test]
+        public void Dispose_RemovesControlFromGameComponents()
+        {
+            _control.AddControlToDefaultGame();
+            Assert.IsTrue(_gameManager.Game.Components.Contains(_control));
+
+            _control.Dispose();
+            Assert.IsFalse(_gameManager.Game.Components.Contains(_control));
+        }
+
+        [Test]
+        public void Dispose_DisposesChildren()
+        {
+            var child1 = CreateFakeControl();
+            var child2 = CreateFakeControl();
+
+            child1.SetParentControl(_control);
+            child2.SetParentControl(_control);
+
+            _control.Dispose();
+
+            Assert.IsTrue(child1.IsDisposed);
+            Assert.IsTrue(child2.IsDisposed);
+        }
+
         private static void GivenGameIsActive(FakeXNAControl control)
         {
             control.SetIsActive(true);
@@ -326,6 +373,13 @@ namespace XNAControls.Test.Controls
         private static void GivenGameIsInactive(FakeXNAControl control)
         {
             control.SetIsActive(false);
+        }
+
+        private FakeXNAControl CreateFakeControl()
+        {
+            var control = new FakeXNAControl();
+            _createdControls.Add(control);
+            return control;
         }
     }
 }
