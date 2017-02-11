@@ -15,8 +15,7 @@ using XNAControls.Test.Helpers;
 namespace XNAControls.Test.Controls
 {
     //todo: currently it is difficult to test the following
-    // 1. Event invocation in default logic in OnUpdateControl
-    // 2. Keeping the control within the bounds of the game window (see OnUpdateControl)
+    // 1. Keeping the control within the bounds of the game window (see OnUpdateControl)
 
     [TestFixture]
     public class XNAControlTest
@@ -481,6 +480,53 @@ namespace XNAControls.Test.Controls
             _control.Update(new GameTime());
             Assert.AreEqual(initialKeyState, _control.PreviousKeyStateDuringUpdate);
             Assert.AreEqual(updatedKeyState, _control.CurrentKeyStateDuringUpdate);
+        }
+
+        [Test]
+        public void Update_InvokesMouseOverEvent_IfMouseIsInDrawArea()
+        {
+            var mouseOverEventFired = false;
+            _control.OnMouseOver += (o, e) => mouseOverEventFired = true;
+            _control.DrawArea = new Rectangle(0, 0, 10, 10);
+
+            GivenCurrentMouseState(MouseStateWithPosition(5, 5));
+            GivenControlsCanBeUpdated(_control);
+
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(mouseOverEventFired);
+        }
+
+        [Test]
+        public void Update_InvokesMouseEnterEvent_IfMouseIsFirstEnteringDrawArea()
+        {
+            var mouseEnterEventFired = false;
+            _control.OnMouseEnter += (o, e) => mouseEnterEventFired = true;
+            _control.DrawArea = new Rectangle(0, 0, 10, 10);
+
+            GivenCurrentMouseState(MouseStateWithPosition(5, 5));
+            GivenControlsCanBeUpdated(_control);
+
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(mouseEnterEventFired);
+        }
+
+        [Test]
+        public void Update_InvokesMouseLeaveEvent_IfMouseWasPreviouslyOverDrawArea()
+        {
+            var mouseLeaveEventFired = false;
+            _control.OnMouseLeave += (o, e) => mouseLeaveEventFired = true;
+            _control.DrawArea = new Rectangle(0, 0, 10, 10);
+
+            GivenCurrentMouseState(MouseStateWithPosition(5, 5));
+            GivenControlsCanBeUpdated(_control);
+            _control.Update(new GameTime());
+
+            GivenCurrentMouseState(MouseStateWithPosition(15, 15));
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(mouseLeaveEventFired);
         }
 
         [Test]
