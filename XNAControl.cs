@@ -23,6 +23,9 @@ namespace XNAControls
         }
 
         private readonly List<IXNAControl> _children;
+        private readonly IKeyboardAdapter _keyboardAdapter;
+        private readonly IMouseAdapter _mouseAdapter;
+
         protected readonly SpriteBatch _spriteBatch;
 
         private bool _disposed;
@@ -135,10 +138,12 @@ namespace XNAControls
             : base(GameRepository.GetGame())
         {
             _children = new List<IXNAControl>();
+            _keyboardAdapter = Singleton<IKeyboardAdapter>.Instance;
+            _mouseAdapter = Singleton<IMouseAdapter>.Instance;
 
             _spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-            _currentKeyState = _previousKeyState = Keyboard.GetState();
-            _currentMouseState = _previousMouseState = Mouse.GetState();
+            _currentKeyState = _previousKeyState = _keyboardAdapter.State;
+            _currentMouseState = _previousMouseState = _mouseAdapter.State;
 
             ShouldClickDrag = true;
         }
@@ -227,8 +232,8 @@ namespace XNAControls
         {
             if (!ShouldUpdate()) return;
 
-            _currentKeyState = Keyboard.GetState();
-            _currentMouseState = Mouse.GetState();
+            _currentKeyState = _keyboardAdapter.State;
+            _currentMouseState = _mouseAdapter.State;
 
             OnUpdateControl(gameTime);
 
