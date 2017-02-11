@@ -30,10 +30,15 @@ namespace XNAControls
     {
         public static void Map()
         {
+            Map(new U());
+        }
+
+        internal static void Map(U instance)
+        {
             var typeKey = typeof(T);
             if (_typeMap.ContainsKey(typeKey))
                 _typeMap.Remove(typeKey);
-            _typeMap.Add(typeKey, new U());
+            _typeMap.Add(typeKey, instance);
         }
     }
 
