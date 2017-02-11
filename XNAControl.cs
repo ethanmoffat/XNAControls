@@ -37,24 +37,12 @@ namespace XNAControls
         /// <summary>
         /// Returns true if the mouse is currently over this control
         /// </summary>
-        public bool MouseOver
-        {
-            get
-            {
-                return DrawAreaWithParentOffset.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y);
-            }
-        }
+        public bool MouseOver => DrawAreaWithParentOffset.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y);
 
         /// <summary>
         /// Returns true if the mouse was over the control during the last Update()
         /// </summary>
-        public bool MouseOverPreviously
-        {
-            get
-            {
-                return DrawAreaWithParentOffset.ContainsPoint(PreviousMouseState.X, PreviousMouseState.Y);
-            }
-        }
+        public bool MouseOverPreviously => DrawAreaWithParentOffset.ContainsPoint(PreviousMouseState.X, PreviousMouseState.Y);
 
         /// <summary>
         /// The X,Y coordinates of this control, based on DrawArea
@@ -68,10 +56,7 @@ namespace XNAControls
         /// <summary>
         /// The X,Y coordinates of this control, based on the parent control's X,Y coordinates (if any)
         /// </summary>
-        public Vector2 DrawPositionWithParentOffset
-        {
-            get { return new Vector2(DrawAreaWithParentOffset.X, DrawAreaWithParentOffset.Y); }
-        }
+        public Vector2 DrawPositionWithParentOffset => new Vector2(DrawAreaWithParentOffset.X, DrawAreaWithParentOffset.Y);
 
         /// <summary>
         /// The draw area of this control. Use to set position and size of this control relative to the parent.
@@ -120,7 +105,7 @@ namespace XNAControls
         /// <summary>
         /// A list of all child controls of this control
         /// </summary>
-        public IReadOnlyList<IXNAControl> ChildControls { get { return _children; } }
+        public IReadOnlyList<IXNAControl> ChildControls => _children;
 
         /// <summary>
         /// Event that is invoked when the mouse is over the control

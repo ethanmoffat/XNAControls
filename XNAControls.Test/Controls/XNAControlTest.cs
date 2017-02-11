@@ -288,6 +288,26 @@ namespace XNAControls.Test.Controls
         }
 
         [Test]
+        public void Update_UpdatesChildren()
+        {
+            var child = CreateFakeControl();
+            var child2 = CreateFakeControl();
+
+            child.SetParentControl(_control);
+            child2.SetParentControl(_control);
+
+            GivenGameIsActive(_control, child, child2);
+            _control.Visible = true;
+            child.Visible = true;
+            child2.Visible = true;
+
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(child.Updated);
+            Assert.IsTrue(child2.Updated);
+        }
+
+        [Test]
         public void Draw_DoesNotDrawControl_IfControlIsNotVisible()
         {
             _control.Visible = false;
@@ -331,6 +351,25 @@ namespace XNAControls.Test.Controls
         }
 
         [Test]
+        public void Update_DrawsChildren()
+        {
+            var child = CreateFakeControl();
+            var child2 = CreateFakeControl();
+
+            child.SetParentControl(_control);
+            child2.SetParentControl(_control);
+
+            _control.Visible = true;
+            child.Visible = true;
+            child2.Visible = true;
+
+            _control.Draw(new GameTime());
+
+            Assert.IsTrue(child.Drawn);
+            Assert.IsTrue(child2.Drawn);
+        }
+
+        [Test]
         public void Dispose_SetsValueForDisposed_ToTrue()
         {
             Assert.IsFalse(_control.IsDisposed);
@@ -365,14 +404,16 @@ namespace XNAControls.Test.Controls
             Assert.IsTrue(child2.IsDisposed);
         }
 
-        private static void GivenGameIsActive(FakeXNAControl control)
+        private static void GivenGameIsActive(params FakeXNAControl[] controls)
         {
-            control.SetIsActive(true);
+            foreach (var control in controls)
+                control.SetIsActive(true);
         }
 
-        private static void GivenGameIsInactive(FakeXNAControl control)
+        private static void GivenGameIsInactive(params FakeXNAControl[] controls)
         {
-            control.SetIsActive(false);
+            foreach (var control in controls)
+                control.SetIsActive(false);
         }
 
         private FakeXNAControl CreateFakeControl()
