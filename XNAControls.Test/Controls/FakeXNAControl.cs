@@ -4,6 +4,7 @@
 
 using System.Reflection;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace XNAControls.Test.Controls
 {
@@ -17,6 +18,11 @@ namespace XNAControls.Test.Controls
         internal new bool ShouldClickDrag => base.ShouldClickDrag;
 
         public override bool GameIsActive => _isActive;
+
+        public MouseState CurrentMouseStateDuringUpdate { get; private set; }
+        public KeyboardState CurrentKeyStateDuringUpdate { get; private set; }
+        public MouseState PreviousMouseStateDuringUpdate { get; private set; }
+        public KeyboardState PreviousKeyStateDuringUpdate { get; private set; }
 
         internal bool IsDisposed
         {
@@ -35,6 +41,12 @@ namespace XNAControls.Test.Controls
         protected override void OnUpdateControl(GameTime gameTime)
         {
             Updated = true;
+
+            CurrentMouseStateDuringUpdate = CurrentMouseState;
+            CurrentKeyStateDuringUpdate = CurrentKeyState;
+            PreviousMouseStateDuringUpdate = PreviousMouseState;
+            PreviousKeyStateDuringUpdate = PreviousKeyState;
+
             base.OnUpdateControl(gameTime);
         }
 

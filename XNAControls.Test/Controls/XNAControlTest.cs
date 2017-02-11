@@ -6,16 +6,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+using Moq;
 using NUnit.Framework;
+using XNAControls.Adapters;
 using XNAControls.Test.Helpers;
 
 namespace XNAControls.Test.Controls
 {
     //todo: currently it is difficult to test the following
     // 1. Event invocation in default logic in OnUpdateControl
-    // 2. Setting of current/previous mouse/keyboard state
-    // 3. Keeping the control within the bounds of the game window (see OnUpdateControl)
-    // 4. MouseOver and MouseOverPreviously properties
+    // 2. Keeping the control within the bounds of the game window (see OnUpdateControl)
+    // 3. MouseOver and MouseOverPreviously properties
 
     [TestFixture]
     public class XNAControlTest
@@ -404,6 +406,40 @@ namespace XNAControls.Test.Controls
         }
 
         [Test]
+        public void Update_UpdatesCurrentAndPreviousMouseState()
+        {
+            var initialMouseState = MouseStateWithPosition(5, 15);
+            var updatedMouseState = MouseStateWithPosition(10, 20);
+            GivenControlsCanBeUpdated(_control);
+
+            GivenCurrentMouseState(initialMouseState);
+            _control.Update(new GameTime());
+            Assert.AreEqual(initialMouseState, _control.CurrentMouseStateDuringUpdate);
+
+            GivenCurrentMouseState(updatedMouseState);
+            _control.Update(new GameTime());
+            Assert.AreEqual(initialMouseState, _control.PreviousMouseStateDuringUpdate);
+            Assert.AreEqual(updatedMouseState, _control.CurrentMouseStateDuringUpdate);
+        }
+
+        [Test]
+        public void Update_UpdatesCurrentAndPreviousKeyState()
+        {
+            var initialKeyState = KeyStateWithKeys(Keys.A, Keys.B);
+            var updatedKeyState = KeyStateWithKeys(Keys.C, Keys.D);
+            GivenControlsCanBeUpdated(_control);
+
+            GivenCurrentKeyState(initialKeyState);
+            _control.Update(new GameTime());
+            Assert.AreEqual(initialKeyState, _control.CurrentKeyStateDuringUpdate);
+
+            GivenCurrentKeyState(updatedKeyState);
+            _control.Update(new GameTime());
+            Assert.AreEqual(initialKeyState, _control.PreviousKeyStateDuringUpdate);
+            Assert.AreEqual(updatedKeyState, _control.CurrentKeyStateDuringUpdate);
+        }
+
+        [Test]
         public void Draw_DoesNotDrawControl_IfControlIsNotVisible()
         {
             _control.Visible = false;
@@ -512,11 +548,41 @@ namespace XNAControls.Test.Controls
                 control.SetIsActive(false);
         }
 
+        private void GivenControlsCanBeUpdated(params FakeXNAControl[] controls)
+        {
+            GivenGameIsActive(controls);
+            foreach (var control in controls)
+                control.Visible = true;
+        }
+
+        private static void GivenCurrentMouseState(MouseState state)
+        {
+            var mouseAdapter = Mock.Of<IMouseAdapter>(x => x.State == state);
+            Singleton<IMouseAdapter>.Map(mouseAdapter);
+        }
+
+        private static void GivenCurrentKeyState(KeyboardState state)
+        {
+            var keyAdapter = Mock.Of<IKeyboardAdapter>(x => x.State == state);
+            Singleton<IKeyboardAdapter>.Map(keyAdapter);
+        }
+
         private FakeXNAControl CreateFakeControl()
         {
             var control = new FakeXNAControl();
             _createdControls.Add(control);
             return control;
+        }
+
+        private static MouseState MouseStateWithPosition(int x, int y)
+        {
+            return new MouseState(x, y, 0, ButtonState.Released, ButtonState.Released,
+                ButtonState.Released, ButtonState.Released, ButtonState.Released);
+        }
+
+        private static KeyboardState KeyStateWithKeys(params Keys[] keys)
+        {
+            return new KeyboardState(keys);
         }
     }
 }
