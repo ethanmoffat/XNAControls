@@ -17,7 +17,6 @@ namespace XNAControls.Test.Controls
     //todo: currently it is difficult to test the following
     // 1. Event invocation in default logic in OnUpdateControl
     // 2. Keeping the control within the bounds of the game window (see OnUpdateControl)
-    // 3. MouseOver and MouseOverPreviously properties
 
     [TestFixture]
     public class XNAControlTest
@@ -70,6 +69,51 @@ namespace XNAControls.Test.Controls
         {
             _control.DrawPosition = new Vector2(100, 50);
             Assert.AreEqual(new Rectangle(100, 50, 0, 0), _control.DrawArea);
+        }
+
+        [Test]
+        public void MouseOver_TrueWhenDrawAreaContainsMousePosition()
+        {
+            GivenCurrentMouseState(MouseStateWithPosition(8, 10));
+            GivenControlsCanBeUpdated(_control);
+
+            _control.DrawArea = new Rectangle(5, 5, 10, 10);
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(_control.MouseOverDuringUpdate);
+        }
+
+        [Test]
+        public void MouseOver_TrueWhenDrawAreaWithParentOffsetContainsContainsMousePosition()
+        {
+            GivenCurrentMouseState(MouseStateWithPosition(105, 103));
+
+            var parent = CreateFakeControl();
+            GivenControlsCanBeUpdated(_control, parent);
+
+            _control.SetParentControl(parent);
+            _control.DrawArea = new Rectangle(5, 5, 10, 10);
+            parent.DrawArea = new Rectangle(95, 95, 10, 10);
+
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(_control.MouseOverDuringUpdate);
+        }
+
+        [Test]
+        public void MouseOverPreviously_TrueWhenDrawAreaContainedPoint_InTheLastUpdateLoop()
+        {
+            GivenCurrentMouseState(MouseStateWithPosition(50, 50));
+            GivenControlsCanBeUpdated(_control);
+
+            _control.DrawArea = new Rectangle(45, 45, 10, 10);
+            _control.Update(new GameTime());
+
+            GivenCurrentMouseState(MouseStateWithPosition(40, 40));
+            _control.Update(new GameTime());
+
+            Assert.IsFalse(_control.MouseOverDuringUpdate);
+            Assert.IsTrue(_control.MouseOverPreviouslyDuringUpdate);
         }
 
         [Test]

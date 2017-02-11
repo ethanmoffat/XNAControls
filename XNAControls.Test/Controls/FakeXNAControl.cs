@@ -23,6 +23,8 @@ namespace XNAControls.Test.Controls
         public KeyboardState CurrentKeyStateDuringUpdate { get; private set; }
         public MouseState PreviousMouseStateDuringUpdate { get; private set; }
         public KeyboardState PreviousKeyStateDuringUpdate { get; private set; }
+        public bool MouseOverDuringUpdate { get; private set; }
+        public bool MouseOverPreviouslyDuringUpdate { get; private set; }
 
         internal bool IsDisposed
         {
@@ -46,6 +48,8 @@ namespace XNAControls.Test.Controls
             CurrentKeyStateDuringUpdate = CurrentKeyState;
             PreviousMouseStateDuringUpdate = PreviousMouseState;
             PreviousKeyStateDuringUpdate = PreviousKeyState;
+            MouseOverDuringUpdate = MouseOver;
+            MouseOverPreviouslyDuringUpdate = MouseOverPreviously;
 
             base.OnUpdateControl(gameTime);
         }
