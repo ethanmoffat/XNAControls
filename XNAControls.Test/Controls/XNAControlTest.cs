@@ -11,6 +11,12 @@ using XNAControls.Test.Helpers;
 
 namespace XNAControls.Test.Controls
 {
+    //todo: currently it is difficult to test the following
+    // 1. Event invocation in default logic in OnUpdateControl
+    // 2. Setting of current/previous mouse/keyboard state
+    // 3. Keeping the control within the bounds of the game window (see OnUpdateControl)
+    // 4. MouseOver and MouseOverPreviously properties
+
     [TestFixture]
     public class XNAControlTest
     {
@@ -48,6 +54,96 @@ namespace XNAControls.Test.Controls
         {
             GameRepository.SetGame(null);
             _gameManager.Dispose();
+        }
+
+        [Test]
+        public void DrawPosition_MatchesDrawArea()
+        {
+            _control.DrawArea = new Rectangle(50, 100, 200, 400);
+            Assert.AreEqual(new Vector2(50, 100), _control.DrawPosition);
+        }
+
+        [Test]
+        public void DrawArea_MatchesDrawPosition()
+        {
+            _control.DrawPosition = new Vector2(100, 50);
+            Assert.AreEqual(new Rectangle(100, 50, 0, 0), _control.DrawArea);
+        }
+
+        [Test]
+        public void DrawPositionWithParentOffset_OffsetsBasedOnParentDrawPosition()
+        {
+            var parent = CreateFakeControl();
+            parent.DrawPosition = new Vector2(100, 100);
+
+            _control.SetParentControl(parent);
+            _control.DrawPosition = new Vector2(100, 100);
+
+            Assert.AreEqual(new Vector2(200, 200), _control.DrawPositionWithParentOffset);
+        }
+
+        [Test]
+        public void DrawAreaWithParentOffset_OffsetsBasedOnParentDrawPosition()
+        {
+            var parent = CreateFakeControl();
+            parent.DrawPosition = new Vector2(100, 100);
+
+            _control.SetParentControl(parent);
+            _control.DrawArea = new Rectangle(100, 100, 200, 200);
+
+            Assert.AreEqual(new Rectangle(200, 200, 200, 200), _control.DrawAreaWithParentOffset);
+        }
+
+        [Test]
+        public void DrawPositionWithParentOffset_IsUpdated_WhenParentControlIsSet()
+        {
+            var parent = CreateFakeControl();
+            parent.DrawPosition = new Vector2(50, 50);
+
+            _control.DrawPosition = new Vector2(100, 100);
+            _control.SetParentControl(parent);
+
+            Assert.AreEqual(new Vector2(150, 150), _control.DrawPositionWithParentOffset);
+        }
+
+        [Test]
+        public void DrawAreaWithParentOffset_IsUpdated_WhenParentControlIsSet()
+        {
+            var parent = CreateFakeControl();
+            parent.DrawArea = new Rectangle(50, 50, 100, 100);
+
+            _control.DrawArea = new Rectangle(150, 150, 200, 200);
+            _control.SetParentControl(parent);
+
+            Assert.AreEqual(new Rectangle(200, 200, 200, 200), _control.DrawAreaWithParentOffset);
+        }
+
+        [Test]
+        public void TopParent_IsNull_WhenNoParent()
+        {
+            Assert.IsNull(_control.TopParent);
+        }
+
+        [Test]
+        public void TopParent_IsImmediateParent_WhenImmediateParentHasNoParent()
+        {
+            var parent = CreateFakeControl();
+            _control.SetParentControl(parent);
+            Assert.AreEqual(parent, _control.TopParent);
+        }
+
+        [Test]
+        public void TopParent_IsHighestParentInHierarchy_WhenImmediateParentHasParent()
+        {
+            var topParent = CreateFakeControl();
+            var nextParent = CreateFakeControl();
+            var parent = CreateFakeControl();
+
+            _control.SetParentControl(parent);
+            parent.SetParentControl(nextParent);
+            nextParent.SetParentControl(topParent);
+
+            Assert.AreEqual(topParent, _control.TopParent);
         }
 
         [Test]
