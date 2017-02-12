@@ -10,9 +10,10 @@ using Microsoft.Xna.Framework.Input;
 using Moq;
 using NUnit.Framework;
 using XNAControls.Adapters;
+using XNAControls.Test.Controls;
 using XNAControls.Test.Helpers;
 
-namespace XNAControls.Test.Controls
+namespace XNAControls.Test
 {
     //todo: currently it is difficult to test the following
     // 1. Keeping the control within the bounds of the game window (see OnUpdateControl)

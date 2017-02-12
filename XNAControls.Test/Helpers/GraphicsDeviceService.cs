@@ -10,14 +10,16 @@
 //File modified by Ethan Moffat for use in testing
 
 #region Using Statements
+
 using System;
 using System.Threading;
 using Microsoft.Xna.Framework.Graphics;
+
 #endregion
 
 #pragma warning disable 67
 
-namespace XNAControls.Test
+namespace XNAControls.Test.Helpers
 {
     class GraphicsDeviceService : IGraphicsDeviceService
     {
