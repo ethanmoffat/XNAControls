@@ -2,21 +2,21 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
     <metadata>
         <id>XNAControls</id>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
         <authors>Ethan Moffat</authors>
         <owners>ethanmoffat</owners>
         <licenseUrl>https://opensource.org/licenses/GPL-2.0</licenseUrl>
         <projectUrl>https://www.github.com/ethanmoffat/XNAControls</projectUrl>
         <!--todo: <iconUrl></iconUrl> -->
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <releaseNotes>Initial release. Provides library of UI controls usable with MonoGame/XNA.</releaseNotes>
+        <releaseNotes>Update MonoGame reference to DestopGL for better cross-platform support</releaseNotes>
         <description>Cross-platform UI control library for MonoGame/XNA.</description>
         <copyright>Copyright ©2016-2017 Ethan Moffat</copyright>
         <tags>utility library UI cross-platform controls XNA MonoGame</tags>        
         <references>
         </references>
         <dependencies>
-            <dependency id="Monogame.Framework.WindowsDX" version="3.5.1.1679" />
+            <dependency id="Monogame.Framework.DesktopGL" version="3.6.0.1625" />
         </dependencies>
     </metadata>
 
