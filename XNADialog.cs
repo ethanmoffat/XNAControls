@@ -29,7 +29,7 @@ namespace XNAControls
         /// </summary>
         protected Texture2D BackgroundTexture
         {
-            get { return _backgroundTexture; }
+            get => _backgroundTexture;
             set
             {
                 _backgroundTexture = value;

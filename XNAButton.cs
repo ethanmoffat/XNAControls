@@ -41,16 +41,11 @@ namespace XNAControls
         /// <summary>
         /// Gets the click area of the control offset based on the control and all parent's X,Y coordinates
         /// </summary>
-        protected Rectangle ClickAreaWithOffset
-        {
-            get
-            {
-                return new Rectangle(ClickArea.X + DrawAreaWithParentOffset.X,
-                                     ClickArea.Y + DrawAreaWithParentOffset.Y,
-                                     ClickArea.Width,
-                                     ClickArea.Height);
-            }
-        }
+        protected Rectangle ClickAreaWithOffset =>
+            new Rectangle(ClickArea.X + DrawAreaWithParentOffset.X,
+                        ClickArea.Y + DrawAreaWithParentOffset.Y,
+                          ClickArea.Width,
+                          ClickArea.Height);
 
         /// <summary>
         /// Construct a button where the textures for over/out are a part of a sprite sheet.
@@ -61,13 +56,11 @@ namespace XNAControls
         /// <param name="overSource">Source within the sprite sheet that contains the texture to draw on MouseOver</param>
         public XNAButton(Texture2D sheet, Vector2 location, Rectangle outSource, Rectangle overSource)
         {
-            if (sheet == null)
-                throw new ArgumentNullException("sheet");
             if (outSource == null)
-                throw new ArgumentNullException("outSource");
+                throw new ArgumentNullException(nameof(outSource));
             if (overSource == null)
-                throw new ArgumentNullException("outSource");
-            _sheet = sheet;
+                throw new ArgumentNullException(nameof(outSource));
+            _sheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
             _outSource = outSource;
             _overSource = overSource;
 

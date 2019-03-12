@@ -30,14 +30,11 @@ namespace XNAControls
 
         protected bool ShouldClickDrag { get; private set; }
 
-        private MouseState _currentMouseState, _previousMouseState;
-        private KeyboardState _currentKeyState, _previousKeyState;
+        protected MouseState CurrentMouseState { get; private set; }
+        protected MouseState PreviousMouseState { get; private set; }
 
-        protected MouseState CurrentMouseState => _currentMouseState;
-        protected MouseState PreviousMouseState => _previousMouseState;
-
-        protected KeyboardState CurrentKeyState => _currentKeyState;
-        protected KeyboardState PreviousKeyState => _previousKeyState;
+        protected KeyboardState CurrentKeyState { get; private set; }
+        protected KeyboardState PreviousKeyState { get; private set; }
 
         /// <summary>
         /// Returns true if the default game is active (i.e. has focus), false otherwise
@@ -59,8 +56,8 @@ namespace XNAControls
         /// </summary>
         public virtual Vector2 DrawPosition
         {
-            get { return new Vector2(DrawArea.X, DrawArea.Y); }
-            set { DrawArea = new Rectangle((int) value.X, (int) value.Y, DrawArea.Width, DrawArea.Height); }
+            get => new Vector2(DrawArea.X, DrawArea.Y);
+            set => DrawArea = new Rectangle((int) value.X, (int) value.Y, DrawArea.Width, DrawArea.Height);
         }
 
         /// <summary>
@@ -80,8 +77,8 @@ namespace XNAControls
         {
             get
             {
-                var parentLocationX = ImmediateParent == null ? 0 : ImmediateParent.DrawAreaWithParentOffset.X;
-                var parentLocationY = ImmediateParent == null ? 0 : ImmediateParent.DrawAreaWithParentOffset.Y;
+                var parentLocationX = ImmediateParent?.DrawAreaWithParentOffset.X ?? 0;
+                var parentLocationY = ImmediateParent?.DrawAreaWithParentOffset.Y ?? 0;
 
                 return new Rectangle(parentLocationX + DrawArea.X,
                     parentLocationY + DrawArea.Y,
@@ -138,8 +135,8 @@ namespace XNAControls
             _children = new List<IXNAControl>();
 
             _spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-            _currentKeyState = _previousKeyState = Singleton<IKeyboardAdapter>.Instance.State;
-            _currentMouseState = _previousMouseState = Singleton<IMouseAdapter>.Instance.State;
+            CurrentKeyState = PreviousKeyState = Singleton<IKeyboardAdapter>.Instance.State;
+            CurrentMouseState = PreviousMouseState = Singleton<IMouseAdapter>.Instance.State;
 
             ShouldClickDrag = true;
         }
@@ -172,7 +169,7 @@ namespace XNAControls
                 SetControlUnparented();
 
             ImmediateParent = parent;
-            ((List<IXNAControl>) ImmediateParent.ChildControls).Add(this);
+            ((XNAControl)ImmediateParent)._children.Add(this);
             RemoveFromGameComponents(this);
 
             UpdateDrawOrderBasedOnParent(ImmediateParent, this);
@@ -187,7 +184,7 @@ namespace XNAControls
         {
             if (ImmediateParent == null) return;
 
-            ((List<IXNAControl>) ImmediateParent.ChildControls).Remove(this);
+            ((XNAControl)ImmediateParent)._children.Remove(this);
             ImmediateParent = null;
         }
 
@@ -228,13 +225,13 @@ namespace XNAControls
         {
             if (!ShouldUpdate()) return;
 
-            _currentKeyState = Singleton<IKeyboardAdapter>.Instance.State;
-            _currentMouseState = Singleton<IMouseAdapter>.Instance.State;
+            CurrentKeyState = Singleton<IKeyboardAdapter>.Instance.State;
+            CurrentMouseState = Singleton<IMouseAdapter>.Instance.State;
 
             OnUpdateControl(gameTime);
 
-            _previousKeyState = _currentKeyState;
-            _previousMouseState = _currentMouseState;
+            PreviousKeyState = CurrentKeyState;
+            PreviousMouseState = CurrentMouseState;
 
             base.Update(gameTime);
         }
