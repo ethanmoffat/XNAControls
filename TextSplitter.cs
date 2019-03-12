@@ -29,7 +29,7 @@ namespace XNAControls
         /// <summary>
         /// Gets a value determining whether or not the text is long enough to require processing
         /// </summary>
-        public bool NeedsProcessing { get { return _textIsOverflowFunc(Text); } }
+        public bool NeedsProcessing => _textIsOverflowFunc(Text);
 
         private SpriteFont _spriteFont;
 

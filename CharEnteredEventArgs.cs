@@ -10,7 +10,7 @@ namespace XNAControls
 
     internal class CharEnteredEventArgs : EventArgs
     {
-        internal char Character { get; private set; }
+        internal char Character { get; }
 
         internal CharEnteredEventArgs(char character)
         {

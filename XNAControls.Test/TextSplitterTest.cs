@@ -27,7 +27,7 @@ namespace XNAControls.Test
         [OneTimeTearDown]
         public static void ClassCleanup()
         {
-            _gameManager.Dispose();
+            _gameManager?.Dispose();
         }
 
         [SetUp]

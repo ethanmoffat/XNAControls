@@ -11,11 +11,12 @@ namespace XNAControls
 {
     public class XNAButton : XNAControl, IXNAButton
     {
-        private readonly Texture2D _out;
-        private readonly Texture2D _over;
+        private readonly Texture2D _sheet;
+        private readonly Rectangle _outSource;
+        private readonly Rectangle _overSource;
 
+        private Rectangle _sourceRect;
         private bool _dragging;
-        private Texture2D _drawTexture;
 
         /// <summary>
         /// Invoked when the button control is clicked once
@@ -40,16 +41,11 @@ namespace XNAControls
         /// <summary>
         /// Gets the click area of the control offset based on the control and all parent's X,Y coordinates
         /// </summary>
-        protected Rectangle ClickAreaWithOffset
-        {
-            get
-            {
-                return new Rectangle(ClickArea.X + DrawAreaWithParentOffset.X,
-                                     ClickArea.Y + DrawAreaWithParentOffset.Y,
-                                     ClickArea.Width,
-                                     ClickArea.Height);
-            }
-        }
+        protected Rectangle ClickAreaWithOffset =>
+            new Rectangle(ClickArea.X + DrawAreaWithParentOffset.X,
+                        ClickArea.Y + DrawAreaWithParentOffset.Y,
+                          ClickArea.Width,
+                          ClickArea.Height);
 
         /// <summary>
         /// Construct a button where the textures for over/out are a part of a sprite sheet.
@@ -60,28 +56,19 @@ namespace XNAControls
         /// <param name="overSource">Source within the sprite sheet that contains the texture to draw on MouseOver</param>
         public XNAButton(Texture2D sheet, Vector2 location, Rectangle outSource, Rectangle overSource)
         {
-            if (sheet == null)
-                throw new ArgumentNullException("sheet");
             if (outSource == null)
-                throw new ArgumentNullException("outSource");
+                throw new ArgumentNullException(nameof(outSource));
             if (overSource == null)
-                throw new ArgumentNullException("outSource");
+                throw new ArgumentNullException(nameof(outSource));
+            _sheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
+            _outSource = outSource;
+            _overSource = overSource;
 
             var largerArea = outSource.Size.X*outSource.Size.Y >= overSource.Size.X*overSource.Size.Y
                 ? outSource
                 : overSource;
 
-            var outData = new Color[outSource.Width * outSource.Height];
-            _out = new Texture2D(sheet.GraphicsDevice, outSource.Width, outSource.Height);
-            sheet.GetData(0, outSource, outData, 0, outData.Length);
-            _out.SetData(outData);
-
-            _drawTexture = _out;
-
-            var overData = new Color[overSource.Width * overSource.Height];
-            _over = new Texture2D(sheet.GraphicsDevice, overSource.Width, overSource.Height);
-            sheet.GetData(0, overSource, overData, 0, overData.Length);
-            _over.SetData(overData);
+            _sourceRect = outSource;
 
             DrawArea = new Rectangle((int)location.X, (int)location.Y, largerArea.Width, largerArea.Height);
             ClickArea = new Rectangle(0, 0, DrawArea.Width, DrawArea.Height);
@@ -110,11 +97,11 @@ namespace XNAControls
                 OnClickDrag(this, EventArgs.Empty);
 
             if (!MouseOver && FlashSpeed != null && (int)gameTime.TotalGameTime.TotalMilliseconds % FlashSpeed == 0)
-                _drawTexture = _drawTexture == _over ? _out : _over;
+                _sourceRect = _sourceRect.Equals(_overSource) ? _outSource : _overSource;
             else if (MouseOver)
-                _drawTexture = _over;
+                _sourceRect = _overSource;
             else if (FlashSpeed == null)
-                _drawTexture = _out;
+                _sourceRect = _outSource;
 
             base.OnUpdateControl(gameTime);
         }
@@ -123,27 +110,12 @@ namespace XNAControls
         {
             _spriteBatch.Begin();
 
-            if (_drawTexture != null)
-                _spriteBatch.Draw(_drawTexture, DrawAreaWithParentOffset, Color.White);
+            if (_sheet != null)
+                _spriteBatch.Draw(_sheet, DrawAreaWithParentOffset, _sourceRect, Color.White);
 
             _spriteBatch.End();
 
             base.OnDrawControl(gameTime);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            PrepareForDisposal();
-
-            if (disposing)
-            {
-                if (_over != null)
-                    _over.Dispose();
-                if (_out != null)
-                    _out.Dispose();
-            }
-
-            base.Dispose(disposing);
         }
     }
 

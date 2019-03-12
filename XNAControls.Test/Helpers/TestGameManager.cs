@@ -4,7 +4,6 @@
 
 using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace XNAControls.Test.Helpers
 {
@@ -17,14 +16,7 @@ namespace XNAControls.Test.Helpers
         {
             Game = new Game();
             GraphicsDeviceManager = new GraphicsDeviceManager(Game);
-
-            //remove the default graphics device service and inject our own
-            Game.Services.RemoveService(typeof(IGraphicsDeviceService));
-
-            var gds = GraphicsDeviceService.AddRef(Game.Window.Handle,
-                                                   Game.Window.ClientBounds.Width,
-                                                   Game.Window.ClientBounds.Height);
-            Game.Services.AddService(typeof(IGraphicsDeviceService), gds);
+            Game.RunOneFrame(); //creates necessary graphics device so tests will pass
         }
 
         public void Dispose()

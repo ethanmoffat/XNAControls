@@ -20,7 +20,7 @@ namespace XNAControls
         private IKeyboardSubscriber _subscriber;
         public IKeyboardSubscriber Subscriber
         {
-            get { return _subscriber; }
+            get => _subscriber;
             set
             {
                 SetSubscriberSelected(false);

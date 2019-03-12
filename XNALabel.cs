@@ -79,7 +79,7 @@ namespace XNAControls
         /// </summary>
         public int? RowSpacing
         {
-            get { return _font.LineSpacing; }
+            get => _font.LineSpacing;
             set
             {
                 if (!value.HasValue)
@@ -104,23 +104,12 @@ namespace XNAControls
         /// <summary>
         /// Get the actual height of the text as measured by the font
         /// </summary>
-        public float ActualHeight
-        {
-            get
-            {
-                return _drawStrings.Count <= 1
-                    ? _font.MeasureString(Text).Y
-                    : _drawStrings.Count*_font.LineSpacing;
-            }
-        }
+        public float ActualHeight =>
+            _drawStrings.Count <= 1
+                ? _font.MeasureString(Text).Y
+                : _drawStrings.Count*_font.LineSpacing;
 
-        internal Vector2 AdjustedDrawPosition
-        {
-            get
-            {
-                return DrawPositionWithParentOffset + (AutoSize ? Vector2.Zero : _alignmentOffset);
-            }
-        }
+        internal Vector2 AdjustedDrawPosition => DrawPositionWithParentOffset + (AutoSize ? Vector2.Zero : _alignmentOffset);
 
         /// <summary>
         /// Turn underlining on or off

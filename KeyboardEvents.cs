@@ -20,10 +20,7 @@ namespace XNAControls
 
         private void GameWindow_TextInput(object sender, TextInputEventArgs e)
         {
-            if (CharEntered != null)
-            {
-                CharEntered(null, new CharEnteredEventArgs(e.Character));
-            }
+            CharEntered?.Invoke(null, new CharEnteredEventArgs(e.Character));
         }
 
         ~KeyboardEvents()

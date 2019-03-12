@@ -28,7 +28,7 @@ namespace XNAControls
 
         public override Rectangle DrawArea
         {
-            get { return _drawArea; }
+            get => _drawArea;
             set
             {
                 _drawArea = value;
@@ -47,10 +47,7 @@ namespace XNAControls
 
         public string Text
         {
-            get
-            {
-                return _actualText;
-            }
+            get => _actualText;
             set
             {
                 if (MaxChars > 0 && value.Length > MaxChars)
@@ -67,25 +64,25 @@ namespace XNAControls
 
         public string DefaultText
         {
-            get { return _defaultTextLabel.Text; }
-            set { _defaultTextLabel.Text = value; }
+            get => _defaultTextLabel.Text;
+            set => _defaultTextLabel.Text = value;
         }
 
         public Color TextColor
         {
-            get { return _textLabel.ForeColor; }
-            set { _textLabel.ForeColor = value; }
+            get => _textLabel.ForeColor;
+            set => _textLabel.ForeColor = value;
         }
 
         public Color DefaultTextColor
         {
-            get { return _defaultTextLabel.ForeColor; }
-            set { _defaultTextLabel.ForeColor = value; }
+            get => _defaultTextLabel.ForeColor;
+            set => _defaultTextLabel.ForeColor = value;
         }
 
         public LabelAlignment TextAlignment
         {
-            get { return _textLabel.TextAlign; }
+            get => _textLabel.TextAlign;
             set
             {
                 _textLabel.TextAlign = value;
@@ -102,7 +99,7 @@ namespace XNAControls
 
         public bool Selected
         {
-            get { return _selected; }
+            get => _selected;
             set
             {
                 bool oldSel = _selected;
@@ -241,12 +238,10 @@ namespace XNAControls
                         Text = Text.Substring(0, Text.Length - 1);
                     break;
                 case KeyboardDispatcher.CHAR_RETURNKEY_CODE:
-                    if (OnEnterPressed != null)
-                        OnEnterPressed(this, new EventArgs());
+                    OnEnterPressed?.Invoke(this, new EventArgs());
                     break;
                 case KeyboardDispatcher.CHAR_TAB_CODE:
-                    if (OnTabPressed != null)
-                        OnTabPressed(this, new EventArgs());
+                    OnTabPressed?.Invoke(this, new EventArgs());
                     break;
             }
         }
