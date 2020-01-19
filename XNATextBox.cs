@@ -138,6 +138,8 @@ namespace XNAControls
             };
 
             DrawArea = area;
+
+            _actualText = "";
         }
 
         public override void Initialize()
