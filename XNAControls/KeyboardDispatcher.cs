@@ -3,14 +3,12 @@
 // For additional details, see the LICENSE file
 
 using System;
-using System.Threading;
 using Microsoft.Xna.Framework;
 
 namespace XNAControls
 {
     public class KeyboardDispatcher : IDisposable
     {
-        private const char CHAR_PASTE_CODE = (char)0x16;
         internal const char CHAR_RETURNKEY_CODE = '\r';
         internal const char CHAR_BACKSPACE_CODE = '\b';
         internal const char CHAR_TAB_CODE = '\t';
@@ -48,41 +46,13 @@ namespace XNAControls
 
             if (char.IsControl(e.Character))
             {
-                if (e.Character == CHAR_PASTE_CODE)
-                {
-                    GetClipboardInfoFromThread();
-                    _subscriber.ReceiveTextInput(_pasteResult);
-                }
-                else
-                {
-                    _subscriber.ReceiveCommandInput(e.Character);
-                }
+                _subscriber.ReceiveCommandInput(e.Character);
             }
             else
             {
                 _subscriber.ReceiveTextInput(e.Character);
             }
         }
-
-        #region Clipboard Handling
-
-        private string _pasteResult = "";
-
-        private void GetClipboardInfoFromThread()
-        {
-            var thread = new Thread(SetPasteResult);
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-            thread.Join();
-        }
-
-        [STAThread]
-        void SetPasteResult()
-        {
-            _pasteResult = System.Windows.Forms.Clipboard.ContainsText() ? System.Windows.Forms.Clipboard.GetText() : "";
-        }
-
-        #endregion
 
         #region IDisposable
 
