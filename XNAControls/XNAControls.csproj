@@ -2,6 +2,19 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
+    <AssemblyName>XNAControls</AssemblyName>
+    <RootNamespace>XNAControls</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/ethanmoffat/XNAControls</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/ethanmoffat/XNAControls</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>utility library UI cross-platform controls XNA MonoGame</PackageTags>
+    <Copyright>Copyright © 2016-2022 Ethan Moffat</Copyright>
+    <Description>Cross-platform UI control library for MonoGame/XNA.</Description>
+    <Version>1.2.3</Version>
+    <AssemblyVersion>1.2.3</AssemblyVersion>
+    <PackageVersion>1.2.3</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641">
