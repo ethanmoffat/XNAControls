@@ -23,26 +23,30 @@ steps:
   inputs:
     version: 6.0.x
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
   inputs:
     command: 'restore'
     projects: '$(Build.SourcesDirectory)\XNAControls.sln'
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
   inputs:
     command: 'build'
     projects: '$(Build.SourcesDirectory)\XNAControls.sln'
     arguments: '--configuration $(buildConfiguration)'
     versioningScheme: byBuildNumber
 - task: DotNetCoreCLI@2
-  displayName: 'Run tests - disabled (not supported on hosted agent, need graphics device)'
+  displayName: 'dotnet test - disabled (not supported on hosted agent, need graphics device)'
   condition: false
   inputs:
     command: 'test'
     projects: '$(Build.SourcesDirectory)\XNAControls.sln'
 - task: CopyFiles@2
+  displayName: 'Copy build to artifact staging directory'
   inputs:
     SourceFolder: $(Build.SourcesDirectory)\XNAControls\bin\$(buildConfiguration)
     TargetFolder: $(Build.ArtifactStagingDirectory)
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish build artifacts'
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
