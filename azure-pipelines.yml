@@ -33,6 +33,8 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
     versioningScheme: byBuildNumber
 - task: DotNetCoreCLI@2
+  displayName: 'Run tests - disabled (not supported on hosted agent, need graphics device)'
+  condition: false
   inputs:
     command: 'test'
     projects: '$(Build.SourcesDirectory)\XNAControls.sln'
