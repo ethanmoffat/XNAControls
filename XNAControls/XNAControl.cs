@@ -348,6 +348,9 @@ namespace XNAControls
 
         private void RemoveFromGameComponents(IXNAControl control)
         {
+            if (Game.Components == null)
+                return;
+
             if (Game.Components.Contains(control))
                 Game.Components.Remove(control);
         }
