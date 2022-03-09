@@ -76,6 +76,12 @@ namespace XNAControls
         event EventHandler OnMouseLeave;
 
         /// <summary>
+        /// True to force the control to stay within the client's window bounds, false otherwise.
+        /// Default: true
+        /// </summary>
+        bool KeepInClientWindowBounds { get; set; }
+
+        /// <summary>
         /// Add this control to the components of the default game. 
         /// Prerequisite: game must be registered using GameRepository.SetGame(). 
         /// NOTE: Adding to the game's components automatically calls Initialize()

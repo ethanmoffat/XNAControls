@@ -115,6 +115,12 @@ namespace XNAControls
         public IReadOnlyList<IXNAControl> ChildControls => _children;
 
         /// <summary>
+        /// True to force the control to stay within the client's window bounds, false otherwise.
+        /// Default: true
+        /// </summary>
+        public bool KeepInClientWindowBounds { get; set; } = true;
+
+        /// <summary>
         /// Event that is invoked when the mouse is over the control
         /// </summary>
         public event EventHandler OnMouseOver = delegate { };
@@ -266,7 +272,7 @@ namespace XNAControls
             foreach (var child in _children)
                 child.Update(gameTime);
 
-            if (TopParent == null && Game.Window != null)
+            if (KeepInClientWindowBounds && TopParent == null && Game.Window != null)
             {
                 var clientBounds = Game.Window.ClientBounds;
                 if (clientBounds.Width > 0 && clientBounds.Height > 0)
