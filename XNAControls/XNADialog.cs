@@ -18,7 +18,12 @@ namespace XNAControls
 
     public abstract class XNADialog : XNAControl, IXNADialog
     {
-        private const int DIALOG_LAYER_OFFSET = 30;
+        /// <summary>
+        /// The base draw order to use for dialogs in the dialog stack.
+        /// Each subsequent dialog will be displayed with a greater draw order so the most recent dialog is always shown on top.
+        /// Note that setting the DrawOrder property of a dialog manually will have no effect.
+        /// </summary>
+        public static int DialogLayerOffset { get; set; } = 30;
 
         private readonly TaskCompletionSource<XNADialogResult> _showTaskCompletionSource;
 
@@ -57,7 +62,7 @@ namespace XNAControls
         public virtual void BringToTop()
         {
             var dialogsCount = Singleton<DialogRepository>.Instance.OpenDialogs.Count;
-            SetDrawOrder((dialogsCount+1) * 5 + DIALOG_LAYER_OFFSET);
+            SetDrawOrder((dialogsCount+1) * 5 + DialogLayerOffset);
         }
 
         /// <summary>
