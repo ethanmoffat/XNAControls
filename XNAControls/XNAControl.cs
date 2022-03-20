@@ -322,9 +322,8 @@ namespace XNAControls
 
             if (dialogStack.Count <= 0 || this == dialogStack.Peek()) return true;
 
-            //todo: ignore dialogs? old logic:
-            //if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
-            //    return true;
+            // replacement for IgnoreDialogs: if the dialog is not modal, update
+            if (!((XNADialog)dialogStack.Peek()).Modal) return true;
 
             //return false if:
             //dialog is open and this control is a top parent OR

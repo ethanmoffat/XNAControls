@@ -25,6 +25,8 @@ namespace XNAControls
         /// </summary>
         public static int DialogLayerOffset { get; set; } = 30;
 
+        internal bool Modal { get; private set; }
+
         private readonly TaskCompletionSource<XNADialogResult> _showTaskCompletionSource;
 
         private Texture2D _backgroundTexture;
@@ -84,22 +86,21 @@ namespace XNAControls
             //Run the ShowDialogAsync() method on a Threadpool Thread
             //Use ConfigureAwait(false) to ignore the captured context when starting the async operation
             //See http://blog.stephencleary.com/2012/02/async-and-await.html for more info
-            Task.Run(async () => await ShowDialogAsync().ConfigureAwait(false));
+            Task.Run(async () => await ShowDialogAsync(modal: true).ConfigureAwait(false));
         }
 
         /// <summary>
         /// Show the modal dialog asynchronously and do processing until the user makes a choice
         /// </summary>
         /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
-        public async Task<XNADialogResult> ShowDialogAsync()
+        public Task<XNADialogResult> ShowDialogAsync()
         {
-            AddControlToDefaultGame();
-            BringToTop();
+            return ShowDialogAsync(modal: true);
+        }
 
-            var result = await _showTaskCompletionSource.Task;
-
-            Dispose();
-            return result;
+        public void Show()
+        {
+            Task.Run(async () => await ShowDialogAsync(modal: false).ConfigureAwait(false));
         }
 
         /// <summary>
@@ -143,6 +144,19 @@ namespace XNAControls
             Singleton<DialogRepository>.Instance.OpenDialogs.Pop();
             _showTaskCompletionSource.SetResult(result);
         }
+
+        private async Task<XNADialogResult> ShowDialogAsync(bool modal)
+        {
+            Modal = modal;
+
+            AddControlToDefaultGame();
+            BringToTop();
+
+            var result = await _showTaskCompletionSource.Task;
+
+            Dispose();
+            return result;
+        }
     }
 
     public interface IXNADialog : IXNAControl
@@ -167,5 +181,10 @@ namespace XNAControls
         /// </summary>
         /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
         Task<XNADialogResult> ShowDialogAsync();
+
+        /// <summary>
+        /// Show the dialog as modeless (does not block updating of other controls)
+        /// </summary>
+        void Show();
     }
 }
