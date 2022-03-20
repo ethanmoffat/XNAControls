@@ -318,7 +318,7 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
-            if (!_hasUpdated) return (_hasUpdated = true);
+            if (!_hasUpdated && !_disposed) return (_hasUpdated = true);
 
             if (!GameIsActive || !Visible || _disposed) return false;
 

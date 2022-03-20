@@ -391,6 +391,8 @@ namespace XNAControls.Test
             GivenGameIsInactive(_control);
 
             _control.Update(new GameTime());
+            _control.ResetUpdated();
+            _control.Update(new GameTime());
 
             Assert.IsFalse(_control.Updated);
         }
@@ -401,6 +403,8 @@ namespace XNAControls.Test
             GivenGameIsActive(_control);
             _control.Visible = false;
 
+            _control.Update(new GameTime());
+            _control.ResetUpdated();
             _control.Update(new GameTime());
 
             Assert.IsFalse(_control.Updated);
