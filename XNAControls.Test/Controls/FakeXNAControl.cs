@@ -40,6 +40,11 @@ namespace XNAControls.Test.Controls
             _isActive = value;
         }
 
+        internal void ResetUpdated()
+        {
+            Updated = false;
+        }
+
         protected override void OnUpdateControl(GameTime gameTime)
         {
             Updated = true;

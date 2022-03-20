@@ -28,6 +28,8 @@ namespace XNAControls
 
         private bool _disposed;
 
+        private bool _hasUpdated;
+
         protected bool ShouldClickDrag { get; private set; }
 
         protected MouseState CurrentMouseState { get; private set; }
@@ -316,15 +318,16 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
+            if (!_hasUpdated && !_disposed) return (_hasUpdated = true);
+
             if (!GameIsActive || !Visible || _disposed) return false;
 
             var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
 
             if (dialogStack.Count <= 0 || this == dialogStack.Peek()) return true;
 
-            //todo: ignore dialogs? old logic:
-            //if (Visible && Dialogs.Count > 0 && IgnoreDialogs.Contains(Dialogs.Peek().GetType()))
-            //    return true;
+            // replacement for IgnoreDialogs: if the dialog is not modal, update
+            if (!dialogStack.Peek().Modal) return true;
 
             //return false if:
             //dialog is open and this control is a top parent OR
