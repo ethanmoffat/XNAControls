@@ -28,6 +28,8 @@ namespace XNAControls
 
         private bool _disposed;
 
+        private bool _hasUpdated;
+
         protected bool ShouldClickDrag { get; private set; }
 
         protected MouseState CurrentMouseState { get; private set; }
@@ -316,6 +318,8 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
+            if (!_hasUpdated) return (_hasUpdated = true);
+
             if (!GameIsActive || !Visible || _disposed) return false;
 
             var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
