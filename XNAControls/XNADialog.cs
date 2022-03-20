@@ -25,7 +25,9 @@ namespace XNAControls
         /// </summary>
         public static int DialogLayerOffset { get; set; } = 30;
 
-        internal bool Modal { get; private set; }
+        private bool _modal;
+
+        bool IXNADialog.Modal => _modal;
 
         private readonly TaskCompletionSource<XNADialogResult> _showTaskCompletionSource;
 
@@ -147,7 +149,7 @@ namespace XNAControls
 
         private async Task<XNADialogResult> ShowDialogAsync(bool modal)
         {
-            Modal = modal;
+            _modal = modal;
 
             AddControlToDefaultGame();
             BringToTop();
@@ -161,6 +163,8 @@ namespace XNAControls
 
     public interface IXNADialog : IXNAControl
     {
+        internal bool Modal { get; }
+
         /// <summary>
         /// Adjust the draw order of the dialog such that it is brought to the top of the draw order
         /// </summary>
