@@ -2,6 +2,7 @@
 // This file is subject to the GPL v2 License
 // For additional details, see the LICENSE file
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,6 +17,18 @@ namespace XNAControls
         NO_BUTTON_PRESSED
     }
 
+    public class DialogClosingEventArgs : EventArgs
+    {
+        public XNADialogResult Result { get; }
+
+        public bool Cancel { get; set; }
+
+        public DialogClosingEventArgs(XNADialogResult result)
+        {
+            Result = result;
+        }
+    }
+
     public abstract class XNADialog : XNAControl, IXNADialog
     {
         /// <summary>
@@ -27,11 +40,17 @@ namespace XNAControls
 
         private bool _modal;
 
-        bool IXNADialog.Modal => _modal;
-
         private readonly TaskCompletionSource<XNADialogResult> _showTaskCompletionSource;
 
         private Texture2D _backgroundTexture;
+
+        bool IXNADialog.Modal => _modal;
+
+        /// <inheritdoc />
+        public event EventHandler<DialogClosingEventArgs> DialogClosing;
+
+        /// <inheritdoc />
+        public event EventHandler DialogClosed;
 
         /// <summary>
         /// The background texture of the dialog. Setting the background texture automatically sets the dialog size
@@ -51,27 +70,21 @@ namespace XNAControls
             _showTaskCompletionSource = new TaskCompletionSource<XNADialogResult>();
         }
 
-        /// <summary>
-        /// Add this dialog to tracked OpenDialogs
-        /// </summary>
+        /// <inheritdoc />
         public override void Initialize()
         {
             Singleton<DialogRepository>.Instance.OpenDialogs.Push(this);
             base.Initialize();
         }
 
-        /// <summary>
-        /// Adjust the draw order of the dialog such that it is brought to the top of the draw order
-        /// </summary>
+        /// <inheritdoc />
         public virtual void BringToTop()
         {
             var dialogsCount = Singleton<DialogRepository>.Instance.OpenDialogs.Count;
             SetDrawOrder((dialogsCount+1) * 5 + DialogLayerOffset);
         }
 
-        /// <summary>
-        /// Center the dialog in the Game's default graphics device
-        /// </summary>
+        /// <inheritdoc />
         public virtual void CenterInGameView()
         {
             var viewport = Game.GraphicsDevice.Viewport;
@@ -80,9 +93,7 @@ namespace XNAControls
                                        viewport.Height/2 - BackgroundTexture.Height/2);
         }
 
-        /// <summary>
-        /// Show the modal dialog and do processing until the dialog is closed
-        /// </summary>
+        /// <inheritdoc />
         public void ShowDialog()
         {
             //Run the ShowDialogAsync() method on a Threadpool Thread
@@ -91,15 +102,13 @@ namespace XNAControls
             Task.Run(async () => await ShowDialogAsync(modal: true).ConfigureAwait(false));
         }
 
-        /// <summary>
-        /// Show the modal dialog asynchronously and do processing until the user makes a choice
-        /// </summary>
-        /// <returns>Result of the dialog based on user selection (OK or Cancel)</returns>
+        /// <inheritdoc />
         public Task<XNADialogResult> ShowDialogAsync()
         {
             return ShowDialogAsync(modal: true);
         }
 
+        /// <inheritdoc />
         public void Show()
         {
             Task.Run(async () => await ShowDialogAsync(modal: false).ConfigureAwait(false));
@@ -141,10 +150,18 @@ namespace XNAControls
         /// Close the dialog with the specified result
         /// </summary>
         /// <param name="result">Result to return from the Show() call</param>
-        protected void Close(XNADialogResult result)
+        protected virtual void Close(XNADialogResult result)
         {
-            Singleton<DialogRepository>.Instance.OpenDialogs.Pop();
-            _showTaskCompletionSource.SetResult(result);
+            var eventArgs = new DialogClosingEventArgs(result);
+            DialogClosing?.Invoke(this, eventArgs);
+
+            if (!eventArgs.Cancel)
+            {
+                Singleton<DialogRepository>.Instance.OpenDialogs.Pop();
+                _showTaskCompletionSource.SetResult(result);
+
+                DialogClosed?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private async Task<XNADialogResult> ShowDialogAsync(bool modal)
@@ -164,6 +181,16 @@ namespace XNAControls
     public interface IXNADialog : IXNAControl
     {
         internal bool Modal { get; }
+
+        /// <summary>
+        /// Fired when the dialog is about to be closed
+        /// </summary>
+        event EventHandler<DialogClosingEventArgs> DialogClosing;
+
+        /// <summary>
+        /// Fired when the dialog has been closed
+        /// </summary>
+        event EventHandler DialogClosed;
 
         /// <summary>
         /// Adjust the draw order of the dialog such that it is brought to the top of the draw order
