@@ -271,7 +271,7 @@ namespace XNAControls
             else if (!MouseOver && MouseOverPreviously)
                 OnMouseLeave(this, EventArgs.Empty);
 
-            foreach (var child in _children)
+            foreach (var child in _children.OrderBy(x => x.UpdateOrder))
                 child.Update(gameTime);
 
             if (KeepInClientWindowBounds && TopParent == null && Game.Window != null)
@@ -304,7 +304,7 @@ namespace XNAControls
         /// </summary>
         protected virtual void OnDrawControl(GameTime gameTime)
         {
-            foreach (var child in _children)
+            foreach (var child in _children.OrderBy(x => x.DrawOrder))
                 child.Draw(gameTime);
         }
 
