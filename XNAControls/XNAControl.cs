@@ -208,6 +208,12 @@ namespace XNAControls
                 UpdateDrawOrderBasedOnParent(this, childControl);
         }
 
+        /// <inheritdoc />
+        public void SuppressClickDragEvent(bool suppress)
+        {
+            ShouldClickDrag = !suppress;
+        }
+
         /// <summary>
         /// Called when a child control is being dragged and the parent should not respond to click drag.  Example: scroll bar being dragged within a dialog
         /// </summary>

@@ -108,6 +108,12 @@ namespace XNAControls
         void SetDrawOrder(int drawOrder);
 
         /// <summary>
+        /// Called when a control should not be click dragged because another control is being dragged on top of it. Example: object being drag/droped to dialog
+        /// </summary>
+        /// <param name="suppress">True if dragging should be disabled (suppressed), false to enable dragging</param>
+        void SuppressClickDragEvent(bool suppress);
+
+        /// <summary>
         /// Called when a child control is being dragged and the parent should not respond to click drag.  Example: scroll bar being dragged within a dialog
         /// </summary>
         /// <param name="suppress">True if parent dragging should be disabled (suppressed), false to enable dragging</param>
