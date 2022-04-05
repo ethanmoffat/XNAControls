@@ -81,11 +81,17 @@ namespace XNAControls
 
                 if (endOfWord)
                 {
-                    newLine += nextWord + buffer[0];
+                    lineOverFlow = buffer[0] == '\n';
+
+                    if (!lineOverFlow)
+                        nextWord += buffer[0];
+
+                    newLine += nextWord;
                     buffer = buffer.Remove(0, 1);
                     nextWord = "";
                 }
-                else if (lineOverFlow)
+
+                if (lineOverFlow)
                 {
                     if (nextWord.Length > 0)
                     {
@@ -96,7 +102,11 @@ namespace XNAControls
                         }
                     }
 
-                    if (newLine.Contains('\n'))
+                    if (newLine.Equals("\n"))
+                    {
+                        retList.Add(string.Empty);
+                    }
+                    else if (newLine.Contains('\n'))
                     {
                         retList.AddRange(newLine.Split('\n').Select(x => x + (x.Length > 0 ? LineEnd : "")));
                     }
@@ -107,7 +117,7 @@ namespace XNAControls
                     }
                     newLine = LineIndent;
                 }
-                else
+                else if (!endOfWord)
                 {
                     newLine += nextWord;
                     retList.Add(newLine);

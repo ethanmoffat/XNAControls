@@ -132,7 +132,7 @@ namespace XNAControls.Test
 
             var result = _ts.SplitIntoLines();
 
-            Assert.IsTrue(result.Except(new[] { result.Last() }).All(x => x.EndsWith(_ts.LineEnd)));
+            Assert.IsTrue(result.Where(x => x != string.Empty).Except(new[] { result.Last() }).All(x => x.EndsWith(_ts.LineEnd)));
             Assert.IsFalse(result.Last().EndsWith(_ts.LineEnd));
         }
 
@@ -162,6 +162,40 @@ namespace XNAControls.Test
 
             Assert.IsFalse(result.First().StartsWith(_ts.LineIndent));
             Assert.IsTrue(result.Except(new[] { result.First() }).All(x => x.StartsWith(_ts.LineIndent)));
+        }
+
+        [Test]
+        [Timeout(2000)]
+        public void GivenMessageShorterThanLineLength_WithTrailingNewLines_WhenSplittingAt254px_HasExpectedLineCountAndContents()
+        {
+            const string ExpectedString = "A short message";
+            _ts.Text = $"{ExpectedString}\n\n";
+            _ts.LineLength = 254;
+
+            var result = _ts.SplitIntoLines();
+
+            Assert.That(result, Has.Count.EqualTo(2));
+            CollectionAssert.AreEqual(new[] { ExpectedString, string.Empty }, result);
+        }
+
+        [Test]
+        public void GivenMessageWithMultipleNewLineCharacters_WhenSplittingAt254px_HasExpectedLineCountAndContents()
+        {
+            var expectedLines = new[]
+            {
+                "A short message",
+                "",
+                "Followed by some",
+                "Other content"
+            };
+
+            _ts.Text = $"{expectedLines[0]}\n{expectedLines[1]}\n{expectedLines[2]}\n{expectedLines[3]}\n";
+            _ts.LineLength = 254;
+
+            var result = _ts.SplitIntoLines();
+
+            Assert.That(result, Has.Count.EqualTo(4));
+            CollectionAssert.AreEqual(expectedLines, result);
         }
 
         private static SpriteFont LoadSpriteFontFromWorkingDirectory()
