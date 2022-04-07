@@ -39,6 +39,7 @@ namespace XNAControls
         private readonly TaskCompletionSource<XNADialogResult> _showTaskCompletionSource;
 
         private Texture2D _backgroundTexture;
+        private Rectangle? _backgroundTextureSource;
 
         bool IXNADialog.Modal => _modal;
 
@@ -57,7 +58,25 @@ namespace XNAControls
             set
             {
                 _backgroundTexture = value;
-                SetSize(_backgroundTexture.Width, _backgroundTexture.Height);
+
+                if (BackgroundTextureSource.HasValue)
+                    SetSize(BackgroundTextureSource.Value.Width, BackgroundTextureSource.Value.Height);
+                else if (BackgroundTexture != null)
+                    SetSize(BackgroundTexture.Width, BackgroundTexture.Height);
+            }
+        }
+
+        protected Rectangle? BackgroundTextureSource
+        {
+            get => _backgroundTextureSource;
+            set
+            {
+                _backgroundTextureSource = value;
+
+                if (_backgroundTextureSource.HasValue)
+                    SetSize(_backgroundTextureSource.Value.Width, _backgroundTextureSource.Value.Height);
+                else if (BackgroundTexture != null)
+                    SetSize(BackgroundTexture.Width, BackgroundTexture.Height);
             }
         }
 
@@ -85,8 +104,9 @@ namespace XNAControls
         {
             var viewport = Game.GraphicsDevice.Viewport;
 
-            DrawPosition = new Vector2(viewport.Width/2 - BackgroundTexture.Width/2,
-                                       viewport.Height/2 - BackgroundTexture.Height/2);
+            var bounds = BackgroundTextureSource ?? BackgroundTexture?.Bounds ?? Rectangle.Empty;
+            DrawPosition = new Vector2(viewport.Width/2 - bounds.Width/2,
+                                       viewport.Height/2 - bounds.Height/2);
         }
 
         /// <inheritdoc />
@@ -135,7 +155,7 @@ namespace XNAControls
             if (BackgroundTexture != null)
             {
                 _spriteBatch.Begin();
-                _spriteBatch.Draw(BackgroundTexture, DrawAreaWithParentOffset, Color.White);
+                _spriteBatch.Draw(BackgroundTexture, DrawAreaWithParentOffset, BackgroundTextureSource, Color.White);
                 _spriteBatch.End();
             }
 
