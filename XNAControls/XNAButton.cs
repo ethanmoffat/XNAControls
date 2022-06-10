@@ -87,6 +87,24 @@ namespace XNAControls
             ClickArea = new Rectangle(0, 0, DrawArea.Width, DrawArea.Height);
         }
 
+        protected override void OnUnconditionalUpdateControl(GameTime gameTime)
+        {
+            if (FlashSpeed != null && (FlashBehavior == ButtonFlashBehavior.FlashOnMouseOver || !MouseOver))
+            {
+                if (gameTime.TotalGameTime.TotalMilliseconds - _lastFlashTick > FlashSpeed)
+                {
+                    _lastFlashTick = (long)gameTime.TotalGameTime.TotalMilliseconds;
+                    _sourceRect = _sourceRect.Equals(_overSource) ? _outSource : _overSource;
+                }
+            }
+            else
+            {
+                _sourceRect = MouseOver ? _overSource : _outSource;
+            }
+
+            base.OnUnconditionalUpdateControl(gameTime);
+        }
+
         protected override void OnUpdateControl(GameTime gameTime)
         {
             if (MouseOver && ClickAreaWithOffset.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y)
@@ -108,19 +126,6 @@ namespace XNAControls
 
             if (_dragging)
                 OnClickDrag(this, EventArgs.Empty);
-
-            if (FlashSpeed != null && (FlashBehavior == ButtonFlashBehavior.FlashOnMouseOver || !MouseOver))
-            {
-                if (gameTime.TotalGameTime.TotalMilliseconds - _lastFlashTick > FlashSpeed)
-                {
-                    _lastFlashTick = (long)gameTime.TotalGameTime.TotalMilliseconds;
-                    _sourceRect = _sourceRect.Equals(_overSource) ? _outSource : _overSource;
-                }
-            }
-            else
-            {
-                _sourceRect = MouseOver ? _overSource : _outSource;
-            }
 
             base.OnUpdateControl(gameTime);
         }

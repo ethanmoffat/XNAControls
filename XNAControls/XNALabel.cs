@@ -155,12 +155,7 @@ namespace XNAControls
                     (int)Math.Round(sz.Y) + (int)yPadding);
         }
 
-        protected override bool ShouldUpdate()
-        {
-            return Visible;
-        }
-
-        protected override void OnUpdateControl(GameTime gameTime)
+        protected override void OnUnconditionalUpdateControl(GameTime gameTime)
         {
             if (_lastText != Text || _lastTextWidth != TextWidth)
             {
@@ -188,7 +183,7 @@ namespace XNAControls
             _totalTextArea = CalculateSizeOfTextArea();
             _alignmentOffset = CalculatePositionFromAlignment();
 
-            base.OnUpdateControl(gameTime);
+            base.OnUnconditionalUpdateControl(gameTime);
         }
 
         private Vector2 CalculatePositionFromAlignment()
