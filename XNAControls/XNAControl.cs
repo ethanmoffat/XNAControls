@@ -233,6 +233,8 @@ namespace XNAControls
         /// </summary>
         public override void Update(GameTime gameTime)
         {
+            OnUnconditionalUpdateControl(gameTime);
+
             if (!ShouldUpdate()) return;
 
             CurrentKeyState = Singleton<IKeyboardAdapter>.Instance.State;
@@ -256,6 +258,16 @@ namespace XNAControls
             OnDrawControl(gameTime);
 
             base.Draw(gameTime);
+        }
+
+        /// <summary>
+        /// Does unconditional update logic for the control (this logic ALWAYS runs, regardless of the implementation of ShouldUpdate())
+        /// </summary>
+        /// <param name="gameTime"></param>
+        protected virtual void OnUnconditionalUpdateControl(GameTime gameTime)
+        {
+            foreach (var child in _children.OfType<XNAControl>().OrderBy(x => x.UpdateOrder))
+                child.OnUnconditionalUpdateControl(gameTime);
         }
 
         /// <summary>

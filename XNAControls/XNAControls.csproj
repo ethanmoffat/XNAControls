@@ -13,9 +13,9 @@
     <PackageTags>utility library UI cross-platform controls XNA MonoGame</PackageTags>
     <Copyright>Copyright © 2016-2022 Ethan Moffat</Copyright>
     <Description>Cross-platform UI control library for MonoGame/XNA.</Description>
-    <Version>1.4.0</Version>
-    <AssemblyVersion>1.4.0</AssemblyVersion>
-    <PackageVersion>1.4.0</PackageVersion>
+    <Version>1.5.0</Version>
+    <AssemblyVersion>1.5.0</AssemblyVersion>
+    <PackageVersion>1.5.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641">
