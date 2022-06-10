@@ -1,18 +1,32 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace XNAControls
 {
     public class XNAButton : XNAControl, IXNAButton
     {
+        public enum ButtonFlashBehavior
+        {
+            /// <summary>
+            /// Button will continue flashing even on mouseover
+            /// </summary>
+            FlashOnMouseOver,
+            /// <summary>
+            /// Button will not continue flashing on mouseover
+            /// </summary>
+            DoNotFlashOnMouseOver,
+        }
+
         private readonly Texture2D _sheet;
         private readonly Rectangle _outSource;
         private readonly Rectangle _overSource;
 
         private Rectangle _sourceRect;
         private bool _dragging;
+
+        private long _lastFlashTick;
 
         /// <summary>
         /// Invoked when the button control is clicked once
@@ -30,6 +44,11 @@ namespace XNAControls
         public int? FlashSpeed { get; set; }
 
         /// <summary>
+        /// Set the behavior of the button when FlashSpeed is set
+        /// </summary>
+        public ButtonFlashBehavior FlashBehavior { get; set; }
+
+        /// <summary>
         /// Get/set the area that should respond to a click event relative to the top-left corner of this control.
         /// </summary>
         public Rectangle ClickArea { get; set; }
@@ -38,10 +57,8 @@ namespace XNAControls
         /// Gets the click area of the control offset based on the control and all parent's X,Y coordinates
         /// </summary>
         protected Rectangle ClickAreaWithOffset =>
-            new Rectangle(ClickArea.X + DrawAreaWithParentOffset.X,
-                        ClickArea.Y + DrawAreaWithParentOffset.Y,
-                          ClickArea.Width,
-                          ClickArea.Height);
+            new Rectangle(ClickArea.X + DrawAreaWithParentOffset.X, ClickArea.Y + DrawAreaWithParentOffset.Y,
+                          ClickArea.Width, ClickArea.Height);
 
         /// <summary>
         /// Construct a button where the textures for over/out are a part of a sprite sheet.
@@ -92,12 +109,18 @@ namespace XNAControls
             if (_dragging)
                 OnClickDrag(this, EventArgs.Empty);
 
-            if (!MouseOver && FlashSpeed != null && (int)gameTime.TotalGameTime.TotalMilliseconds % FlashSpeed == 0)
-                _sourceRect = _sourceRect.Equals(_overSource) ? _outSource : _overSource;
-            else if (MouseOver)
-                _sourceRect = _overSource;
-            else if (FlashSpeed == null)
-                _sourceRect = _outSource;
+            if (FlashSpeed != null && (FlashBehavior == ButtonFlashBehavior.FlashOnMouseOver || !MouseOver))
+            {
+                if (gameTime.TotalGameTime.TotalMilliseconds - _lastFlashTick > FlashSpeed)
+                {
+                    _lastFlashTick = (long)gameTime.TotalGameTime.TotalMilliseconds;
+                    _sourceRect = _sourceRect.Equals(_overSource) ? _outSource : _overSource;
+                }
+            }
+            else
+            {
+                _sourceRect = MouseOver ? _overSource : _outSource;
+            }
 
             base.OnUpdateControl(gameTime);
         }
