@@ -27,6 +27,18 @@ namespace XNAControls
         BottomRight = Bottom | Right
     }
 
+    public enum WrapBehavior
+    {
+        /// <summary>
+        /// Default behavior. Wrap long text to the next line.
+        /// </summary>
+        WrapToNewLine,
+        /// <summary>
+        /// Scroll the text horizontally when width is exceeded.
+        /// </summary>
+        ScrollText,
+    }
+
     public class XNALabel : XNAControl, IXNALabel
     {
         private readonly string _spriteFontName;
@@ -38,41 +50,54 @@ namespace XNAControls
         private string _lastText;
         private int? _lastTextWidth;
 
+        private string _actualText;
+        private string _displayText;
+
         private Vector2 _alignmentOffset, _totalTextArea;
 
-        /// <summary>
-        /// Get or set the text to display in the label.
-        /// </summary>
-        public string Text { get; set; }
+        /// <inheritdoc />
+        public string Text
+        {
+            get => _actualText;
+            set
+            {
+                _actualText = value;
+                switch (WrapBehavior)
+                {
+                    case WrapBehavior.WrapToNewLine: _displayText = _actualText; break;
+                    case WrapBehavior.ScrollText:
+                        {
+                            _displayText = _actualText;
+                            if (TextWidth.HasValue)
+                            {
+                                while(_font.MeasureString(_displayText).X > TextWidth)
+                                    _displayText = _displayText.Substring(1);
+                            }
+                        }
+                        break;
+                }
+            }
+        }
 
-        /// <summary>
-        /// Get or set the Foreground Color.
-        /// </summary>
+        /// <inheritdoc />
         public Color ForeColor { get; set; }
 
-        /// <summary>
-        /// Get or set the Background Color. Set to 'null' to turn off.
-        /// </summary>
+        /// <inheritdoc />
         public Color BackColor { get; set; }
 
-        /// <summary>
-        /// Get or set the control's size state. When true, label is automatically sized to text content
-        /// </summary>
+        /// <inheritdoc />
         public bool AutoSize { get; set; }
 
-        /// <summary>
-        /// Set the alignment of the text in the label. Only evaluated when <see cref="AutoSize">AutoSize</see> is false.
-        /// </summary>
+        /// <inheritdoc />
         public LabelAlignment TextAlign { get; set; }
 
-        /// <summary>
-        /// Get or set the text width in pixels
-        /// </summary> 
+        /// <inheritdoc />
         public int? TextWidth { get; set; }
 
-        /// <summary>
-        /// Get or set the spacing between rows, in pixels. Includes the height of the text.
-        /// </summary>
+        /// <inheritdoc />
+        public WrapBehavior WrapBehavior { get; set; }
+
+        /// <inheritdoc />
         public int? RowSpacing
         {
             get => _font.LineSpacing;
@@ -84,9 +109,7 @@ namespace XNAControls
             }
         }
 
-        /// <summary>
-        /// Get the actual width of the text as measured by the font
-        /// </summary>
+        /// <inheritdoc />
         public float ActualWidth
         {
             get
@@ -97,9 +120,7 @@ namespace XNAControls
             }
         }
 
-        /// <summary>
-        /// Get the actual height of the text as measured by the font
-        /// </summary>
+        /// <inheritdoc />
         public float ActualHeight =>
             _drawStrings.Count <= 1
                 ? _font.MeasureString(Text).Y
@@ -107,9 +128,7 @@ namespace XNAControls
 
         internal Vector2 AdjustedDrawPosition => DrawPositionWithParentOffset + (AutoSize ? Vector2.Zero : _alignmentOffset);
 
-        /// <summary>
-        /// Turn underlining on or off
-        /// </summary>
+        /// <inheritdoc />
         public bool Underline { get; set; }
 
         public XNALabel(string spriteFontName)
@@ -141,11 +160,7 @@ namespace XNAControls
             base.LoadContent();
         }
 
-        /// <summary>
-        /// Resize the label based on the contained text, with optional padding
-        /// </summary>
-        /// <param name="xPadding">Number of pixels to pad in the X direction (horizontal)</param>
-        /// <param name="yPadding">Number of pixels to pad in the Y direction (vertical)</param>
+        /// <inheritdoc />
         public void ResizeBasedOnText(uint xPadding = 0, uint yPadding = 0)
         {
             if (_font == null || AutoSize) return;
@@ -162,7 +177,7 @@ namespace XNAControls
                 _lastText = Text;
                 _lastTextWidth = TextWidth;
 
-                if (TextWidth != null)
+                if (TextWidth != null && WrapBehavior == WrapBehavior.WrapToNewLine)
                 {
                     var ts = new TextSplitter(Text, _font) {LineLength = TextWidth.Value};
                     _drawStrings.Clear();
@@ -215,8 +230,10 @@ namespace XNAControls
 
             return TextWidth == null
                 ? _font.MeasureString(Text)
-                : new Vector2(_drawStrings.Count > 0 ? _drawStrings.Select(line => _font.MeasureString(line).X).Max() : 1f,
-                              _drawStrings.Count > 0 ? _font.LineSpacing * _drawStrings.Count : _font.LineSpacing);
+                : WrapBehavior == WrapBehavior.WrapToNewLine
+                    ? new Vector2(_drawStrings.Count > 0 ? _drawStrings.Select(line => _font.MeasureString(line).X).Max() : 1f,
+                                  _drawStrings.Count > 0 ? _font.LineSpacing * _drawStrings.Count : _font.LineSpacing)
+                    : new Vector2(TextWidth.Value, _font.MeasureString(Text).Y);
         }
 
         protected override void OnDrawControl(GameTime gameTime)
@@ -233,14 +250,20 @@ namespace XNAControls
             DrawBackground();
 
             if (TextWidth == null)
+            {
                 DrawTextLine(Text, adjustedX, adjustedY);
-            else
+            }
+            else if (WrapBehavior == WrapBehavior.WrapToNewLine)
             {
                 for (int i = 0; i < _drawStrings.Count; i++)
                 {
                     var line = _drawStrings[i];
-                    DrawTextLine(line, adjustedX, adjustedY + _font.LineSpacing*i);
+                    DrawTextLine(line, adjustedX, adjustedY + _font.LineSpacing * i);
                 }
+            }
+            else if (WrapBehavior == WrapBehavior.ScrollText)
+            {
+                DrawTextLine(_displayText, adjustedX, adjustedY);
             }
 
             _spriteBatch.End();
@@ -334,6 +357,11 @@ namespace XNAControls
         /// Get or set the text width in pixels
         /// </summary> 
         int? TextWidth { get; set; }
+
+        /// <summary>
+        /// Get or set the behavior of wrapping when text width is exceeded
+        /// </summary>
+        WrapBehavior WrapBehavior { get; set; }
 
         /// <summary>
         /// Get or set the spacing between rows, in pixels. Includes the height of the text.

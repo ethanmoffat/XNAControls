@@ -35,6 +35,16 @@ namespace XNAControls
 
         public int MaxChars { get; set; }
 
+        public int? MaxWidth
+        {
+            get => _textLabel.TextWidth;
+            set
+            {
+                _textLabel.TextWidth = value;
+                _defaultTextLabel.TextWidth = value;
+            }
+        }
+
         public bool Highlighted { get; set; }
 
         public bool PasswordBox { get; set; }
@@ -122,7 +132,8 @@ namespace XNAControls
                 AutoSize = false,
                 BackColor = Color.Transparent,
                 TextAlign = LabelAlignment.MiddleLeft,
-                DrawArea = new Rectangle(0, 0, area.Width, area.Height)
+                DrawArea = new Rectangle(0, 0, area.Width, area.Height),
+                WrapBehavior = WrapBehavior.ScrollText,
             };
 
             _defaultTextLabel = new XNALabel(spriteFontContentName)
@@ -130,7 +141,8 @@ namespace XNAControls
                 AutoSize = false,
                 BackColor = Color.Transparent,
                 TextAlign = LabelAlignment.MiddleLeft,
-                DrawArea = new Rectangle(0, 0, area.Width, area.Height)
+                DrawArea = new Rectangle(0, 0, area.Width, area.Height),
+                WrapBehavior = WrapBehavior.ScrollText,
             };
 
             DrawArea = area;
@@ -203,10 +215,15 @@ namespace XNAControls
             {
                 var caretVisible = !(gameTime.TotalGameTime.TotalMilliseconds % 1000 < 500);
                 if (caretVisible)
+                {
+                    var textWidth = _textLabel.TextWidth.HasValue && _textLabel.ActualWidth > _textLabel.TextWidth
+                        ? _textLabel.TextWidth.Value
+                        : _textLabel.ActualWidth;
                     _spriteBatch.Draw(_caretTexture,
-                                      new Vector2(_textLabel.AdjustedDrawPosition.X + _textLabel.ActualWidth + 2,
+                                      new Vector2(_textLabel.AdjustedDrawPosition.X + textWidth + 2,
                                                   DrawAreaWithParentOffset.Y + (int)Math.Round((DrawArea.Height - _caretTexture.Height) / 2.0)),
                                       Color.White);
+                }
             }
 
             _spriteBatch.End();
@@ -248,6 +265,7 @@ namespace XNAControls
     public interface IXNATextBox : IXNAControl, IKeyboardSubscriber
     {
         int MaxChars { get; set; }
+        int? MaxWidth { get; set; }
         bool Highlighted { get; set; }
         bool PasswordBox { get; set; }
         int LeftPadding { get; set; }
