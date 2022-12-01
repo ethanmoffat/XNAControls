@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <OutputType>Library</OutputType>
     <AssemblyName>XNAControls</AssemblyName>
@@ -11,14 +11,14 @@
     <RepositoryUrl>https://github.com/ethanmoffat/XNAControls</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>utility library UI cross-platform controls XNA MonoGame</PackageTags>
-    <Copyright>Copyright © 2016-2022 Ethan Moffat</Copyright>
+    <Copyright>Copyright © 2016-2023 Ethan Moffat</Copyright>
     <Description>Cross-platform UI control library for MonoGame/XNA.</Description>
-    <Version>1.6.0</Version>
-    <AssemblyVersion>1.6.0</AssemblyVersion>
-    <PackageVersion>1.6.0</PackageVersion>
+    <Version>1.7.0</Version>
+    <AssemblyVersion>1.7.0</AssemblyVersion>
+    <PackageVersion>1.7.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641">
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
