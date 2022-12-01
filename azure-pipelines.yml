@@ -1,4 +1,4 @@
-name: 1.6.0.$(rev:rrr)
+name: 1.7.0.$(rev:rrr)
 
 trigger:
 - master
