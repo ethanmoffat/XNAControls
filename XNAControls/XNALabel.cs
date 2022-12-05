@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.BitmapFonts;
 
 namespace XNAControls
 {
@@ -44,7 +45,9 @@ namespace XNAControls
         private readonly string _spriteFontName;
         private readonly List<string> _drawStrings;
 
-        private SpriteFont _font;
+        private bool _isBitmapFont;
+        private SpriteFont _sFont;
+        private BitmapFont _bFont;
         private Texture2D _whitePixel;
 
         private string _lastText;
@@ -52,6 +55,8 @@ namespace XNAControls
 
         private string _actualText;
         private string _displayText;
+
+        private int _rowHeight;
 
         private Vector2 _alignmentOffset, _totalTextArea;
 
@@ -70,8 +75,8 @@ namespace XNAControls
                             _displayText = _actualText;
                             if (TextWidth.HasValue)
                             {
-                                while(_font.MeasureString(_displayText).X > TextWidth)
-                                    _displayText = _displayText.Substring(1);
+                                while (MeasureString(_displayText).X > TextWidth)
+                                    _displayText = _displayText[1..];
                             }
                         }
                         break;
@@ -100,12 +105,12 @@ namespace XNAControls
         /// <inheritdoc />
         public int? RowSpacing
         {
-            get => _font.LineSpacing;
+            get => _rowHeight;
             set
             {
                 if (!value.HasValue)
-                    value = (int)_font.MeasureString(Text).Y + 2;
-                _font.LineSpacing = value.Value;
+                    value = (int)MeasureString(Text).Y + 2;
+                _rowHeight = value.Value;
             }
         }
 
@@ -115,16 +120,16 @@ namespace XNAControls
             get
             {
                 return _drawStrings.Count <= 1
-                    ? _font.MeasureString(Text).X
-                    : _drawStrings.Select(x => _font.MeasureString(x).X).Max();
+                    ? MeasureString(Text).X
+                    : _drawStrings.Select(x => MeasureString(x).X).Max();
             }
         }
 
         /// <inheritdoc />
         public float ActualHeight =>
             _drawStrings.Count <= 1
-                ? _font.MeasureString(Text).Y
-                : _drawStrings.Count*_font.LineSpacing;
+                ? MeasureString(Text).Y
+                : _drawStrings.Count * LineHeight;
 
         internal Vector2 AdjustedDrawPosition => DrawPositionWithParentOffset + (AutoSize ? Vector2.Zero : _alignmentOffset);
 
@@ -155,7 +160,17 @@ namespace XNAControls
 
         protected override void LoadContent()
         {
-            _font = Game.Content.Load<SpriteFont>(_spriteFontName);
+            try
+            {
+                _sFont = Game.Content.Load<SpriteFont>(_spriteFontName);
+            }
+            catch
+            {
+                _bFont = Game.Content.Load<BitmapFont>(_spriteFontName);
+                _isBitmapFont = true;
+            }
+
+            _rowHeight = LineHeight;
 
             base.LoadContent();
         }
@@ -163,9 +178,9 @@ namespace XNAControls
         /// <inheritdoc />
         public void ResizeBasedOnText(uint xPadding = 0, uint yPadding = 0)
         {
-            if (_font == null || AutoSize) return;
+            if ((_sFont == null && _bFont == null) || AutoSize) return;
 
-            var sz = _font.MeasureString(Text);
+            var sz = MeasureString(Text);
             SetSize((int)Math.Round(sz.X) + (int)xPadding,
                     (int)Math.Round(sz.Y) + (int)yPadding);
         }
@@ -179,14 +194,16 @@ namespace XNAControls
 
                 if (TextWidth != null && WrapBehavior == WrapBehavior.WrapToNewLine)
                 {
-                    var ts = new TextSplitter(Text, _font) {LineLength = TextWidth.Value};
+                    var ts = _isBitmapFont
+                        ? new TextSplitter(Text, _bFont) { LineLength = TextWidth.Value }
+                        : new TextSplitter(Text, _sFont) { LineLength = TextWidth.Value };
                     _drawStrings.Clear();
                     _drawStrings.AddRange(ts.SplitIntoLines());
 
                     if (AutoSize && _drawStrings.Any())
                     {
-                        var largestWidth = _drawStrings.Select(line => _font.MeasureString(line).X).Max();
-                        SetSize((int) largestWidth, _drawStrings.Count*_font.LineSpacing);
+                        var largestWidth = _drawStrings.Select(line => MeasureString(line).X).Max();
+                        SetSize((int)largestWidth, _drawStrings.Count * LineHeight);
                     }
                 }
                 else
@@ -225,15 +242,15 @@ namespace XNAControls
 
         private Vector2 CalculateSizeOfTextArea()
         {
-            if (Text == null || _font == null || _drawStrings == null)
+            if (Text == null || (_sFont == null && _bFont == null) || _drawStrings == null)
                 return Vector2.Zero;
 
             return TextWidth == null
-                ? _font.MeasureString(Text)
+                ? MeasureString(Text)
                 : WrapBehavior == WrapBehavior.WrapToNewLine
-                    ? new Vector2(_drawStrings.Count > 0 ? _drawStrings.Select(line => _font.MeasureString(line).X).Max() : 1f,
-                                  _drawStrings.Count > 0 ? _font.LineSpacing * _drawStrings.Count : _font.LineSpacing)
-                    : new Vector2(TextWidth.Value, _font.MeasureString(Text).Y);
+                    ? new Vector2(_drawStrings.Count > 0 ? _drawStrings.Select(line => MeasureString(line).X).Max() : 1f,
+                                  _drawStrings.Count > 0 ? LineHeight * _drawStrings.Count : LineHeight)
+                    : new Vector2(TextWidth.Value, MeasureString(Text).Y);
         }
 
         protected override void OnDrawControl(GameTime gameTime)
@@ -258,7 +275,7 @@ namespace XNAControls
                 for (int i = 0; i < _drawStrings.Count; i++)
                 {
                     var line = _drawStrings[i];
-                    DrawTextLine(line, adjustedX, adjustedY + _font.LineSpacing * i);
+                    DrawTextLine(line, adjustedX, adjustedY + LineHeight * i);
                 }
             }
             else if (WrapBehavior == WrapBehavior.ScrollText)
@@ -286,16 +303,26 @@ namespace XNAControls
 
         private void DrawTextLine(string textLine, float adjustedX, float adjustedY)
         {
-            if (_font == null || textLine == null)
+            if ((_sFont == null && _bFont == null) || textLine == null)
                 return;
 
-            var textLineWidth = _font.MeasureString(textLine).X;
-            var extraHeightForUnderline = _font.MeasureString(textLine).Y - 3;
+            var textLineWidth = MeasureString(textLine).X;
+            var extraHeightForUnderline = MeasureString(textLine).Y - 3;
 
-            _spriteBatch.DrawString(_font,
-                textLine,
-                new Vector2(DrawAreaWithParentOffset.X + adjustedX, DrawAreaWithParentOffset.Y + adjustedY),
-                ForeColor);
+            if (_isBitmapFont)
+            {
+                _spriteBatch.DrawString(_bFont,
+                    textLine,
+                    new Vector2(DrawAreaWithParentOffset.X + adjustedX, DrawAreaWithParentOffset.Y + adjustedY),
+                    ForeColor);
+            }
+            else
+            {
+                _spriteBatch.DrawString(_sFont,
+                    textLine,
+                    new Vector2(DrawAreaWithParentOffset.X + adjustedX, DrawAreaWithParentOffset.Y + adjustedY),
+                    ForeColor);
+            }
 
             if (Underline)
             {
@@ -308,6 +335,15 @@ namespace XNAControls
                 _spriteBatch.Draw(_whitePixel, underlineDestRect, null, ForeColor);
             }
         }
+
+        private Vector2 MeasureString(string input)
+        {
+            return _isBitmapFont
+                ? (Vector2)_bFont.MeasureString(input)
+                : _sFont.MeasureString(input);
+        }
+
+        private int LineHeight => _isBitmapFont ? _bFont.LineHeight : _sFont.LineSpacing;
 
         protected override void Dispose(bool disposing)
         {
