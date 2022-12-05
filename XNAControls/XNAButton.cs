@@ -69,10 +69,6 @@ namespace XNAControls
         /// <param name="overSource">Source within the sprite sheet that contains the texture to draw on MouseOver</param>
         public XNAButton(Texture2D sheet, Vector2 location, Rectangle outSource, Rectangle overSource)
         {
-            if (outSource == null)
-                throw new ArgumentNullException(nameof(outSource));
-            if (overSource == null)
-                throw new ArgumentNullException(nameof(outSource));
             _sheet = sheet ?? throw new ArgumentNullException(nameof(sheet));
             _outSource = outSource;
             _overSource = overSource;
