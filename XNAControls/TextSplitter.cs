@@ -1,35 +1,68 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.BitmapFonts;
 
 namespace XNAControls
 {
     public class TextSplitter
     {
+        private int _lineLength;
+
         /// <summary>
         /// Gets or sets a string that is used as padding in front of every string (except the first)
         /// </summary>
         public string LineIndent { get; set; }
+
         /// <summary>
         /// Gets or sets a string that is inserted at the end of every line of text that is processed (except the last)
         /// </summary>
         public string LineEnd { get; set; }
+
+        public string Hyphen { get; set; } = "-";
+
         /// <summary>
         /// Gets or sets the text to be processed
         /// </summary>
         public string Text { get; set; }
+
         /// <summary>
         /// Gets or sets the number of pixels at which text will be wrapped to a new line
         /// </summary>
-        public int LineLength { get; set; }
+        public int LineLength
+        {
+            get => _lineLength;
+            set
+            {
+                if (HardBreak < value)
+                    HardBreak = value;
+                _lineLength = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets an absolute maximum width for long words without spaces
+        /// </summary>
+        public int HardBreak { get; set; }
+
         /// <summary>
         /// Gets a value determining whether or not the text is long enough to require processing
         /// </summary>
-        public bool NeedsProcessing => _textIsOverflowFunc(Text);
+        public bool NeedsProcessing => _textIsOverflowFunc(Text, () => LineLength);
 
         private SpriteFont _spriteFont;
+        private BitmapFont _bitmapFont;
 
         public TextSplitter(string text, SpriteFont font)
+        {
+            Text = text;
+            SetFont(font);
+            ResetToDefaults();
+        }
+
+        public TextSplitter(string text, BitmapFont font)
         {
             Text = text;
             SetFont(font);
@@ -39,7 +72,6 @@ namespace XNAControls
         /// <summary>
         /// Resets optional parameters to their default value
         /// </summary>
-// ReSharper disable once MemberCanBePrivate.Global
         public void ResetToDefaults()
         {
             LineIndent = "";
@@ -47,10 +79,24 @@ namespace XNAControls
             LineLength = 200;
         }
 
-// ReSharper disable once MemberCanBePrivate.Global
         public void SetFont(SpriteFont newFont)
         {
+            if (_bitmapFont != null)
+            {
+                _bitmapFont = null;
+            }
+
             _spriteFont = newFont;
+        }
+
+        public void SetFont(BitmapFont newFont)
+        {
+            if (_spriteFont != null)
+            {
+                _spriteFont = null;
+            }
+
+            _bitmapFont = newFont;
         }
 
         /// <summary>
@@ -59,73 +105,57 @@ namespace XNAControls
         /// <returns>List of strings</returns>
         public List<string> SplitIntoLines()
         {
-            string buffer = Text;
-            buffer = buffer.TrimEnd(' ');
-            List<string> retList = new List<string>();
-            char[] whiteSpace = {' ', '\t', '\n'};
-            string nextWord = "", newLine = "";
-            while (buffer.Length > 0) //keep going until the buffer is empty
+            var retList = new List<string>();
+            var words = Text.Split(new[] { " ", "\t" }, StringSplitOptions.None).ToList();
+
+            while (words.Count > 0)
             {
-                //get the next word
-                bool endOfWord = true, lineOverFlow = true; //these are negative logic booleans: will be set to false when flagged
-                while (buffer.Length > 0 && !(endOfWord = whiteSpace.Contains(buffer[0])) &&
-                       !(lineOverFlow = _textIsOverflowFunc(newLine + nextWord + LineEnd)))
+                var nextLine = string.Empty;
+
+                while (words.Count > 0 && !_textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => LineLength))
                 {
-                    nextWord += buffer[0];
-                    buffer = buffer.Remove(0, 1);
-                }
-
-                if (endOfWord)
-                {
-                    lineOverFlow = buffer[0] == '\n';
-
-                    if (!lineOverFlow)
-                        nextWord += buffer[0];
-
-                    newLine += nextWord;
-                    buffer = buffer.Remove(0, 1);
-                    nextWord = "";
-                }
-
-                if (lineOverFlow)
-                {
-                    if (nextWord.Length > 0)
+                    if (words[0].Contains("\n"))
                     {
-                        if (newLine == LineIndent)
-                        {
-                            newLine += nextWord;
-                            nextWord = "";
-                        }
+                        var thisLineWord = words[0].Substring(0, words[0].IndexOf("\n"));
+                        var nextLineWord = words[0].Substring(words[0].IndexOf("\n")+1);
+                        nextLine += (nextLine.Any() ? " " : string.Empty) + thisLineWord;
+
+                        words.RemoveAt(0);
+                        words.Insert(0, nextLineWord);
+
+                        break;
                     }
 
-                    if (newLine.Equals("\n"))
-                    {
-                        retList.Add(string.Empty);
-                    }
-                    else if (newLine.Contains('\n'))
-                    {
-                        retList.AddRange(newLine.Split('\n').Select(x => x + (x.Length > 0 ? LineEnd : "")));
-                    }
-                    else
-                    {
-                        newLine += LineEnd;
-                        retList.Add(newLine);
-                    }
-                    newLine = LineIndent;
+                    nextLine += (nextLine.Any() ? " " : string.Empty) + words[0];
+                    words.RemoveAt(0);
                 }
-                else if (!endOfWord)
+
+                var extraWord = string.Empty;
+                while (nextLine.Length > 0 && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => HardBreak))
                 {
-                    newLine += nextWord;
-                    retList.Add(newLine);
+                    extraWord += nextLine.Last();
+                    nextLine = nextLine[..^1];
                 }
+
+                var lineEnd = LineEnd;
+                if (extraWord != string.Empty)
+                {
+                    words.Insert(0, extraWord);
+                    lineEnd += Hyphen;
+                }
+
+                var addString = (retList.Count > 0 ? LineIndent : string.Empty) + nextLine + (words.Count > 0 ? lineEnd : string.Empty);
+                retList.Add(string.IsNullOrWhiteSpace(addString) ? string.Empty : addString);
             }
 
             return retList;
         }
 
-        private bool _textIsOverflowFunc(string toMeasure)
+        private bool _textIsOverflowFunc(string input, Func<int> propGetter)
         {
-            return _spriteFont.MeasureString(toMeasure).X > LineLength;
+            return (_spriteFont != null
+                ? new Func<string, bool>(input => _spriteFont.MeasureString(input).X > propGetter())
+                : input => _bitmapFont.MeasureString(input).Width > propGetter()).Invoke(input);
         }
     }
 }
