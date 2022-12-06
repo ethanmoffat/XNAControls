@@ -56,26 +56,35 @@ namespace XNAControls.Test
 
         [Test]
         [Timeout(2000)]
-        public void GivenLongMessageWithLongWords1_WhenSplittingAt200px_ShouldBe3LinesOfText()
+        public void GivenLongMessageWithLongWordsAndLineBreaks_WhenSplittingAt100px_HasExpectedLineBreaksAndHyphens()
         {
-            _ts.Text = "Testttttttttttttttttttttttttttttttttttttttttttttttttttt messageeeeeeeeeeeeeeeeeeeeeeeeee oneee";
-            _ts.LineLength = 200;
+            _ts.Text = "Testtwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n\nmessagewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww oneee";
+            _ts.LineLength = 150;
+            _ts.HardBreak = 150;
+            _ts.Hyphen = "-";
 
             var result = _ts.SplitIntoLines();
 
-            Assert.AreEqual(3, result.Count);
+            Assert.That(result, Has.Count.EqualTo(6));
+            Assert.That(result, Has.None.StartsWith(" "));
+            Assert.That(result[0], Does.EndWith(_ts.Hyphen));
+            Assert.That(result[3], Does.EndWith(_ts.Hyphen));
         }
 
         [Test]
         [Timeout(2000)]
-        public void GivenLongMessageWithLongWords2_WhenSplittingAt200px_ShouldBe5LinesOfText()
+        public void GivenLongMessageWithLongWords_WhenSplittingAt200px_ShouldHyphenateLongWordsBeyondHardBreak()
         {
             _ts.Text = "Test messageeeeeeeeeeeeeeeeeeeeeeeeee oneeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
-            _ts.LineLength = 200;
+            _ts.LineLength = 190;
+            _ts.HardBreak = 200;
+            _ts.Hyphen = "-";
 
             var result = _ts.SplitIntoLines();
 
-            Assert.AreEqual(4, result.Count);
+            Assert.That(result, Has.Count.EqualTo(3));
+            Assert.That(result, Has.None.StartsWith(" "));
+            Assert.That(result.Take(2), Has.All.EndsWith(_ts.Hyphen));
         }
 
         [Test]
@@ -84,6 +93,8 @@ namespace XNAControls.Test
         {
             _ts.Text = "This is a test message in which the words should be able to easily be split into multiple lines";
             _ts.LineLength = 200;
+            _ts.HardBreak = 200;
+            _ts.Hyphen = "-";
 
             var result = _ts.SplitIntoLines();
 
@@ -128,8 +139,8 @@ namespace XNAControls.Test
 
             var result = _ts.SplitIntoLines();
 
-            Assert.IsTrue(result.Where(x => x != string.Empty).Except(new[] { result.Last() }).All(x => x.EndsWith(_ts.LineEnd)));
-            Assert.IsFalse(result.Last().EndsWith(_ts.LineEnd));
+            Assert.That(result.Where(x => x != string.Empty).Except(new[] { result.Last() }), Has.All.EndsWith(_ts.LineEnd));
+            Assert.That(result.Last(), Does.Not.EndWith(_ts.LineEnd));
         }
 
         [Test]
@@ -142,8 +153,8 @@ namespace XNAControls.Test
 
             var result = _ts.SplitIntoLines();
 
-            Assert.IsFalse(result.First().StartsWith(_ts.LineIndent));
-            Assert.IsTrue(result.Except(new[] { result.First() }).All(x => x.StartsWith(_ts.LineIndent)));
+            Assert.That(result.First(), Does.Not.StartWith(_ts.LineIndent));
+            Assert.That(result.Skip(1), Has.All.StartsWith(_ts.LineIndent));
         }
 
         [Test]
@@ -170,11 +181,12 @@ namespace XNAControls.Test
 
             var result = _ts.SplitIntoLines();
 
-            Assert.That(result, Has.Count.EqualTo(2));
-            CollectionAssert.AreEqual(new[] { ExpectedString, string.Empty }, result);
+            Assert.That(result, Has.Count.EqualTo(3));
+            CollectionAssert.AreEqual(new[] { ExpectedString, string.Empty, string.Empty }, result);
         }
 
         [Test]
+        [Timeout(2000)]
         public void GivenMessageWithMultipleNewLineCharacters_WhenSplittingAt254px_HasExpectedLineCountAndContents()
         {
             var expectedLines = new[]
@@ -185,12 +197,53 @@ namespace XNAControls.Test
                 "Other content"
             };
 
-            _ts.Text = $"{expectedLines[0]}\n{expectedLines[1]}\n{expectedLines[2]}\n{expectedLines[3]}\n";
+            _ts.Text = $"{expectedLines[0]}\n{expectedLines[1]}\n{expectedLines[2]}\n{expectedLines[3]}";
             _ts.LineLength = 254;
 
             var result = _ts.SplitIntoLines();
 
             Assert.That(result, Has.Count.EqualTo(4));
+            CollectionAssert.AreEqual(expectedLines, result);
+        }
+
+        [Test]
+        [Timeout(2000)]
+        public void GivenMessageWhereLastWordHasTrailingNewLines_WhenSplitting_HasExpectedNumberOfNewlines()
+        {
+            var expectedLines = new[]
+            {
+                "This is a long string where the last word",
+                "wraps",
+                "",
+                ""
+            };
+
+            _ts.Text = "This is a long string where the last word wraps\n\n";
+            _ts.LineLength = 200;
+
+            var result = _ts.SplitIntoLines();
+
+            Assert.That(result, Has.Count.EqualTo(4));
+            CollectionAssert.AreEqual(expectedLines, result);
+        }
+
+        [Test]
+        [Timeout(2000)]
+        public void GivenMessageWhereLastWordHasLeadingAndTrailingNewLines_WhenSplitting_HasExpectedNumberOfNewlines()
+        {
+            var expectedLines = new[]
+            {
+                "This is a long string where the last word",
+                "wraps",
+                ""
+            };
+
+            _ts.Text = "This is a long string where the last word \nwraps\n";
+            _ts.LineLength = 200;
+
+            var result = _ts.SplitIntoLines();
+
+            Assert.That(result, Has.Count.EqualTo(3));
             CollectionAssert.AreEqual(expectedLines, result);
         }
 
