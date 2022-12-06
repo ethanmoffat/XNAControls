@@ -21,7 +21,10 @@ namespace XNAControls
         /// </summary>
         public string LineEnd { get; set; }
 
-        public string Hyphen { get; set; } = "-";
+        /// <summary>
+        /// Gets or sets the string to use when hyphenating a word across lines
+        /// </summary>
+        public string Hyphen { get; set; }
 
         /// <summary>
         /// Gets or sets the text to be processed
@@ -36,7 +39,7 @@ namespace XNAControls
             get => _lineLength;
             set
             {
-                if (HardBreak < value)
+                if (HardBreak.HasValue && HardBreak < value)
                     HardBreak = value;
                 _lineLength = value;
             }
@@ -45,7 +48,7 @@ namespace XNAControls
         /// <summary>
         /// Gets or sets an absolute maximum width for long words without spaces
         /// </summary>
-        public int HardBreak { get; set; }
+        public int? HardBreak { get; set; }
 
         /// <summary>
         /// Gets a value determining whether or not the text is long enough to require processing
@@ -76,6 +79,7 @@ namespace XNAControls
         {
             LineIndent = "";
             LineEnd = "";
+            Hyphen = "";
             LineLength = 200;
         }
 
@@ -110,15 +114,18 @@ namespace XNAControls
 
             while (words.Count > 0)
             {
+                var newlineConsumed = false;
                 var nextLine = string.Empty;
 
                 while (words.Count > 0 && !_textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => LineLength))
                 {
                     if (words[0].Contains("\n"))
                     {
-                        var thisLineWord = words[0].Substring(0, words[0].IndexOf("\n"));
-                        var nextLineWord = words[0].Substring(words[0].IndexOf("\n")+1);
-                        nextLine += (nextLine.Any() ? " " : string.Empty) + thisLineWord;
+                        newlineConsumed = true;
+
+                        var thisLineWord = words[0][..words[0].IndexOf("\n")];
+                        var nextLineWord = words[0][(words[0].IndexOf("\n") + 1)..];
+                        nextLine += (nextLine.Any() && thisLineWord.Any() ? " " : string.Empty) + thisLineWord;
 
                         words.RemoveAt(0);
                         words.Insert(0, nextLineWord);
@@ -131,10 +138,23 @@ namespace XNAControls
                 }
 
                 var extraWord = string.Empty;
-                while (nextLine.Length > 0 && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => HardBreak))
+                if (HardBreak.HasValue)
                 {
-                    extraWord += nextLine.Last();
-                    nextLine = nextLine[..^1];
+                    while (nextLine.Length > 0 && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => HardBreak.Value))
+                    {
+                        extraWord += nextLine.Last();
+                        nextLine = nextLine[..^1];
+                    }
+                }
+                else if (nextLine.Contains(' ') && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => LineLength))
+                {
+                    var lastWord = nextLine[(nextLine.LastIndexOf(' ') + 1)..];
+                    nextLine = nextLine.Remove(nextLine.LastIndexOf(' '));
+
+                    if (newlineConsumed)
+                        lastWord += "\n";
+
+                    words.Insert(0, lastWord);
                 }
 
                 var lineEnd = LineEnd;
