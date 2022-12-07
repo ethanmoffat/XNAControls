@@ -138,12 +138,19 @@ namespace XNAControls
                 }
 
                 var extraWord = string.Empty;
+                var lineEnd = LineEnd;
                 if (HardBreak.HasValue)
                 {
                     while (nextLine.Length > 0 && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => HardBreak.Value))
                     {
                         extraWord += nextLine.Last();
                         nextLine = nextLine[..^1];
+                    }
+
+                    if (extraWord.Any())
+                    {
+                        words.Insert(0, extraWord);
+                        lineEnd += Hyphen;
                     }
                 }
                 else if (nextLine.Contains(' ') && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => LineLength))
@@ -155,13 +162,6 @@ namespace XNAControls
                         lastWord += "\n";
 
                     words.Insert(0, lastWord);
-                }
-
-                var lineEnd = LineEnd;
-                if (extraWord != string.Empty)
-                {
-                    words.Insert(0, extraWord);
-                    lineEnd += Hyphen;
                 }
 
                 var addString = (retList.Count > 0 ? LineIndent : string.Empty) + nextLine + (words.Count > 0 ? lineEnd : string.Empty);

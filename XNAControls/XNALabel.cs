@@ -100,6 +100,12 @@ namespace XNAControls
         public int? TextWidth { get; set; }
 
         /// <inheritdoc />
+        public int? HardBreak { get; set; }
+
+        /// <inheritdoc />
+        public string Hyphen { get; set; } = string.Empty;
+
+        /// <inheritdoc />
         public WrapBehavior WrapBehavior { get; set; }
 
         /// <inheritdoc />
@@ -195,8 +201,8 @@ namespace XNAControls
                 if (TextWidth != null && WrapBehavior == WrapBehavior.WrapToNewLine)
                 {
                     var ts = _isBitmapFont
-                        ? new TextSplitter(Text, _bFont) { LineLength = TextWidth.Value }
-                        : new TextSplitter(Text, _sFont) { LineLength = TextWidth.Value };
+                        ? new TextSplitter(Text, _bFont) { LineLength = TextWidth.Value, HardBreak = HardBreak, Hyphen = Hyphen }
+                        : new TextSplitter(Text, _sFont) { LineLength = TextWidth.Value, HardBreak = HardBreak, Hyphen = Hyphen };
                     _drawStrings.Clear();
                     _drawStrings.AddRange(ts.SplitIntoLines());
 
@@ -393,6 +399,16 @@ namespace XNAControls
         /// Get or set the text width in pixels
         /// </summary> 
         int? TextWidth { get; set; }
+
+        /// <summary>
+        /// Get or set the maximum text width for hard breaks (long words that should be force-wrapped with a hyphen)
+        /// </summary>
+        public int? HardBreak { get; set; }
+
+        /// <summary>
+        /// Get or set the hyphen character used when a hard break is applied
+        /// </summary>
+        public string Hyphen { get; set; }
 
         /// <summary>
         /// Get or set the behavior of wrapping when text width is exceeded
