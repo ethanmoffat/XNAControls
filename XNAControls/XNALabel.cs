@@ -313,7 +313,7 @@ namespace XNAControls
                 return;
 
             var textLineWidth = MeasureString(textLine).X;
-            var extraHeightForUnderline = MeasureString(textLine).Y - 3;
+            var extraHeightForUnderline = MeasureString(textLine).Y;
 
             if (_isBitmapFont)
             {
