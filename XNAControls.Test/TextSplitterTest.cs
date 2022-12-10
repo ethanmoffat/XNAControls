@@ -51,24 +51,33 @@ namespace XNAControls.Test
 
             var result = _ts.SplitIntoLines();
 
-            Assert.AreEqual(1, result.Count);
+            Assert.That(result, Has.Exactly(1).Items);
+            Assert.That(result[0], Is.EqualTo(_ts.Text));
         }
 
         [Test]
         [Timeout(2000)]
-        public void GivenLongMessageWithLongWordsAndLineBreaks_WhenSplittingAt100px_HasExpectedLineBreaksAndHyphens()
+        public void GivenLongMessageWithLongWordsAndLineBreaks_WhenSplitting_HasExpectedLineBreaksAndHyphens()
         {
-            _ts.Text = "Testtwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n\nmessagewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww oneee";
+            _ts.Text = "Testtreallylongmessagewithnospacestobreakthemessageintosmallerwords\n\nmessagewwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww oneee";
             _ts.LineLength = 150;
             _ts.HardBreak = 150;
             _ts.Hyphen = "-";
 
             var result = _ts.SplitIntoLines();
 
-            Assert.That(result, Has.Count.EqualTo(6));
-            Assert.That(result, Has.None.StartsWith(" "));
-            Assert.That(result[0], Does.EndWith(_ts.Hyphen));
-            Assert.That(result[3], Does.EndWith(_ts.Hyphen));
+            var expectedLines = new[]
+            {
+                "Testtreallylongmessagewithnosp-",
+                "acestobreakthemessageintosma-",
+                "llerwords",
+                "",
+                "messagewwwwwwwwwwwwww-",
+                "wwwwwwwwwwwwwwwwwww-",
+                "ww oneee"
+            };
+
+            CollectionAssert.AreEqual(expectedLines, result);
         }
 
         [Test]
@@ -181,7 +190,6 @@ namespace XNAControls.Test
 
             var result = _ts.SplitIntoLines();
 
-            Assert.That(result, Has.Count.EqualTo(3));
             CollectionAssert.AreEqual(new[] { ExpectedString, string.Empty, string.Empty }, result);
         }
 
@@ -212,18 +220,17 @@ namespace XNAControls.Test
         {
             var expectedLines = new[]
             {
-                "This is a long string where the last word",
+                "This is a long string where the very last word ",
                 "wraps",
                 "",
                 ""
             };
 
-            _ts.Text = "This is a long string where the last word wraps\n\n";
+            _ts.Text = "This is a long string where the very last word wraps\n\n";
             _ts.LineLength = 200;
 
             var result = _ts.SplitIntoLines();
 
-            Assert.That(result, Has.Count.EqualTo(4));
             CollectionAssert.AreEqual(expectedLines, result);
         }
 
@@ -233,7 +240,7 @@ namespace XNAControls.Test
         {
             var expectedLines = new[]
             {
-                "This is a long string where the last word",
+                "This is a long string where the last word ",
                 "wraps",
                 ""
             };
@@ -243,7 +250,6 @@ namespace XNAControls.Test
 
             var result = _ts.SplitIntoLines();
 
-            Assert.That(result, Has.Count.EqualTo(3));
             CollectionAssert.AreEqual(expectedLines, result);
         }
 

@@ -1,35 +1,37 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.BitmapFonts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
-using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended.BitmapFonts;
+using System.Text;
 
 namespace XNAControls
 {
     public class TextSplitter
     {
+        private static readonly char[] _whiteSpace = new[] { ' ', '\t', '\n' };
+
         private int _lineLength;
 
         /// <summary>
         /// Gets or sets a string that is used as padding in front of every string (except the first)
         /// </summary>
-        public string LineIndent { get; set; }
+        public string LineIndent { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets a string that is inserted at the end of every line of text that is processed (except the last)
         /// </summary>
-        public string LineEnd { get; set; }
+        public string LineEnd { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the string to use when hyphenating a word across lines
         /// </summary>
-        public string Hyphen { get; set; }
+        public string Hyphen { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the text to be processed
         /// </summary>
-        public string Text { get; set; }
+        public string Text { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the number of pixels at which text will be wrapped to a new line
@@ -110,65 +112,59 @@ namespace XNAControls
         public List<string> SplitIntoLines()
         {
             var retList = new List<string>();
-            var words = Text.Split(new[] { " ", "\t" }, StringSplitOptions.None).ToList();
 
-            while (words.Count > 0)
+            var nextLine = new StringBuilder();
+            var nextChar = '\0';
+
+            var buffer = new Queue<char>(Text);
+            while (buffer.Any())
             {
-                var newlineConsumed = false;
-                var nextLine = string.Empty;
+                nextChar = buffer.Dequeue();
 
-                while (words.Count > 0 && !_textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => LineLength))
+                if (nextChar == '\n')
                 {
-                    if (words[0].Contains("\n"))
-                    {
-                        newlineConsumed = true;
-
-                        var thisLineWord = words[0][..words[0].IndexOf("\n")];
-                        var nextLineWord = words[0][(words[0].IndexOf("\n") + 1)..];
-                        nextLine += (nextLine.Any() && thisLineWord.Any() ? " " : string.Empty) + thisLineWord;
-
-                        words.RemoveAt(0);
-                        words.Insert(0, nextLineWord);
-
-                        break;
-                    }
-
-                    nextLine += (nextLine.Any() ? " " : string.Empty) + words[0];
-                    words.RemoveAt(0);
+                    var lineEnd = buffer.Any() ? LineEnd : string.Empty;
+                    ResetNextLine(nextLine + lineEnd);
+                    continue;
                 }
 
-                var extraWord = string.Empty;
-                var lineEnd = LineEnd;
-                if (HardBreak.HasValue)
+                nextLine.Append(nextChar);
+
+                if (_textIsOverflowFunc(nextLine + LineEnd, () => LineLength))
                 {
-                    while (nextLine.Length > 0 && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => HardBreak.Value))
+                    bool isHardBreakOverflow = false;
+                    while (buffer.Any() && !_whiteSpace.Contains(nextChar) && !(HardBreak.HasValue && (isHardBreakOverflow = _textIsOverflowFunc(nextLine + LineEnd, () => HardBreak.Value))))
                     {
-                        extraWord += nextLine.Last();
-                        nextLine = nextLine[..^1];
+                        nextChar = buffer.Dequeue();
+                        nextLine.Append(nextChar);
                     }
 
-                    if (extraWord.Any())
+                    var lineEnd = buffer.Any() ? LineEnd : string.Empty;
+                    if (isHardBreakOverflow)
                     {
-                        words.Insert(0, extraWord);
-                        lineEnd += Hyphen;
+                        ResetNextLine(nextLine + lineEnd + Hyphen);
+                    }
+                    else if (nextChar == '\n')
+                    {
+                        ResetNextLine(nextLine + lineEnd, string.Empty);
+                    }
+                    else
+                    {
+                        ResetNextLine(nextLine + lineEnd);
                     }
                 }
-                else if (nextLine.Contains(' ') && _textIsOverflowFunc(LineIndent + nextLine + LineEnd, () => LineLength))
-                {
-                    var lastWord = nextLine[(nextLine.LastIndexOf(' ') + 1)..];
-                    nextLine = nextLine.Remove(nextLine.LastIndexOf(' '));
-
-                    if (newlineConsumed)
-                        lastWord += "\n";
-
-                    words.Insert(0, lastWord);
-                }
-
-                var addString = (retList.Count > 0 ? LineIndent : string.Empty) + nextLine + (words.Count > 0 ? lineEnd : string.Empty);
-                retList.Add(string.IsNullOrWhiteSpace(addString) ? string.Empty : addString);
             }
 
+            if (nextChar == '\n' || nextLine.Length > 0)
+                retList.Add(nextLine.ToString());
+
             return retList;
+
+            void ResetNextLine(params string[] toAdd)
+            {
+                retList.AddRange(toAdd);
+                nextLine = new StringBuilder(LineIndent ?? string.Empty);
+            }
         }
 
         private bool _textIsOverflowFunc(string input, Func<int> propGetter)
