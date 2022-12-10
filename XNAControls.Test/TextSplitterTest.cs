@@ -220,13 +220,13 @@ namespace XNAControls.Test
         {
             var expectedLines = new[]
             {
-                "This is a long string where the very last word ",
+                "This is a long string where the last word ",
                 "wraps",
                 "",
                 ""
             };
 
-            _ts.Text = "This is a long string where the very last word wraps\n\n";
+            _ts.Text = "This is a long string where the last word wraps\n\n";
             _ts.LineLength = 200;
 
             var result = _ts.SplitIntoLines();
@@ -247,6 +247,24 @@ namespace XNAControls.Test
 
             _ts.Text = "This is a long string where the last word \nwraps\n";
             _ts.LineLength = 200;
+
+            var result = _ts.SplitIntoLines();
+
+            CollectionAssert.AreEqual(expectedLines, result);
+        }
+
+        [Test]
+        [Timeout(2000)]
+        public void GivenMessageWhereLineEndsWithASpace_AndNoHardBreak_WhenSplitting_NoDuplicateCharactersOnPreviousLine()
+        {
+            var expectedLines = new[]
+            {
+                "How much Guitar would ",
+                "you like to drop?",
+            };
+
+            _ts.Text = "How much Guitar would you like to drop?";
+            _ts.LineLength = 113;
 
             var result = _ts.SplitIntoLines();
 

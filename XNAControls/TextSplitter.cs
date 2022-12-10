@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.BitmapFonts;
+using MonoGame.Extended.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,10 +117,10 @@ namespace XNAControls
             var nextLine = new StringBuilder();
             var nextChar = '\0';
 
-            var buffer = new Queue<char>(Text);
+            var buffer = new Deque<char>(Text);
             while (buffer.Any())
             {
-                nextChar = buffer.Dequeue();
+                buffer.RemoveFromFront(out nextChar);
 
                 if (nextChar == '\n')
                 {
@@ -130,26 +131,47 @@ namespace XNAControls
 
                 nextLine.Append(nextChar);
 
+                // the text in the line measures longer than LineLength
                 if (_textIsOverflowFunc(nextLine + LineEnd, () => LineLength))
                 {
                     bool isHardBreakOverflow = false;
-                    while (buffer.Any() && !_whiteSpace.Contains(nextChar) && !(HardBreak.HasValue && (isHardBreakOverflow = _textIsOverflowFunc(nextLine + LineEnd, () => HardBreak.Value))))
+                    if (HardBreak.HasValue)
                     {
-                        nextChar = buffer.Dequeue();
-                        nextLine.Append(nextChar);
+                        // hard breaks are enabled: find either the next whitespace or the point where the overflow happens
+                        while (buffer.Any() && !_whiteSpace.Contains(nextChar) && !(isHardBreakOverflow = _textIsOverflowFunc(nextLine + LineEnd, () => HardBreak.Value)))
+                        {
+                            buffer.RemoveFromFront(out nextChar);
+                            nextLine.Append(nextChar);
+                        }
+                    }
+                    else if (!_whiteSpace.Contains(nextLine[^1]))
+                    {
+                        // hard breaks are not enabled: take characters back from the split word until we find whitespace
+                        // if there is no whitespace, leave string as-is
+                        var parts = nextLine.ToString().Split(_whiteSpace, StringSplitOptions.RemoveEmptyEntries);
+                        if (parts.Length > 1)
+                        {
+                            foreach (var c in parts.Last().Reverse())
+                                buffer.AddToFront(c);
+
+                            nextLine = nextLine.Remove(nextLine.Length - parts.Last().Length, parts.Last().Length);
+                        }
                     }
 
                     var lineEnd = buffer.Any() ? LineEnd : string.Empty;
                     if (isHardBreakOverflow)
                     {
+                        // for hard breaks: append hyphen string to the end (not considered for length measurements)
                         ResetNextLine(nextLine + lineEnd + Hyphen);
                     }
                     else if (nextChar == '\n')
                     {
+                        // for newlines: append the next line as well as an empty line
                         ResetNextLine(nextLine + lineEnd, string.Empty);
                     }
                     else
                     {
+                        // for other whitespace: use the line as-is
                         ResetNextLine(nextLine + lineEnd);
                     }
                 }
