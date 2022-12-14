@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Input;
+using MonoGame.Extended.Input.InputListeners;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using XNAControls.Adapters;
+using XNAControls.Input;
 
 namespace XNAControls
 {
@@ -13,10 +14,10 @@ namespace XNAControls
         static XNAControl()
         {
             Singleton<GameRepository>.MapIfMissing(new GameRepository());
-            Singleton<DialogRepository>.MapIfMissing(new DialogRepository());
-            Singleton<IKeyboardAdapter, KeyboardAdapter>.Map();
-            Singleton<IMouseAdapter, MouseAdapter>.Map();
+            Singleton<InputManager>.Map(new InputManager(GameRepository.GetGame()));
         }
+
+        private readonly Queue<(EventType, object)> _eventQueue;
 
         private readonly List<IXNAControl> _children;
 
@@ -24,15 +25,9 @@ namespace XNAControls
 
         private bool _disposed;
 
-        private bool _hasUpdated;
+        public int ZOrder => DrawOrder;
 
-        protected bool ShouldClickDrag { get; private set; }
-
-        protected MouseState CurrentMouseState { get; private set; }
-        protected MouseState PreviousMouseState { get; private set; }
-
-        protected KeyboardState CurrentKeyState { get; private set; }
-        protected KeyboardState PreviousKeyState { get; private set; }
+        public Rectangle EventArea => DrawAreaWithParentOffset;
 
         /// <summary>
         /// Returns true if the default game is active (i.e. has focus), false otherwise
@@ -42,12 +37,12 @@ namespace XNAControls
         /// <summary>
         /// Returns true if the mouse is currently over this control
         /// </summary>
-        public bool MouseOver => DrawAreaWithParentOffset.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y);
+        public bool MouseOver { get; private set; }
 
         /// <summary>
         /// Returns true if the mouse was over the control during the last Update()
         /// </summary>
-        public bool MouseOverPreviously => DrawAreaWithParentOffset.ContainsPoint(PreviousMouseState.X, PreviousMouseState.Y);
+        public bool MouseOverPreviously { get; private set; }
 
         /// <summary>
         /// The X,Y coordinates of this control, based on DrawArea
@@ -121,28 +116,25 @@ namespace XNAControls
         /// <summary>
         /// Event that is invoked when the mouse is over the control
         /// </summary>
-        public event EventHandler OnMouseOver = delegate { };
+        public event EventHandler<MouseStateExtended> OnMouseOver = delegate { };
 
         /// <summary>
         /// Event that is invoked when the mouse first enters the control
         /// </summary>
-        public event EventHandler OnMouseEnter = delegate { };
+        public event EventHandler<MouseStateExtended> OnMouseEnter = delegate { };
 
         /// <summary>
         /// Event that is invoked when the mouse first leaves the control
         /// </summary>
-        public event EventHandler OnMouseLeave = delegate { };
+        public event EventHandler<MouseStateExtended> OnMouseLeave = delegate { };
 
         protected XNAControl()
             : base(GameRepository.GetGame())
         {
+            _eventQueue = new Queue<(EventType, object)>();
             _children = new List<IXNAControl>();
 
             _spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-            CurrentKeyState = PreviousKeyState = Singleton<IKeyboardAdapter>.Instance.State;
-            CurrentMouseState = PreviousMouseState = Singleton<IMouseAdapter>.Instance.State;
-
-            ShouldClickDrag = true;
         }
 
         #region Public Interface
@@ -204,25 +196,6 @@ namespace XNAControls
                 UpdateDrawOrderBasedOnParent(this, childControl);
         }
 
-        /// <inheritdoc />
-        public void SuppressClickDragEvent(bool suppress)
-        {
-            ShouldClickDrag = !suppress;
-        }
-
-        /// <summary>
-        /// Called when a child control is being dragged and the parent should not respond to click drag.  Example: scroll bar being dragged within a dialog
-        /// </summary>
-        /// <param name="suppress">True if parent dragging should be disabled (suppressed), false to enable dragging</param>
-        public void SuppressParentClickDragEvent(bool suppress)
-        {
-            if (ImmediateParent == null)
-                return;
-
-            ((XNAControl)ImmediateParent).ShouldClickDrag = !suppress;
-            ImmediateParent.SuppressParentClickDragEvent(suppress);
-        }
-
         #endregion
 
         #region GameComponent overrides
@@ -237,13 +210,7 @@ namespace XNAControls
 
             if (!ShouldUpdate()) return;
 
-            CurrentKeyState = Singleton<IKeyboardAdapter>.Instance.State;
-            CurrentMouseState = Singleton<IMouseAdapter>.Instance.State;
-
             OnUpdateControl(gameTime);
-
-            PreviousKeyState = CurrentKeyState;
-            PreviousMouseState = CurrentMouseState;
 
             base.Update(gameTime);
         }
@@ -258,6 +225,12 @@ namespace XNAControls
             OnDrawControl(gameTime);
 
             base.Draw(gameTime);
+        }
+
+        public virtual void SendMessage(EventType eventType, object eventArgs)
+        {
+            // queue handling of the event so it happens as part of this control's update loop
+            _eventQueue.Enqueue((eventType, eventArgs));
         }
 
         /// <summary>
@@ -277,16 +250,12 @@ namespace XNAControls
         /// </summary>
         protected virtual void OnUpdateControl(GameTime gameTime)
         {
-            if (MouseOver)
-                OnMouseOver(this, EventArgs.Empty);
-
-            if (MouseOver && !MouseOverPreviously)
-                OnMouseEnter(this, EventArgs.Empty);
-            else if (!MouseOver && MouseOverPreviously)
-                OnMouseLeave(this, EventArgs.Empty);
-
             foreach (var child in _children.OrderBy(x => x.UpdateOrder))
                 child.Update(gameTime);
+
+            MouseOverPreviously = MouseOver;
+            foreach (var (messageType, messageArgs) in _eventQueue)
+                HandleEvent(messageType, messageArgs);
 
             if (KeepInClientWindowBounds && TopParent == null && Game.Window != null)
             {
@@ -324,6 +293,75 @@ namespace XNAControls
 
         #endregion
 
+        #region Events
+
+        protected virtual void HandleEvent(EventType eventType, object eventArgs)
+        {
+            switch (eventType)
+            {
+                case EventType.MouseOver:
+                    {
+                        MouseOver = true;
+                        OnMouseOver?.Invoke(this, (MouseStateExtended)eventArgs);
+                    }
+                    break;
+                case EventType.MouseEnter:
+                    {
+                        MouseOver = true;
+                        OnMouseEnter?.Invoke(this, (MouseStateExtended)eventArgs);
+                    }
+                    break;
+                case EventType.MouseLeave:
+                    {
+                        MouseOver = false;
+                        OnMouseLeave?.Invoke(this, (MouseStateExtended)eventArgs);
+                    }
+                    break;
+                case EventType.DragStart: HandleDragStart(this, (MouseEventArgs)eventArgs); break;
+                case EventType.DragEnd: HandleDragEnd(this, (MouseEventArgs)eventArgs); break;
+                case EventType.Drag: HandleDrag(this, (MouseEventArgs)eventArgs); break;
+                case EventType.Click: HandleClick(this, (MouseEventArgs)eventArgs); break;
+                case EventType.DoubleClick: HandleDoubleClick(this, (MouseEventArgs)eventArgs);  break;
+                case EventType.KeyTyped: HandleKeyTyped(this, (KeyboardEventArgs)eventArgs); break;
+                case EventType.GotFocus: HandleGotFocus(this, EventArgs.Empty); break;
+                case EventType.LostFocus: HandleLostFocus(this, EventArgs.Empty); break;
+            }
+        }
+
+        protected virtual void HandleDragStart(IXNAControl control, MouseEventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleDragEnd(IXNAControl control, MouseEventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleClick(IXNAControl control, MouseEventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleDoubleClick(IXNAControl control, MouseEventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleGotFocus(IXNAControl control, EventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleLostFocus(IXNAControl control, EventArgs eventArgs)
+        {
+        }
+
+        #endregion
+
         #region Helper methods
 
         /// <summary>
@@ -332,21 +370,20 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
-            if (!_hasUpdated && !_disposed) return (_hasUpdated = true);
+            return GameIsActive && Visible && !_disposed;
+            //if (!GameIsActive || !Visible || _disposed) return false;
 
-            if (!GameIsActive || !Visible || _disposed) return false;
+            //var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
 
-            var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
+            //if (dialogStack.Count <= 0 || this == dialogStack.Peek()) return true;
 
-            if (dialogStack.Count <= 0 || this == dialogStack.Peek()) return true;
+            //// replacement for IgnoreDialogs: if the dialog is not modal, update
+            //if (!dialogStack.Peek().Modal) return true;
 
-            // replacement for IgnoreDialogs: if the dialog is not modal, update
-            if (!dialogStack.Peek().Modal) return true;
-
-            //return false if:
-            //dialog is open and this control is a top parent OR
-            //dialog is open and this control does not belong to it
-            return TopParent != null && TopParent == dialogStack.Peek();
+            ////return false if:
+            ////dialog is open and this control is a top parent OR
+            ////dialog is open and this control does not belong to it
+            //return TopParent != null && TopParent == dialogStack.Peek();
         }
 
         /// <summary>

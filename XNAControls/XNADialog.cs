@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input.InputListeners;
+using XNAControls.Input;
 
 namespace XNAControls
 {
@@ -86,17 +88,10 @@ namespace XNAControls
         }
 
         /// <inheritdoc />
-        public override void Initialize()
-        {
-            Singleton<DialogRepository>.Instance.OpenDialogs.Push(this);
-            base.Initialize();
-        }
-
-        /// <inheritdoc />
         public virtual void BringToTop()
         {
-            var dialogsCount = Singleton<DialogRepository>.Instance.OpenDialogs.Count;
-            SetDrawOrder((dialogsCount+1) * 5 + DialogLayerOffset);
+            var maxDrawOrder = Game.Components.OfType<IEventReceiver>().Max(x => x.ZOrder);
+            SetDrawOrder(maxDrawOrder + 1);
         }
 
         /// <inheritdoc />
@@ -130,21 +125,9 @@ namespace XNAControls
             Task.Run(async () => await ShowDialogAsync(modal: false).ConfigureAwait(false));
         }
 
-        /// <summary>
-        /// Handle click+drag for the dialog
-        /// </summary>
-        protected override void OnUpdateControl(GameTime gameTime)
+        protected override void HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
         {
-            if (PreviousMouseState.LeftButton == ButtonState.Pressed &&
-                CurrentMouseState.LeftButton == ButtonState.Pressed &&
-                DrawAreaWithParentOffset.Contains(CurrentMouseState.X, CurrentMouseState.Y) && ShouldClickDrag)
-            {
-                DrawPosition = new Vector2(
-                    DrawPositionWithParentOffset.X + (CurrentMouseState.X - PreviousMouseState.X),
-                    DrawPositionWithParentOffset.Y + (CurrentMouseState.Y - PreviousMouseState.Y));
-            }
-
-            base.OnUpdateControl(gameTime);
+            DrawPosition += eventArgs.DistanceMoved;
         }
 
         /// <summary>
@@ -173,9 +156,7 @@ namespace XNAControls
 
             if (!eventArgs.Cancel)
             {
-                Singleton<DialogRepository>.Instance.OpenDialogs.Pop();
                 _showTaskCompletionSource.SetResult(result);
-
                 DialogClosed?.Invoke(this, EventArgs.Empty);
             }
         }

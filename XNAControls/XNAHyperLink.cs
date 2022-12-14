@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input;
+using MonoGame.Extended.Input.InputListeners;
 
 namespace XNAControls
 {
@@ -16,18 +17,10 @@ namespace XNAControls
         /// <summary>
         /// Event that is invoked when the link is clicked
         /// </summary>
-        public event EventHandler OnClick = delegate { };
+        public event EventHandler<MouseEventArgs> OnClick = delegate { };
 
         public XNAHyperLink(string spriteFontContentName)
             : base(spriteFontContentName) { }
-
-        /// <summary>
-        /// Manually invoke the click event on the link
-        /// </summary>
-        public void Click()
-        {
-            OnClick(this, EventArgs.Empty);
-        }
 
         public override void Initialize()
         {
@@ -37,23 +30,18 @@ namespace XNAControls
             base.Initialize();
         }
 
-        protected override void OnUpdateControl(GameTime gameTime)
+        protected override void HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
-            if (MouseOver &&
-                PreviousMouseState.LeftButton == ButtonState.Pressed &&
-                CurrentMouseState.LeftButton == ButtonState.Released)
-                OnClick(this, null);
-
-            base.OnUpdateControl(gameTime);
+            OnClick?.Invoke(control, eventArgs);
         }
 
-        private void MouseEnterControl(object sender, EventArgs e)
+        private void MouseEnterControl(object sender, MouseStateExtended e)
         {
             _temporaryForeColor = ForeColor;
             ForeColor = MouseOverColor;
         }
 
-        private void MouseLeaveControl(object sender, EventArgs e)
+        private void MouseLeaveControl(object sender, MouseStateExtended e)
         {
             ForeColor = _temporaryForeColor;
             _temporaryForeColor = Color.Transparent;
@@ -70,11 +58,6 @@ namespace XNAControls
         /// <summary>
         /// Event that is invoked when the link is clicked
         /// </summary>
-        event EventHandler OnClick;
-
-        /// <summary>
-        /// Manually invoke the click event on the link
-        /// </summary>
-        void Click();
+        event EventHandler<MouseEventArgs> OnClick;
     }
 }

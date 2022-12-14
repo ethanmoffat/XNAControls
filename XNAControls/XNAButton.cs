@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input.InputListeners;
 using System;
 
 namespace XNAControls
@@ -24,19 +24,18 @@ namespace XNAControls
         private readonly Rectangle _overSource;
 
         private Rectangle _sourceRect;
-        private bool _dragging;
 
         private long _lastFlashTick;
 
         /// <summary>
         /// Invoked when the button control is clicked once
         /// </summary>
-        public event EventHandler OnClick = delegate { };
+        public event EventHandler<MouseEventArgs> OnClick = delegate { };
 
         /// <summary>
         /// Invoked when the button control is being dragged
         /// </summary>
-        public event EventHandler OnClickDrag = delegate { };
+        public event EventHandler<MouseEventArgs> OnClickDrag = delegate { };
 
         /// <summary>
         /// Set the FlashSpeed which causes the over/out textures to cycle once every 'FlashSpeed' milliseconds
@@ -100,31 +99,6 @@ namespace XNAControls
 
             base.OnUnconditionalUpdateControl(gameTime);
         }
-
-        protected override void OnUpdateControl(GameTime gameTime)
-        {
-            if (MouseOver && ClickAreaWithOffset.ContainsPoint(CurrentMouseState.X, CurrentMouseState.Y)
-                && PreviousMouseState.LeftButton == ButtonState.Pressed
-                && CurrentMouseState.LeftButton == ButtonState.Released)
-                OnClick(this, EventArgs.Empty);
-
-            if (MouseOver && PreviousMouseState.LeftButton == ButtonState.Pressed && CurrentMouseState.LeftButton == ButtonState.Pressed
-                && ShouldClickDrag && !_dragging)
-            {
-                SuppressParentClickDragEvent(true);
-                _dragging = true;
-            }
-            else if (PreviousMouseState.LeftButton == ButtonState.Pressed && CurrentMouseState.LeftButton == ButtonState.Released && _dragging)
-            {
-                _dragging = false;
-                SuppressParentClickDragEvent(false);
-            }
-
-            if (_dragging)
-                OnClickDrag(this, EventArgs.Empty);
-
-            base.OnUpdateControl(gameTime);
-        }
         
         protected override void OnDrawControl(GameTime gameTime)
         {
@@ -137,6 +111,16 @@ namespace XNAControls
 
             base.OnDrawControl(gameTime);
         }
+
+        protected override void HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            OnClickDrag(control, eventArgs);
+        }
+
+        protected override void HandleClick(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            OnClick(control, eventArgs);
+        }
     }
 
     public interface IXNAButton : IXNAControl
@@ -144,12 +128,12 @@ namespace XNAControls
         /// <summary>
         /// Invoked when the button control is clicked once
         /// </summary>
-        event EventHandler OnClick;
+        event EventHandler<MouseEventArgs> OnClick;
 
         /// <summary>
         /// Invoked when the button control is being dragged
         /// </summary>
-        event EventHandler OnClickDrag;
+        event EventHandler<MouseEventArgs> OnClickDrag;
 
         /// <summary>
         /// Set the FlashSpeed which causes the over/out textures to cycle once every 'FlashSpeed' milliseconds
