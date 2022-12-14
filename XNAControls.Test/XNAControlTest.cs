@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input;
+using MonoGame.Extended.Input.InputListeners;
 using Moq;
 using NUnit.Framework;
-using XNAControls.Adapters;
+using XNAControls.Input;
 using XNAControls.Test.Controls;
 using XNAControls.Test.Helpers;
 
@@ -68,9 +70,9 @@ namespace XNAControls.Test
         }
 
         [Test]
-        public void MouseOver_TrueWhenDrawAreaContainsMousePosition()
+        public void MouseOver_TrueWhenMouseEnterEventFired()
         {
-            GivenCurrentMouseState(MouseStateWithPosition(8, 10));
+            _control.SendMessage(EventType.MouseEnter, MouseStateExtendedWithPosition(8, 10));
             GivenControlsCanBeUpdated(_control);
 
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
@@ -80,9 +82,57 @@ namespace XNAControls.Test
         }
 
         [Test]
-        public void MouseOver_TrueWhenDrawAreaWithParentOffsetContainsContainsMousePosition()
+        public void MouseOver_TrueWhenMouseOverEventFired()
         {
-            GivenCurrentMouseState(MouseStateWithPosition(105, 103));
+            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(8, 10));
+            GivenControlsCanBeUpdated(_control);
+
+            _control.DrawArea = new Rectangle(5, 5, 10, 10);
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(_control.MouseOverDuringUpdate);
+        }
+
+        [Test]
+        public void MouseOver_FalseWhenMouseLeaveEventFired()
+        {
+            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(8, 10));
+            GivenControlsCanBeUpdated(_control);
+
+            _control.DrawArea = new Rectangle(5, 5, 10, 10);
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(_control.MouseOverDuringUpdate);
+
+            _control.SendMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
+            _control.Update(new GameTime());
+
+            Assert.IsFalse(_control.MouseOverDuringUpdate);
+            Assert.IsTrue(_control.MouseOverPreviouslyDuringUpdate);
+        }
+
+        [Test]
+        public void MouseOver_TrueWhenMouseEnterEventFired_WithParent()
+        {
+            _control.SendMessage(EventType.MouseEnter, MouseStateExtendedWithPosition(105, 103));
+
+            var parent = CreateFakeControl();
+            GivenControlsCanBeUpdated(_control, parent);
+
+            _control.SetParentControl(parent);
+            _control.DrawArea = new Rectangle(5, 5, 10, 10);
+            parent.DrawArea = new Rectangle(95, 95, 10, 10);
+
+            _control.DrawArea = new Rectangle(5, 5, 10, 10);
+            _control.Update(new GameTime());
+
+            Assert.IsTrue(_control.MouseOverDuringUpdate);
+        }
+
+        [Test]
+        public void MouseOver_TrueWhenMouseOverEventFired_WithParent()
+        {
+            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(105, 103));
 
             var parent = CreateFakeControl();
             GivenControlsCanBeUpdated(_control, parent);
@@ -97,15 +147,22 @@ namespace XNAControls.Test
         }
 
         [Test]
-        public void MouseOverPreviously_TrueWhenDrawAreaContainedPoint_InTheLastUpdateLoop()
+        public void MouseOver_FalseWhenMouseLeaveEventFired_WithParent()
         {
-            GivenCurrentMouseState(MouseStateWithPosition(50, 50));
-            GivenControlsCanBeUpdated(_control);
+            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(105, 103));
 
-            _control.DrawArea = new Rectangle(45, 45, 10, 10);
+            var parent = CreateFakeControl();
+            GivenControlsCanBeUpdated(_control, parent);
+
+            _control.SetParentControl(parent);
+            _control.DrawArea = new Rectangle(5, 5, 10, 10);
+            parent.DrawArea = new Rectangle(95, 95, 10, 10);
+
             _control.Update(new GameTime());
 
-            GivenCurrentMouseState(MouseStateWithPosition(40, 40));
+            Assert.IsTrue(_control.MouseOverDuringUpdate);
+
+            _control.SendMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
             _control.Update(new GameTime());
 
             Assert.IsFalse(_control.MouseOverDuringUpdate);
@@ -345,43 +402,6 @@ namespace XNAControls.Test
         }
 
         [Test]
-        public void SuppressParentClickDragEvent_SetsParentClickDrag_False()
-        {
-            var parent = CreateFakeControl();
-            _control.SetParentControl(parent);
-            Assert.IsTrue(parent.ShouldClickDrag);
-
-            _control.SuppressParentClickDragEvent(true);
-
-            Assert.IsFalse(parent.ShouldClickDrag);
-        }
-
-        [Test]
-        public void SuppressParentClickDragEvent_SetsParentClickDrag_False_InHierarchy()
-        {
-            var parent = CreateFakeControl();
-            var child = CreateFakeControl();
-            var child2 = CreateFakeControl();
-            var nestedChild = CreateFakeControl();
-            var nestedChild2 = CreateFakeControl();
-
-            nestedChild.SetParentControl(child);
-            nestedChild2.SetParentControl(child2);
-            child.SetParentControl(parent);
-            child2.SetParentControl(parent);
-            _control.SetParentControl(parent);
-
-            nestedChild.SuppressParentClickDragEvent(true);
-
-            Assert.IsTrue(nestedChild.ShouldClickDrag);
-            Assert.IsTrue(nestedChild2.ShouldClickDrag);
-            Assert.IsTrue(child2.ShouldClickDrag);
-            Assert.IsTrue(_control.ShouldClickDrag);
-            Assert.IsFalse(child.ShouldClickDrag);
-            Assert.IsFalse(parent.ShouldClickDrag);
-        }
-
-        [Test]
         public void Update_DoesNotUpdateControl_IfGameIsInactive()
         {
             GivenGameIsInactive(_control);
@@ -447,87 +467,6 @@ namespace XNAControls.Test
 
             Assert.IsTrue(child.Updated);
             Assert.IsTrue(child2.Updated);
-        }
-
-        [Test]
-        public void Update_UpdatesCurrentAndPreviousMouseState()
-        {
-            var initialMouseState = MouseStateWithPosition(5, 15);
-            var updatedMouseState = MouseStateWithPosition(10, 20);
-            GivenControlsCanBeUpdated(_control);
-
-            GivenCurrentMouseState(initialMouseState);
-            _control.Update(new GameTime());
-            Assert.AreEqual(initialMouseState, _control.CurrentMouseStateDuringUpdate);
-
-            GivenCurrentMouseState(updatedMouseState);
-            _control.Update(new GameTime());
-            Assert.AreEqual(initialMouseState, _control.PreviousMouseStateDuringUpdate);
-            Assert.AreEqual(updatedMouseState, _control.CurrentMouseStateDuringUpdate);
-        }
-
-        [Test]
-        public void Update_UpdatesCurrentAndPreviousKeyState()
-        {
-            var initialKeyState = KeyStateWithKeys(Keys.A, Keys.B);
-            var updatedKeyState = KeyStateWithKeys(Keys.C, Keys.D);
-            GivenControlsCanBeUpdated(_control);
-
-            GivenCurrentKeyState(initialKeyState);
-            _control.Update(new GameTime());
-            Assert.AreEqual(initialKeyState, _control.CurrentKeyStateDuringUpdate);
-
-            GivenCurrentKeyState(updatedKeyState);
-            _control.Update(new GameTime());
-            Assert.AreEqual(initialKeyState, _control.PreviousKeyStateDuringUpdate);
-            Assert.AreEqual(updatedKeyState, _control.CurrentKeyStateDuringUpdate);
-        }
-
-        [Test]
-        public void Update_InvokesMouseOverEvent_IfMouseIsInDrawArea()
-        {
-            var mouseOverEventFired = false;
-            _control.OnMouseOver += (o, e) => mouseOverEventFired = true;
-            _control.DrawArea = new Rectangle(0, 0, 10, 10);
-
-            GivenCurrentMouseState(MouseStateWithPosition(5, 5));
-            GivenControlsCanBeUpdated(_control);
-
-            _control.Update(new GameTime());
-
-            Assert.IsTrue(mouseOverEventFired);
-        }
-
-        [Test]
-        public void Update_InvokesMouseEnterEvent_IfMouseIsFirstEnteringDrawArea()
-        {
-            var mouseEnterEventFired = false;
-            _control.OnMouseEnter += (o, e) => mouseEnterEventFired = true;
-            _control.DrawArea = new Rectangle(0, 0, 10, 10);
-
-            GivenCurrentMouseState(MouseStateWithPosition(5, 5));
-            GivenControlsCanBeUpdated(_control);
-
-            _control.Update(new GameTime());
-
-            Assert.IsTrue(mouseEnterEventFired);
-        }
-
-        [Test]
-        public void Update_InvokesMouseLeaveEvent_IfMouseWasPreviouslyOverDrawArea()
-        {
-            var mouseLeaveEventFired = false;
-            _control.OnMouseLeave += (o, e) => mouseLeaveEventFired = true;
-            _control.DrawArea = new Rectangle(0, 0, 10, 10);
-
-            GivenCurrentMouseState(MouseStateWithPosition(5, 5));
-            GivenControlsCanBeUpdated(_control);
-            _control.Update(new GameTime());
-
-            GivenCurrentMouseState(MouseStateWithPosition(15, 15));
-            _control.Update(new GameTime());
-
-            Assert.IsTrue(mouseLeaveEventFired);
         }
 
         [Test]
@@ -646,18 +585,6 @@ namespace XNAControls.Test
                 control.Visible = true;
         }
 
-        private static void GivenCurrentMouseState(MouseState state)
-        {
-            var mouseAdapter = Mock.Of<IMouseAdapter>(x => x.State == state);
-            Singleton<IMouseAdapter>.Map(mouseAdapter);
-        }
-
-        private static void GivenCurrentKeyState(KeyboardState state)
-        {
-            var keyAdapter = Mock.Of<IKeyboardAdapter>(x => x.State == state);
-            Singleton<IKeyboardAdapter>.Map(keyAdapter);
-        }
-
         private FakeXNAControl CreateFakeControl()
         {
             var control = new FakeXNAControl();
@@ -665,15 +592,10 @@ namespace XNAControls.Test
             return control;
         }
 
-        private static MouseState MouseStateWithPosition(int x, int y)
+        private static MouseStateExtended MouseStateExtendedWithPosition(int x, int y)
         {
-            return new MouseState(x, y, 0, ButtonState.Released, ButtonState.Released,
-                ButtonState.Released, ButtonState.Released, ButtonState.Released);
-        }
-
-        private static KeyboardState KeyStateWithKeys(params Keys[] keys)
-        {
-            return new KeyboardState(keys);
+            var ms = new MouseState(x, y, 0, ButtonState.Released, ButtonState.Released, ButtonState.Released, ButtonState.Released, ButtonState.Released);
+            return new MouseStateExtended(ms, ms);
         }
     }
 }

@@ -11,8 +11,6 @@ namespace XNAControls.Test.Controls
         internal bool Updated { get; private set; }
         internal bool Drawn { get; private set; }
 
-        internal new bool ShouldClickDrag => base.ShouldClickDrag;
-
         public override bool GameIsActive => _isActive;
 
         public MouseState CurrentMouseStateDuringUpdate { get; private set; }
@@ -43,16 +41,12 @@ namespace XNAControls.Test.Controls
 
         protected override void OnUpdateControl(GameTime gameTime)
         {
+            base.OnUpdateControl(gameTime);
+
             Updated = true;
 
-            CurrentMouseStateDuringUpdate = CurrentMouseState;
-            CurrentKeyStateDuringUpdate = CurrentKeyState;
-            PreviousMouseStateDuringUpdate = PreviousMouseState;
-            PreviousKeyStateDuringUpdate = PreviousKeyState;
             MouseOverDuringUpdate = MouseOver;
             MouseOverPreviouslyDuringUpdate = MouseOverPreviously;
-
-            base.OnUpdateControl(gameTime);
         }
 
         protected override void OnDrawControl(GameTime gameTime)
