@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace XNAControls.Input
 {
-    internal class InputManager : GameComponent
+    public class InputManager : GameComponent
     {
         private readonly KeyboardListener _keyboardListener;
         private readonly MouseListener _mouseListener;
@@ -15,7 +15,10 @@ namespace XNAControls.Input
 
         private IEventReceiver _dragTarget;
 
-        internal InputManager(Game game)
+        public InputManager()
+            : this (GameRepository.GetGame()) { }
+
+        public InputManager(Game game)
             : base(game)
         {
             _keyboardListener = new KeyboardListener();

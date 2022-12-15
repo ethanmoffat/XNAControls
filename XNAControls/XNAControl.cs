@@ -14,7 +14,6 @@ namespace XNAControls
         static XNAControl()
         {
             Singleton<GameRepository>.MapIfMissing(new GameRepository());
-            Singleton<InputManager>.Map(new InputManager(GameRepository.GetGame()));
         }
 
         private readonly Queue<(EventType, object)> _eventQueue;
