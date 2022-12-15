@@ -105,6 +105,7 @@ namespace XNAControls
         public event EventHandler OnLostFocus = delegate { };
 
         public event EventHandler OnTextChanged = delegate { };
+        public event EventHandler OnEnterPressed = delegate { };
         public event EventHandler<MouseEventArgs> OnClicked = delegate { };
 
         public bool Selected
@@ -247,8 +248,12 @@ namespace XNAControls
         {
             switch (eventArgs.Key)
             {
-                case Keys.Tab:
-                case Keys.Enter: break;
+                case Keys.Tab: break;
+                case Keys.Enter:
+                    {
+                        OnEnterPressed?.Invoke(this, EventArgs.Empty);
+                    }
+                    break;
                 case Keys.Back:
                     {
                         if (!string.IsNullOrEmpty(Text))
