@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
 using MonoGame.Extended.Input.InputListeners;
+using System;
+using System.Linq;
 using XNAControls.Input;
 
 namespace XNAControls
@@ -228,12 +228,25 @@ namespace XNAControls
         {
             if (eventArgs.Key == Keys.Tab && FocusedTextbox != null)
             {
-                var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>().OrderBy(x => x.TabOrder);
-                var nextTextBox = orderTextBoxesEnumerable
-                    .SkipWhile(x => x.TabOrder <= FocusedTextbox.TabOrder)
-                    .FirstOrDefault();
+                IXNATextBox nextTextBox;
 
-                nextTextBox ??= orderTextBoxesEnumerable.FirstOrDefault();
+                var state = KeyboardExtended.GetState();
+                if (state.IsShiftDown())
+                {
+                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>().OrderByDescending(x => x.TabOrder);
+                    nextTextBox = orderTextBoxesEnumerable
+                        .SkipWhile(x => x.TabOrder >= FocusedTextbox.TabOrder)
+                        .FirstOrDefault();
+                    nextTextBox ??= orderTextBoxesEnumerable.FirstOrDefault();
+                }
+                else
+                {
+                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>().OrderBy(x => x.TabOrder);
+                    nextTextBox = orderTextBoxesEnumerable
+                        .SkipWhile(x => x.TabOrder <= FocusedTextbox.TabOrder)
+                        .FirstOrDefault();
+                    nextTextBox ??= orderTextBoxesEnumerable.FirstOrDefault();
+                }
 
                 FocusedTextbox?.SendMessage(EventType.LostFocus, EventArgs.Empty);
                 FocusedTextbox = nextTextBox;
