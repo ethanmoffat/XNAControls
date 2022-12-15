@@ -273,11 +273,15 @@ namespace XNAControls
         protected override void HandleLostFocus(IXNAControl control, EventArgs eventArgs)
         {
             _selected = false;
+            if (FocusedTextbox == this)
+                FocusedTextbox = null;
         }
 
         protected override void HandleGotFocus(IXNAControl control, EventArgs eventArgs)
         {
             _selected = true;
+            if (FocusedTextbox != this)
+                FocusedTextbox = this;
         }
 
         protected override void Dispose(bool disposing)
