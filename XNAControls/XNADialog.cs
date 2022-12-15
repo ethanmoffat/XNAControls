@@ -1,9 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Input.InputListeners;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using XNAControls.Input;
 
 namespace XNAControls
@@ -88,8 +89,18 @@ namespace XNAControls
         }
 
         /// <inheritdoc />
+        public override void Initialize()
+        {
+            Singleton<DialogRepository>.Instance.OpenDialogs.Push(this);
+            base.Initialize();
+        }
+
+        /// <inheritdoc />
         public virtual void BringToTop()
         {
+            FindAndPopThisDialogFromStack();
+            Singleton<DialogRepository>.Instance.OpenDialogs.Push(this);
+
             var maxDrawOrder = Game.Components.OfType<IEventReceiver>().Max(x => x.ZOrder);
             SetDrawOrder(maxDrawOrder + 1);
         }
@@ -156,6 +167,7 @@ namespace XNAControls
 
             if (!eventArgs.Cancel)
             {
+                FindAndPopThisDialogFromStack();
                 _showTaskCompletionSource.SetResult(result);
                 DialogClosed?.Invoke(this, EventArgs.Empty);
             }
@@ -172,6 +184,28 @@ namespace XNAControls
 
             Dispose();
             return result;
+        }
+
+        private void FindAndPopThisDialogFromStack()
+        {
+            var dlgStack = Singleton<DialogRepository>.Instance.OpenDialogs;
+
+            if (!dlgStack.Contains(this))
+                return;
+
+            var tempStack = new Stack<IXNADialog>();
+            do
+            {
+                tempStack.Push(dlgStack.Pop());
+            }
+            while (tempStack.Peek() != this);
+
+            // pop 'this' dialog from temp stack
+            tempStack.Pop();
+
+            // push all other dialogs back onto dialog stacck
+            while (tempStack.Any())
+                dlgStack.Push(tempStack.Pop());
         }
     }
 

@@ -14,6 +14,7 @@ namespace XNAControls
         static XNAControl()
         {
             Singleton<GameRepository>.MapIfMissing(new GameRepository());
+            Singleton<DialogRepository>.MapIfMissing(new DialogRepository());
         }
 
         private readonly Queue<(EventType, object)> _eventQueue;
@@ -255,14 +256,14 @@ namespace XNAControls
         /// </summary>
         protected virtual void OnUpdateControl(GameTime gameTime)
         {
-            foreach (var child in _children.OrderBy(x => x.UpdateOrder))
-                child.Update(gameTime);
-
             while (_eventQueue.Any())
             {
                 var (messageType, messageArgs) = _eventQueue.Dequeue();
                 HandleEvent(messageType, messageArgs);
             }
+
+            foreach (var child in _children.OrderBy(x => x.UpdateOrder))
+                child.Update(gameTime);
 
             if (KeepInClientWindowBounds && TopParent == null && Game.Window != null)
             {
@@ -412,20 +413,19 @@ namespace XNAControls
         /// </summary>
         protected virtual bool ShouldUpdate()
         {
-            return GameIsActive && Visible && !_disposed;
-            //if (!GameIsActive || !Visible || _disposed) return false;
+            if (!GameIsActive || !Visible || _disposed) return false;
 
-            //var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
+            var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
 
-            //if (dialogStack.Count <= 0 || this == dialogStack.Peek()) return true;
+            if (dialogStack.Count <= 0 || this == dialogStack.Peek()) return true;
 
-            //// replacement for IgnoreDialogs: if the dialog is not modal, update
-            //if (!dialogStack.Peek().Modal) return true;
+            // replacement for IgnoreDialogs: if the dialog is not modal, update
+            if (!dialogStack.Peek().Modal) return true;
 
-            ////return false if:
-            ////dialog is open and this control is a top parent OR
-            ////dialog is open and this control does not belong to it
-            //return TopParent != null && TopParent == dialogStack.Peek();
+            //return false if:
+            //dialog is open and this control is a top parent OR
+            //dialog is open and this control does not belong to it
+            return TopParent != null && TopParent == dialogStack.Peek();
         }
 
         /// <summary>
