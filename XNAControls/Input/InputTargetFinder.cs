@@ -11,7 +11,7 @@ namespace XNAControls.Input
             var searchCollection = collection.Concat(collection.OfType<IXNAControl>().SelectMany(x => x.ChildControls));
 
             var targets = searchCollection.OfType<IEventReceiver>()
-                .Where(x => x.EventArea.Contains(position))
+                .Where(x => x.EventArea.Contains(position) && AllParentsVisible(x))
                 .ToList();
 
             if (!targets.Any()) return null;
@@ -35,6 +35,23 @@ namespace XNAControls.Input
             }
 
             return maxTargets.Last();
+        }
+
+        private bool AllParentsVisible(IEventReceiver eventReceiver)
+        {
+            var control = eventReceiver as IXNAControl;
+            if (control == null)
+            {
+                var drawable = eventReceiver as IDrawable;
+                return drawable?.Visible ?? true;
+            }
+
+            var visible = true;
+            var c = control;
+            while ((c = c.ImmediateParent) != null)
+                visible &= c.Visible;
+
+            return control.Visible && visible;
         }
     }
 }
