@@ -27,7 +27,7 @@ namespace XNAControls.Input
 
             var settings = new MouseListenerSettings
             {
-                DoubleClickMilliseconds = 200,
+                DoubleClickMilliseconds = 60,
                 DragThreshold = 1
             };
             _mouseListener = new MouseListener(settings);
