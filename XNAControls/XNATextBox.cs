@@ -139,7 +139,9 @@ namespace XNAControls
                 TextAlign = LabelAlignment.MiddleLeft,
                 DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 WrapBehavior = WrapBehavior.ScrollText,
+                HandlesEvents = EventType.None,
             };
+            _textLabel.SetParentControl(this);
 
             _defaultTextLabel = new XNALabel(spriteFontContentName)
             {
@@ -148,7 +150,9 @@ namespace XNAControls
                 TextAlign = LabelAlignment.MiddleLeft,
                 DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 WrapBehavior = WrapBehavior.ScrollText,
+                HandlesEvents = EventType.None,
             };
+            _defaultTextLabel.SetParentControl(this);
 
             DrawArea = area;
 
@@ -158,10 +162,7 @@ namespace XNAControls
         public override void Initialize()
         {
             _textLabel.Initialize();
-            _textLabel.SetParentControl(this);
-
             _defaultTextLabel.Initialize();
-            _defaultTextLabel.SetParentControl(this);
 
             base.Initialize();
         }
