@@ -20,6 +20,8 @@ namespace XNAControls
 
         private readonly List<IXNAControl> _children;
 
+        private readonly InputTargetFinder _inputTargetFinder;
+
         protected readonly SpriteBatch _spriteBatch;
 
         private bool _disposed;
@@ -42,6 +44,9 @@ namespace XNAControls
         /// Returns true if the mouse was over the control during the last Update()
         /// </summary>
         public bool MouseOverPreviously { get; private set; }
+
+        /// <inheritdoc />
+        public EventType HandlesEvents { get; set; } = EventType.All;
 
         /// <summary>
         /// The X,Y coordinates of this control, based on DrawArea
@@ -132,6 +137,7 @@ namespace XNAControls
         {
             _eventQueue = new Queue<(EventType, object)>();
             _children = new List<IXNAControl>();
+            _inputTargetFinder = new InputTargetFinder();
 
             _spriteBatch = new SpriteBatch(Game.GraphicsDevice);
         }
@@ -253,8 +259,12 @@ namespace XNAControls
                 child.Update(gameTime);
 
             MouseOverPreviously = MouseOver;
-            foreach (var (messageType, messageArgs) in _eventQueue)
+
+            while (_eventQueue.Any())
+            {
+                var (messageType, messageArgs) = _eventQueue.Dequeue();
                 HandleEvent(messageType, messageArgs);
+            }
 
             if (KeepInClientWindowBounds && TopParent == null && Game.Window != null)
             {
@@ -294,8 +304,33 @@ namespace XNAControls
 
         #region Events
 
-        protected virtual void HandleEvent(EventType eventType, object eventArgs)
+        protected virtual bool HandleEvent(EventType eventType, object eventArgs)
         {
+            if (ChildControls.Any())
+            {
+                Point? position = eventArgs switch
+                {
+                    MouseStateExtended mse => mse.Position,
+                    MouseEventArgs args => args.Position,
+                    _ => null
+                };
+
+                if (position != null)
+                {
+                    var target = _inputTargetFinder.GetMouseEventTargetControl(ChildControls, position.Value);
+                    if (target != null && target.HandlesEvents.HasFlag(eventType))
+                    {
+                        target.SendMessage(eventType, eventArgs);
+                        return true;
+                    }
+                }
+            }
+
+            if (!HandlesEvents.HasFlag(eventType))
+                return false;
+
+            var handled = true;
+
             switch (eventType)
             {
                 case EventType.MouseOver:
@@ -324,7 +359,10 @@ namespace XNAControls
                 case EventType.KeyTyped: HandleKeyTyped(this, (KeyboardEventArgs)eventArgs); break;
                 case EventType.GotFocus: HandleGotFocus(this, EventArgs.Empty); break;
                 case EventType.LostFocus: HandleLostFocus(this, EventArgs.Empty); break;
+                default: handled = false; break;
             }
+
+            return handled;
         }
 
         protected virtual void HandleDragStart(IXNAControl control, MouseEventArgs eventArgs)

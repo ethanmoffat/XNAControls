@@ -10,6 +10,7 @@ namespace XNAControls.Input
     {
         private readonly KeyboardListener _keyboardListener;
         private readonly MouseListener _mouseListener;
+        private readonly InputTargetFinder _inputTargetFinder;
 
         private readonly Dictionary<object, bool> _mouseOverState;
 
@@ -21,6 +22,7 @@ namespace XNAControls.Input
         public InputManager(Game game)
             : base(game)
         {
+            _inputTargetFinder = new InputTargetFinder();
             _keyboardListener = new KeyboardListener();
             _mouseListener = new MouseListener();
 
@@ -49,7 +51,8 @@ namespace XNAControls.Input
             var mouseState = MouseExtended.GetState();
             if (mouseState.PositionChanged)
             {
-                foreach (var component in Game.Components.OfType<IEventReceiver>())
+                var comps = Game.Components.OfType<IEventReceiver>().ToList();
+                foreach (var component in comps)
                 {
                     if (component.EventArea.Contains(mouseState.Position))
                     {
@@ -87,13 +90,13 @@ namespace XNAControls.Input
 
         private void Mouse_Click(object sender, MouseEventArgs e)
         {
-            var clickTarget = GetMouseEventTargetControl(Game.Components, e.Position);
+            var clickTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
             clickTarget?.SendMessage(EventType.Click, e);
         }
 
         private void Mouse_DoubleClick(object sender, MouseEventArgs e)
         {
-            var clickTarget = GetMouseEventTargetControl(Game.Components, e.Position);
+            var clickTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
             clickTarget?.SendMessage(EventType.DoubleClick, e);
         }
 
@@ -102,7 +105,7 @@ namespace XNAControls.Input
             if (_dragTarget != null)
                 return;
 
-            _dragTarget = GetMouseEventTargetControl(Game.Components, e.Position);
+            _dragTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
             _dragTarget?.SendMessage(EventType.DragStart, e);
         }
 
@@ -136,27 +139,6 @@ namespace XNAControls.Input
         private static void Mouse_Leave(IEventReceiver component, MouseStateExtended mouseState)
         {
             component.SendMessage(EventType.MouseLeave, mouseState);
-        }
-
-        private static IEventReceiver GetMouseEventTargetControl(GameComponentCollection collection, Point position)
-        {
-            var targets = collection.OfType<IEventReceiver>()
-                .Where(x => x.EventArea.Contains(position))
-                .ToList();
-
-            if (!targets.Any()) return null;
-            if (targets.Count == 1) return targets.Single();
-
-            var max = targets.Max(x => x.ZOrder);
-            var maxTargets = targets.Where(x => x.ZOrder == max).ToList();
-
-            if (maxTargets.Count == 1) return maxTargets.Single();
-
-            // If multiple controls are updateable, the tie breaker should be the lowest UpdateOrder (which component updates first)
-            if (maxTargets.All(x => x is IUpdateable))
-                return maxTargets.MinBy(x => ((IUpdateable)x).UpdateOrder);
-
-            return maxTargets.First();
         }
     }
 }
