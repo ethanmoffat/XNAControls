@@ -17,6 +17,7 @@ namespace XNAControls.Input
         KeyTyped = 256,
         GotFocus = 512,
         LostFocus = 1024,
-        All = 0x7ff
+        MouseWheelMoved = 2048,
+        All = 0xfff
     }
 }

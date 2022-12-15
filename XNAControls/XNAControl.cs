@@ -359,6 +359,7 @@ namespace XNAControls
                 case EventType.KeyTyped: HandleKeyTyped(this, (KeyboardEventArgs)eventArgs); break;
                 case EventType.GotFocus: HandleGotFocus(this, EventArgs.Empty); break;
                 case EventType.LostFocus: HandleLostFocus(this, EventArgs.Empty); break;
+                case EventType.MouseWheelMoved: HandleMouseWheelMoved(this, (MouseEventArgs)eventArgs); break;
                 default: handled = false; break;
             }
 
@@ -394,6 +395,10 @@ namespace XNAControls
         }
 
         protected virtual void HandleLostFocus(IXNAControl control, EventArgs eventArgs)
+        {
+        }
+
+        protected virtual void HandleMouseWheelMoved(IXNAControl control, MouseEventArgs eventArgs)
         {
         }
 

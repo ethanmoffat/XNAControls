@@ -126,6 +126,12 @@ namespace XNAControls.Input
             _dragTarget.SendMessage(EventType.Drag, e);
         }
 
+        private void Mouse_WheelMoved(object sender, MouseEventArgs e)
+        {
+            var clickTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
+            clickTarget?.SendMessage(EventType.MouseWheelMoved, e);
+        }
+
         private static void Mouse_Enter(IEventReceiver component, MouseStateExtended mouseState)
         {
             component.SendMessage(EventType.MouseEnter, mouseState);
