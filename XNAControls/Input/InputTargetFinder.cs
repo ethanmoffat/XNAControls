@@ -8,7 +8,9 @@ namespace XNAControls.Input
     {
         public IEventReceiver GetMouseEventTargetControl(IEnumerable<IGameComponent> collection, Point position)
         {
-            var targets = collection.OfType<IEventReceiver>()
+            var searchCollection = collection.Concat(collection.OfType<IXNAControl>().SelectMany(x => x.ChildControls));
+
+            var targets = searchCollection.OfType<IEventReceiver>()
                 .Where(x => x.EventArea.Contains(position))
                 .ToList();
 

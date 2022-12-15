@@ -28,7 +28,7 @@ namespace XNAControls
 
         public int ZOrder => DrawOrder;
 
-        public Rectangle EventArea => DrawAreaWithParentOffset;
+        public virtual Rectangle EventArea => DrawAreaWithParentOffset;
 
         /// <summary>
         /// Returns true if the default game is active (i.e. has focus), false otherwise
@@ -258,8 +258,6 @@ namespace XNAControls
             foreach (var child in _children.OrderBy(x => x.UpdateOrder))
                 child.Update(gameTime);
 
-            MouseOverPreviously = MouseOver;
-
             while (_eventQueue.Any())
             {
                 var (messageType, messageArgs) = _eventQueue.Dequeue();
@@ -288,6 +286,8 @@ namespace XNAControls
                     DrawArea = new Rectangle(newX, newY, DrawArea.Width, DrawArea.Height);
                 }
             }
+
+            MouseOverPreviously = MouseOver;
         }
 
         /// <summary>

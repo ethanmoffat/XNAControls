@@ -24,7 +24,13 @@ namespace XNAControls.Input
         {
             _inputTargetFinder = new InputTargetFinder();
             _keyboardListener = new KeyboardListener();
-            _mouseListener = new MouseListener();
+
+            var settings = new MouseListenerSettings
+            {
+                DoubleClickMilliseconds = 200,
+                DragThreshold = 1
+            };
+            _mouseListener = new MouseListener(settings);
 
             _mouseOverState = new Dictionary<object, bool>();
 
@@ -39,6 +45,7 @@ namespace XNAControls.Input
             _mouseListener.MouseDragStart += Mouse_DragStart;
             _mouseListener.MouseDragEnd += Mouse_DragEnd;
             _mouseListener.MouseDrag += Mouse_Drag;
+            _mouseListener.MouseWheelMoved += Mouse_WheelMoved;
 
             base.Initialize();
         }
@@ -51,30 +58,30 @@ namespace XNAControls.Input
             var mouseState = MouseExtended.GetState();
             if (mouseState.PositionChanged)
             {
-                var comps = Game.Components.OfType<IEventReceiver>().ToList();
+                var xnaControls = Game.Components.OfType<IXNAControl>();
+
+                var comps = Game.Components.OfType<IEventReceiver>()
+                    .Concat(xnaControls.SelectMany(x => x.ChildControls)).ToList();
+
                 foreach (var component in comps)
                 {
                     if (component.EventArea.Contains(mouseState.Position))
                     {
-                        if (!_mouseOverState.TryGetValue(component, out var value))
+                        if (!_mouseOverState.TryGetValue(component, out var value) || !value)
                         {
                             _mouseOverState[component] = true;
                             Mouse_Enter(component, mouseState);
                         }
                         else
                         {
-                            if (value)
-                                Mouse_Over(component, mouseState);
                             _mouseOverState[component] = true;
+                            Mouse_Over(component, mouseState);
                         }
                     }
-                    else
+                    else if (_mouseOverState.TryGetValue(component, out var value) && value)
                     {
-                        if (_mouseOverState.TryGetValue(component, out var value) && value)
-                        {
-                            _mouseOverState[component] = false;
-                            Mouse_Leave(component, mouseState);
-                        }
+                        _mouseOverState[component] = false;
+                        Mouse_Leave(component, mouseState);
                     }
                 }
             }
