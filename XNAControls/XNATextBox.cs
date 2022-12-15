@@ -233,7 +233,9 @@ namespace XNAControls
                 var state = KeyboardExtended.GetState();
                 if (state.IsShiftDown())
                 {
-                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>().OrderByDescending(x => x.TabOrder);
+                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
+                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
+                        .OrderByDescending(x => x.TabOrder);
                     nextTextBox = orderTextBoxesEnumerable
                         .SkipWhile(x => x.TabOrder >= FocusedTextbox.TabOrder)
                         .FirstOrDefault();
@@ -241,7 +243,9 @@ namespace XNAControls
                 }
                 else
                 {
-                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>().OrderBy(x => x.TabOrder);
+                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
+                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
+                        .OrderBy(x => x.TabOrder);
                     nextTextBox = orderTextBoxesEnumerable
                         .SkipWhile(x => x.TabOrder <= FocusedTextbox.TabOrder)
                         .FirstOrDefault();
