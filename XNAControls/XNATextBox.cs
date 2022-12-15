@@ -285,6 +285,7 @@ namespace XNAControls
 
         protected override void HandleLostFocus(IXNAControl control, EventArgs eventArgs)
         {
+            OnLostFocus?.Invoke(this, eventArgs);
             _selected = false;
             if (FocusedTextbox == this)
                 FocusedTextbox = null;
@@ -292,6 +293,7 @@ namespace XNAControls
 
         protected override void HandleGotFocus(IXNAControl control, EventArgs eventArgs)
         {
+            OnGotFocus?.Invoke(this, eventArgs);
             _selected = true;
             if (FocusedTextbox != this)
                 FocusedTextbox = this;
