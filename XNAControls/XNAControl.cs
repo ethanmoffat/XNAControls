@@ -235,6 +235,8 @@ namespace XNAControls
 
         public virtual void SendMessage(EventType eventType, object eventArgs)
         {
+            if (!ShouldUpdate()) return;
+
             // queue handling of the event so it happens as part of this control's update loop
             _eventQueue.Enqueue((eventType, eventArgs));
         }
