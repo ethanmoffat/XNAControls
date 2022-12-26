@@ -249,9 +249,9 @@ namespace XNAControls
             _eventQueue.Enqueue((eventType, eventArgs));
         }
 
-        public virtual void PostMessage(EventType eventType, object eventArgs)
+        public virtual bool PostMessage(EventType eventType, object eventArgs)
         {
-            HandleEvent(eventType, eventArgs);
+            return HandleEvent(eventType, eventArgs);
         }
 
         /// <summary>
@@ -336,8 +336,8 @@ namespace XNAControls
                     var target = _inputTargetFinder.GetMouseEventTargetControl(ChildControls, position.Value);
                     if (target != null && target.HandlesEvents.HasFlag(eventType))
                     {
-                        target.SendMessage(eventType, eventArgs);
-                        return true;
+                        if (target.PostMessage(eventType, eventArgs))
+                            return true;
                     }
                 }
             }
@@ -375,7 +375,7 @@ namespace XNAControls
                 case EventType.KeyTyped: HandleKeyTyped(this, (KeyboardEventArgs)eventArgs); break;
                 case EventType.GotFocus: HandleGotFocus(this, EventArgs.Empty); break;
                 case EventType.LostFocus: HandleLostFocus(this, EventArgs.Empty); break;
-                case EventType.MouseWheelMoved: HandleMouseWheelMoved(this, (MouseEventArgs)eventArgs); break;
+                case EventType.MouseWheelMoved: handled = HandleMouseWheelMoved(this, (MouseEventArgs)eventArgs); break;
                 default: handled = false; break;
             }
 
@@ -414,9 +414,21 @@ namespace XNAControls
         {
         }
 
-        protected virtual void HandleMouseWheelMoved(IXNAControl control, MouseEventArgs eventArgs)
+        /// <summary>
+        /// Handle a mouse wheel event sent to this control. Default behavior will consider a previously set scroll wheel event receiver.
+        /// </summary>
+        /// <param name="control">The target control</param>
+        /// <param name="eventArgs">Mouse information for the event</param>
+        /// <returns>True if the event was handled, false otherwise</returns>
+        protected virtual bool HandleMouseWheelMoved(IXNAControl control, MouseEventArgs eventArgs)
         {
-            _scrollWheelEventReceiver?.PostMessage(EventType.MouseWheelMoved, eventArgs);
+            if (_scrollWheelEventReceiver != null)
+            {
+                _scrollWheelEventReceiver?.PostMessage(EventType.MouseWheelMoved, eventArgs);
+                return true;
+            }
+
+            return false;
         }
 
         #endregion

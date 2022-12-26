@@ -31,6 +31,7 @@ namespace XNAControls.Input
         /// </summary>
         /// <param name="eventType">The event type to post</param>
         /// <param name="eventArgs">Additional arguments for the event</param>
-        void PostMessage(EventType eventType, object eventArgs);
+        /// <returns>True if the event was handled, false otherwise</returns>
+        bool PostMessage(EventType eventType, object eventArgs);
     }
 }
