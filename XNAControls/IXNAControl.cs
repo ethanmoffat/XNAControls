@@ -100,6 +100,12 @@ namespace XNAControls
         void SetControlUnparented();
 
         /// <summary>
+        /// Sets the handler for mouse wheel events
+        /// </summary>
+        /// <param name="eventReceiver">The event receiver that should handle scroll wheel events.</param>
+        void SetScrollWheelHandler(IEventReceiver eventReceiver);
+
+        /// <summary>
         /// Set the DrawOrder property for this control. Updates all child controls of this control with the new draw order.
         /// </summary>
         /// <param name="drawOrder">The new draw order.</param>

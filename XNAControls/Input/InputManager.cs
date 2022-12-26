@@ -135,7 +135,19 @@ namespace XNAControls.Input
 
         private void Mouse_WheelMoved(object sender, MouseEventArgs e)
         {
-            var clickTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
+            IEventReceiver clickTarget = null;
+
+            var dialogs = Singleton<DialogRepository>.Instance.OpenDialogs;
+            if (dialogs.Any())
+            {
+                clickTarget = dialogs.FirstOrDefault(x => x.DrawAreaWithParentOffset.Contains(e.Position))
+                    ?? _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
+            }
+            else
+            {
+                clickTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
+            }
+
             clickTarget?.SendMessage(EventType.MouseWheelMoved, e);
         }
 

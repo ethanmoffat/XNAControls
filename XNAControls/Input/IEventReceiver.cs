@@ -20,10 +20,17 @@ namespace XNAControls.Input
         EventType HandlesEvents { get; set; }
 
         /// <summary>
-        /// Send this control a message
+        /// Send this control a message (adds this message to the message queue)
         /// </summary>
         /// <param name="eventType">The event type to send</param>
         /// <param name="eventArgs">Additional arguments for the event</param>
         void SendMessage(EventType eventType, object eventArgs);
+
+        /// <summary>
+        /// Post a message to a control for immediate processing (bypasses message queue)
+        /// </summary>
+        /// <param name="eventType">The event type to post</param>
+        /// <param name="eventArgs">Additional arguments for the event</param>
+        void PostMessage(EventType eventType, object eventArgs);
     }
 }

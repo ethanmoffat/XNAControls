@@ -25,6 +25,8 @@ namespace XNAControls
 
         protected readonly SpriteBatch _spriteBatch;
 
+        private IEventReceiver _scrollWheelEventReceiver;
+
         private bool _disposed;
 
         public int ZOrder => DrawOrder;
@@ -190,6 +192,12 @@ namespace XNAControls
             ImmediateParent = null;
         }
 
+        /// <inheritdoc />
+        public virtual void SetScrollWheelHandler(IEventReceiver eventReceiver)
+        {
+            _scrollWheelEventReceiver = eventReceiver;
+        }
+
         /// <summary>
         /// Set the DrawOrder property for this control. Updates all child controls of this control with the new draw order.
         /// </summary>
@@ -239,6 +247,11 @@ namespace XNAControls
 
             // queue handling of the event so it happens as part of this control's update loop
             _eventQueue.Enqueue((eventType, eventArgs));
+        }
+
+        public virtual void PostMessage(EventType eventType, object eventArgs)
+        {
+            HandleEvent(eventType, eventArgs);
         }
 
         /// <summary>
@@ -403,6 +416,7 @@ namespace XNAControls
 
         protected virtual void HandleMouseWheelMoved(IXNAControl control, MouseEventArgs eventArgs)
         {
+            _scrollWheelEventReceiver?.PostMessage(EventType.MouseWheelMoved, eventArgs);
         }
 
         #endregion
