@@ -145,7 +145,7 @@ namespace XNAControls.Input
             }
             else
             {
-                clickTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position);
+                clickTarget = _inputTargetFinder.GetMouseEventTargetControl(Game.Components, e.Position, includeChildren: false);
             }
 
             clickTarget?.SendMessage(EventType.MouseWheelMoved, e);

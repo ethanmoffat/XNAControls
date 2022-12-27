@@ -6,9 +6,11 @@ namespace XNAControls.Input
 {
     public class InputTargetFinder
     {
-        public IEventReceiver GetMouseEventTargetControl(IEnumerable<IGameComponent> collection, Point position)
+        public IEventReceiver GetMouseEventTargetControl(IEnumerable<IGameComponent> collection, Point position, bool includeChildren = true)
         {
-            var searchCollection = collection.Concat(collection.OfType<IXNAControl>().SelectMany(x => x.ChildControls));
+            var searchCollection = includeChildren
+                ? collection.Concat(collection.OfType<IXNAControl>().SelectMany(x => x.ChildControls))
+                : collection;
 
             var targets = searchCollection.OfType<IEventReceiver>()
                 .Where(x => x.EventArea.Contains(position) && AllParentsVisible(x))
