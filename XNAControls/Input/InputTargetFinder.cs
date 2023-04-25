@@ -4,17 +4,53 @@ using System.Linq;
 
 namespace XNAControls.Input
 {
-    public class InputTargetFinder
+    public static class InputTargetFinder
     {
-        public IEventReceiver GetMouseEventTargetControl(IEnumerable<IGameComponent> collection, Point position, bool includeChildren = true)
+        public static IEnumerable<IEventReceiver> GetMouseOverEventTargetControl(IEnumerable<IGameComponent> collection, Point position)
         {
-            var searchCollection = includeChildren
-                ? collection.Concat(collection.OfType<IXNAControl>().SelectMany(x => x.ChildControls))
-                : collection;
-
-            var targets = searchCollection.OfType<IEventReceiver>()
-                .Where(x => x.EventArea.Contains(position) && AllParentsVisible(x))
+            var targets = collection
+                .OfType<IEventReceiver>()
+                .Where(IsValidMouseOverTarget)
                 .ToList();
+
+            var toProcess = new Queue<IXNAControl>(targets.OfType<IXNAControl>());
+            while (toProcess.Any())
+            {
+                var parent = toProcess.Dequeue();
+
+                var childTargets = parent.ChildControls.Where(IsValidMouseOverTarget);
+                foreach (var child in childTargets)
+                    toProcess.Enqueue(child);
+
+                if (!targets.Contains(parent))
+                    targets.Add(parent);
+            }
+
+            return targets;
+        }
+
+        public static IEventReceiver GetMouseDownEventTargetControl(IEnumerable<IGameComponent> collection, Point position, bool includeChildren = true)
+        {
+            var targets = collection
+                .OfType<IEventReceiver>()
+                .Where(x => IsValidMouseDownTarget(x, position))
+                .ToList();
+
+            if (includeChildren)
+            {
+                var toProcess = new Queue<IXNAControl>(targets.OfType<IXNAControl>());
+                while (toProcess.Any())
+                {
+                    var parent = toProcess.Dequeue();
+
+                    var childtargets = parent.ChildControls.Where(x => IsValidMouseDownTarget(x, position));
+                    foreach (var child in childtargets)
+                        toProcess.Enqueue(child);
+
+                    if (!targets.Contains(parent))
+                        targets.Add(parent);
+                }
+            }
 
             if (!targets.Any()) return null;
             if (targets.Count == 1) return targets.Single();
@@ -39,7 +75,17 @@ namespace XNAControls.Input
             return maxTargets.Last();
         }
 
-        private bool AllParentsVisible(IEventReceiver eventReceiver)
+        private static bool IsValidMouseOverTarget(IEventReceiver component)
+        {
+            return component as IDrawable == null || ((IDrawable)component).Visible;
+        }
+
+        private static bool IsValidMouseDownTarget(IEventReceiver eventReceiver, Point position)
+        {
+            return eventReceiver.EventArea.Contains(position) && AllParentsVisible(eventReceiver);
+        }
+
+        private static bool AllParentsVisible(IEventReceiver eventReceiver)
         {
             var control = eventReceiver as IXNAControl;
             if (control == null)

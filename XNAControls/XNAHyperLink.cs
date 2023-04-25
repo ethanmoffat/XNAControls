@@ -30,9 +30,13 @@ namespace XNAControls
             base.Initialize();
         }
 
-        protected override void HandleClick(IXNAControl control, MouseEventArgs eventArgs)
+        protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
+            if (OnClick == null)
+                return false;
+
             OnClick?.Invoke(control, eventArgs);
+            return true;
         }
 
         private void MouseEnterControl(object sender, MouseStateExtended e)

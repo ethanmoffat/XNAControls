@@ -115,8 +115,8 @@ namespace XNAControls
             {
                 _selected = value;
 
-                FocusedTextbox?.SendMessage(EventType.LostFocus, EventArgs.Empty);
-                SendMessage(EventType.GotFocus, EventArgs.Empty);
+                FocusedTextbox?.PostMessage(EventType.LostFocus, EventArgs.Empty);
+                PostMessage(EventType.GotFocus, EventArgs.Empty);
             }
         }
 
@@ -139,7 +139,6 @@ namespace XNAControls
                 TextAlign = LabelAlignment.MiddleLeft,
                 DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 WrapBehavior = WrapBehavior.ScrollText,
-                HandlesEvents = EventType.None,
             };
             _textLabel.SetParentControl(this);
 
@@ -150,7 +149,6 @@ namespace XNAControls
                 TextAlign = LabelAlignment.MiddleLeft,
                 DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 WrapBehavior = WrapBehavior.ScrollText,
-                HandlesEvents = EventType.None,
             };
             _defaultTextLabel.SetParentControl(this);
 
@@ -217,14 +215,16 @@ namespace XNAControls
             base.OnDrawControl(gameTime);
         }
 
-        protected override void HandleClick(IXNAControl control, MouseEventArgs eventArgs)
+        protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
-            FocusedTextbox?.SendMessage(EventType.LostFocus, EventArgs.Empty);
+            FocusedTextbox?.PostMessage(EventType.LostFocus, EventArgs.Empty);
             FocusedTextbox = this;
-            FocusedTextbox.SendMessage(EventType.GotFocus, EventArgs.Empty);
+            FocusedTextbox.PostMessage(EventType.GotFocus, EventArgs.Empty);
+
+            return true;
         }
 
-        protected override void HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs)
+        protected override bool HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs)
         {
             if (eventArgs.Key == Keys.Tab && FocusedTextbox != null)
             {
@@ -252,17 +252,19 @@ namespace XNAControls
                     nextTextBox ??= orderTextBoxesEnumerable.FirstOrDefault();
                 }
 
-                FocusedTextbox?.SendMessage(EventType.LostFocus, EventArgs.Empty);
+                FocusedTextbox?.PostMessage(EventType.LostFocus, EventArgs.Empty);
                 FocusedTextbox = nextTextBox;
-                FocusedTextbox?.SendMessage(EventType.GotFocus, EventArgs.Empty);
+                FocusedTextbox?.PostMessage(EventType.GotFocus, EventArgs.Empty);
             }
             else if(eventArgs.Character.HasValue)
             {
                 HandleTextInput(eventArgs);
             }
+
+            return true;
         }
 
-        protected virtual void HandleTextInput(KeyboardEventArgs eventArgs)
+        protected virtual bool HandleTextInput(KeyboardEventArgs eventArgs)
         {
             switch (eventArgs.Key)
             {
@@ -285,22 +287,28 @@ namespace XNAControls
                     }
                     break;
             }
+
+            return true;
         }
 
-        protected override void HandleLostFocus(IXNAControl control, EventArgs eventArgs)
+        protected override bool HandleLostFocus(IXNAControl control, EventArgs eventArgs)
         {
             OnLostFocus?.Invoke(this, eventArgs);
             _selected = false;
             if (FocusedTextbox == this)
                 FocusedTextbox = null;
+
+            return true;
         }
 
-        protected override void HandleGotFocus(IXNAControl control, EventArgs eventArgs)
+        protected override bool HandleGotFocus(IXNAControl control, EventArgs eventArgs)
         {
             OnGotFocus?.Invoke(this, eventArgs);
             _selected = true;
             if (FocusedTextbox != this)
                 FocusedTextbox = this;
+
+            return true;
         }
 
         protected override void Dispose(bool disposing)

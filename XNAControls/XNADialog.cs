@@ -99,10 +99,11 @@ namespace XNAControls
         public virtual void BringToTop()
         {
             FindAndPopThisDialogFromStack();
-            Singleton<DialogRepository>.Instance.OpenDialogs.Push(this);
+            var openDialogs = Singleton<DialogRepository>.Instance.OpenDialogs;
+            openDialogs.Push(this);
 
             var maxDrawOrder = Game.Components.OfType<IEventReceiver>().Max(x => x.ZOrder);
-            SetDrawOrder(maxDrawOrder + 1);
+            SetDrawOrder((100 * openDialogs.Count) + maxDrawOrder + 1);
         }
 
         /// <inheritdoc />
@@ -136,9 +137,10 @@ namespace XNAControls
             Task.Run(async () => await ShowDialogAsync(modal: false).ConfigureAwait(false));
         }
 
-        protected override void HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
+        protected override bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
         {
             DrawPosition += eventArgs.DistanceMoved;
+            return true;
         }
 
         /// <summary>

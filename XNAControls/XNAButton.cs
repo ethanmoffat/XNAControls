@@ -30,12 +30,12 @@ namespace XNAControls
         /// <summary>
         /// Invoked when the button control is clicked once
         /// </summary>
-        public event EventHandler<MouseEventArgs> OnClick = delegate { };
+        public event EventHandler<MouseEventArgs> OnClick;
 
         /// <summary>
         /// Invoked when the button control is being dragged
         /// </summary>
-        public event EventHandler<MouseEventArgs> OnClickDrag = delegate { };
+        public event EventHandler<MouseEventArgs> OnClickDrag;
 
         /// <summary>
         /// Set the FlashSpeed which causes the over/out textures to cycle once every 'FlashSpeed' milliseconds
@@ -112,14 +112,24 @@ namespace XNAControls
             base.OnDrawControl(gameTime);
         }
 
-        protected override void HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
+        protected override bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
         {
+            if (OnClickDrag == null)
+                return false;
+
             OnClickDrag(control, eventArgs);
+
+            return true;
         }
 
-        protected override void HandleClick(IXNAControl control, MouseEventArgs eventArgs)
+        protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
+            if (OnClick == null)
+                return false;
+
             OnClick(control, eventArgs);
+
+            return true;
         }
     }
 

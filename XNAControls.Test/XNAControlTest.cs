@@ -72,7 +72,7 @@ namespace XNAControls.Test
         [Test]
         public void MouseOver_TrueWhenMouseEnterEventFired()
         {
-            _control.SendMessage(EventType.MouseEnter, MouseStateExtendedWithPosition(8, 10));
+            _control.PostMessage(EventType.MouseEnter, MouseStateExtendedWithPosition(8, 10));
             GivenControlsCanBeUpdated(_control);
 
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
@@ -84,7 +84,7 @@ namespace XNAControls.Test
         [Test]
         public void MouseOver_TrueWhenMouseOverEventFired()
         {
-            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(8, 10));
+            _control.PostMessage(EventType.MouseOver, MouseStateExtendedWithPosition(8, 10));
             GivenControlsCanBeUpdated(_control);
 
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
@@ -96,7 +96,7 @@ namespace XNAControls.Test
         [Test]
         public void MouseOver_FalseWhenMouseLeaveEventFired()
         {
-            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(8, 10));
+            _control.PostMessage(EventType.MouseOver, MouseStateExtendedWithPosition(8, 10));
             GivenControlsCanBeUpdated(_control);
 
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
@@ -104,7 +104,7 @@ namespace XNAControls.Test
 
             Assert.IsTrue(_control.MouseOverDuringUpdate);
 
-            _control.SendMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
+            _control.PostMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
             _control.Update(new GameTime());
 
             Assert.IsFalse(_control.MouseOverDuringUpdate);
@@ -114,7 +114,7 @@ namespace XNAControls.Test
         [Test]
         public void MouseOver_TrueWhenMouseEnterEventFired_WithParent()
         {
-            _control.SendMessage(EventType.MouseEnter, MouseStateExtendedWithPosition(105, 103));
+            _control.PostMessage(EventType.MouseEnter, MouseStateExtendedWithPosition(105, 103));
 
             var parent = CreateFakeControl();
             GivenControlsCanBeUpdated(_control, parent);
@@ -132,7 +132,7 @@ namespace XNAControls.Test
         [Test]
         public void MouseOver_TrueWhenMouseOverEventFired_WithParent()
         {
-            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(105, 103));
+            _control.PostMessage(EventType.MouseOver, MouseStateExtendedWithPosition(105, 103));
 
             var parent = CreateFakeControl();
             GivenControlsCanBeUpdated(_control, parent);
@@ -149,7 +149,7 @@ namespace XNAControls.Test
         [Test]
         public void MouseOver_FalseWhenMouseLeaveEventFired_WithParent()
         {
-            _control.SendMessage(EventType.MouseOver, MouseStateExtendedWithPosition(105, 103));
+            _control.PostMessage(EventType.MouseOver, MouseStateExtendedWithPosition(105, 103));
 
             var parent = CreateFakeControl();
             GivenControlsCanBeUpdated(_control, parent);
@@ -162,7 +162,7 @@ namespace XNAControls.Test
 
             Assert.IsTrue(_control.MouseOverDuringUpdate);
 
-            _control.SendMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
+            _control.PostMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
             _control.Update(new GameTime());
 
             Assert.IsFalse(_control.MouseOverDuringUpdate);
