@@ -1,13 +1,18 @@
-﻿using System;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input;
+using MonoGame.Extended.Input.InputListeners;
+using System;
+using System.Linq;
+using XNAControls.Input;
 
 namespace XNAControls
 {
     public class XNATextBox : XNAControl, IXNATextBox
     {
+        internal static IXNATextBox FocusedTextbox { get; set; }
+
         private readonly Texture2D _textBoxBG;
         private readonly Texture2D _textBoxLeft;
         private readonly Texture2D _textBoxRight;
@@ -45,8 +50,6 @@ namespace XNAControls
             }
         }
 
-        public bool Highlighted { get; set; }
-
         public bool PasswordBox { get; set; }
 
         public int LeftPadding { get; set; }
@@ -61,7 +64,7 @@ namespace XNAControls
 
                 _actualText = value;
                 _textLabel.Text = PasswordBox ? new string(value.Select(x => '*').ToArray()) : value;
-                OnTextChanged(this, EventArgs.Empty);
+                OnTextChanged?.Invoke(this, EventArgs.Empty);
 
                 _textLabel.Visible = _actualText.Length > 0;
                 _defaultTextLabel.Visible = _actualText.Length == 0;
@@ -96,22 +99,24 @@ namespace XNAControls
             }
         }
 
-        public event EventHandler OnFocused = delegate { };
+        public int TabOrder { get; set; }
 
-        public event EventHandler OnEnterPressed = delegate { };
-        public event EventHandler OnTabPressed = delegate { };
+        public event EventHandler OnGotFocus = delegate { };
+        public event EventHandler OnLostFocus = delegate { };
+
         public event EventHandler OnTextChanged = delegate { };
-        public event EventHandler OnClicked = delegate { };
+        public event EventHandler OnEnterPressed = delegate { };
+        public event EventHandler<MouseEventArgs> OnClicked = delegate { };
 
         public bool Selected
         {
             get => _selected;
             set
             {
-                bool oldSel = _selected;
                 _selected = value;
-                if (!oldSel && _selected)
-                    OnFocused(this, EventArgs.Empty);
+
+                FocusedTextbox?.PostMessage(EventType.LostFocus, EventArgs.Empty);
+                PostMessage(EventType.GotFocus, EventArgs.Empty);
             }
         }
 
@@ -135,6 +140,7 @@ namespace XNAControls
                 DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 WrapBehavior = WrapBehavior.ScrollText,
             };
+            _textLabel.SetParentControl(this);
 
             _defaultTextLabel = new XNALabel(spriteFontContentName)
             {
@@ -144,6 +150,7 @@ namespace XNAControls
                 DrawArea = new Rectangle(0, 0, area.Width, area.Height),
                 WrapBehavior = WrapBehavior.ScrollText,
             };
+            _defaultTextLabel.SetParentControl(this);
 
             DrawArea = area;
 
@@ -153,36 +160,13 @@ namespace XNAControls
         public override void Initialize()
         {
             _textLabel.Initialize();
-            _textLabel.SetParentControl(this);
-
             _defaultTextLabel.Initialize();
-            _defaultTextLabel.SetParentControl(this);
 
             base.Initialize();
         }
 
         protected override void OnUpdateControl(GameTime gameTime)
         {
-            if (DrawAreaWithParentOffset.Contains(CurrentMouseState.Position))
-            {
-                Highlighted = true;
-                if (PreviousMouseState.LeftButton == ButtonState.Released &&
-                    CurrentMouseState.LeftButton == ButtonState.Pressed)
-                {
-                    var wasSelectedBeforeOnClick = Selected;
-                    OnClicked(this, new EventArgs());
-
-                    if (Selected && !wasSelectedBeforeOnClick)
-                    {
-                        OnFocused(this, new EventArgs());
-                    }
-                }
-            }
-            else
-            {
-                Highlighted = false;
-            }
-
             if (_lastLeftPadding != LeftPadding)
             {
                 _lastLeftPadding = LeftPadding;
@@ -231,42 +215,117 @@ namespace XNAControls
             base.OnDrawControl(gameTime);
         }
 
-        public virtual void ReceiveTextInput(char inputChar)
+        protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
-            Text = Text + inputChar;
+            FocusedTextbox?.PostMessage(EventType.LostFocus, EventArgs.Empty);
+            FocusedTextbox = this;
+            FocusedTextbox.PostMessage(EventType.GotFocus, EventArgs.Empty);
+
+            return true;
         }
 
-        public virtual void ReceiveTextInput(string text)
+        protected override bool HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs)
         {
-            Text = Text + text;
-        }
-
-        public virtual void ReceiveCommandInput(char command)
-        {
-            if (!ShouldUpdate())
-                return;
-
-            switch (command)
+            if (eventArgs.Key == Keys.Tab && FocusedTextbox != null)
             {
-                case KeyboardDispatcher.CHAR_BACKSPACE_CODE:
-                    if (Text.Length > 0)
-                        Text = Text.Substring(0, Text.Length - 1);
+                IXNATextBox nextTextBox;
+
+                var state = KeyboardExtended.GetState();
+                if (state.IsShiftDown())
+                {
+                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
+                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
+                        .OrderByDescending(x => x.TabOrder);
+                    nextTextBox = orderTextBoxesEnumerable
+                        .SkipWhile(x => x.TabOrder >= FocusedTextbox.TabOrder)
+                        .FirstOrDefault();
+                    nextTextBox ??= orderTextBoxesEnumerable.FirstOrDefault();
+                }
+                else
+                {
+                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
+                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
+                        .OrderBy(x => x.TabOrder);
+                    nextTextBox = orderTextBoxesEnumerable
+                        .SkipWhile(x => x.TabOrder <= FocusedTextbox.TabOrder)
+                        .FirstOrDefault();
+                    nextTextBox ??= orderTextBoxesEnumerable.FirstOrDefault();
+                }
+
+                FocusedTextbox?.PostMessage(EventType.LostFocus, EventArgs.Empty);
+                FocusedTextbox = nextTextBox;
+                FocusedTextbox?.PostMessage(EventType.GotFocus, EventArgs.Empty);
+            }
+            else if(eventArgs.Character.HasValue)
+            {
+                HandleTextInput(eventArgs);
+            }
+
+            return true;
+        }
+
+        protected virtual bool HandleTextInput(KeyboardEventArgs eventArgs)
+        {
+            switch (eventArgs.Key)
+            {
+                case Keys.Tab: break;
+                case Keys.Enter:
+                    {
+                        OnEnterPressed?.Invoke(this, EventArgs.Empty);
+                    }
                     break;
-                case KeyboardDispatcher.CHAR_RETURNKEY_CODE:
-                    OnEnterPressed?.Invoke(this, new EventArgs());
+                case Keys.Back:
+                    {
+                        if (!string.IsNullOrEmpty(Text))
+                            Text = Text.Remove(Text.Length - 1);
+                    }
                     break;
-                case KeyboardDispatcher.CHAR_TAB_CODE:
-                    OnTabPressed?.Invoke(this, new EventArgs());
+                default:
+                    {
+                        if (eventArgs.Character != null)
+                            Text += eventArgs.Character;
+                    }
                     break;
             }
+
+            return true;
+        }
+
+        protected override bool HandleLostFocus(IXNAControl control, EventArgs eventArgs)
+        {
+            OnLostFocus?.Invoke(this, eventArgs);
+            _selected = false;
+            if (FocusedTextbox == this)
+                FocusedTextbox = null;
+
+            return true;
+        }
+
+        protected override bool HandleGotFocus(IXNAControl control, EventArgs eventArgs)
+        {
+            OnGotFocus?.Invoke(this, eventArgs);
+            _selected = true;
+            if (FocusedTextbox != this)
+                FocusedTextbox = this;
+
+            return true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && FocusedTextbox == this)
+            {
+                FocusedTextbox = null;
+            }
+
+            base.Dispose(disposing);
         }
     }
 
-    public interface IXNATextBox : IXNAControl, IKeyboardSubscriber
+    public interface IXNATextBox : IXNAControl
     {
         int MaxChars { get; set; }
         int? MaxWidth { get; set; }
-        bool Highlighted { get; set; }
         bool PasswordBox { get; set; }
         int LeftPadding { get; set; }
         string Text { get; set; }
@@ -274,11 +333,12 @@ namespace XNAControls
         Color TextColor { get; set; }
         Color DefaultTextColor { get; set; }
         LabelAlignment TextAlignment { get; set; }
+        bool Selected { get; set; }
+        int TabOrder { get; set; }
 
-        event EventHandler OnFocused;
-        event EventHandler OnEnterPressed;
-        event EventHandler OnTabPressed;
+        event EventHandler OnGotFocus;
+        event EventHandler OnLostFocus;
         event EventHandler OnTextChanged;
-        event EventHandler OnClicked;
+        event EventHandler<MouseEventArgs> OnClicked;
     }
 }

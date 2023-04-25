@@ -18,12 +18,6 @@ namespace XNAControls.Test
             GameRepository.SetGame(_gameManager.Game);
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            Singleton<DialogRepository>.Instance.OpenDialogs.Clear();
-        }
-
         [Test]
         public void XNADialog_SetBackgroundTexture_SetsControlSizeToTextureDimensions()
         {
@@ -101,28 +95,6 @@ namespace XNAControls.Test
 
             Assert.That(dlg.DrawArea.Width, Is.Zero);
             Assert.That(dlg.DrawArea.Height, Is.Zero);
-        }
-
-        [Test]
-        public void XNADialog_Initialize_PushesDialogOntoStack()
-        {
-            using var dlg = new FakeXNADialog();
-
-            dlg.Initialize();
-
-            var actual = Singleton<DialogRepository>.Instance.OpenDialogs.Peek();
-            Assert.That(actual, Is.EqualTo(dlg));
-        }
-
-        [Test]
-        public void XNADialog_Close_PopsDialogFromStack()
-        {
-            using var dlg = new FakeXNADialog();
-            dlg.Initialize();
-
-            dlg.CloseFake();
-
-            Assert.That(Singleton<DialogRepository>.Instance.OpenDialogs, Is.Empty);
         }
 
         [Test]

@@ -1,8 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input.InputListeners;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using XNAControls.Input;
 
 namespace XNAControls
 {
@@ -95,8 +98,12 @@ namespace XNAControls
         /// <inheritdoc />
         public virtual void BringToTop()
         {
-            var dialogsCount = Singleton<DialogRepository>.Instance.OpenDialogs.Count;
-            SetDrawOrder((dialogsCount+1) * 5 + DialogLayerOffset);
+            FindAndPopThisDialogFromStack();
+            var openDialogs = Singleton<DialogRepository>.Instance.OpenDialogs;
+            openDialogs.Push(this);
+
+            var maxDrawOrder = Game.Components.OfType<IEventReceiver>().Max(x => x.ZOrder);
+            SetDrawOrder((100 * openDialogs.Count) + maxDrawOrder + 1);
         }
 
         /// <inheritdoc />
@@ -130,21 +137,10 @@ namespace XNAControls
             Task.Run(async () => await ShowDialogAsync(modal: false).ConfigureAwait(false));
         }
 
-        /// <summary>
-        /// Handle click+drag for the dialog
-        /// </summary>
-        protected override void OnUpdateControl(GameTime gameTime)
+        protected override bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
         {
-            if (PreviousMouseState.LeftButton == ButtonState.Pressed &&
-                CurrentMouseState.LeftButton == ButtonState.Pressed &&
-                DrawAreaWithParentOffset.Contains(CurrentMouseState.X, CurrentMouseState.Y) && ShouldClickDrag)
-            {
-                DrawPosition = new Vector2(
-                    DrawPositionWithParentOffset.X + (CurrentMouseState.X - PreviousMouseState.X),
-                    DrawPositionWithParentOffset.Y + (CurrentMouseState.Y - PreviousMouseState.Y));
-            }
-
-            base.OnUpdateControl(gameTime);
+            DrawPosition += eventArgs.DistanceMoved;
+            return true;
         }
 
         /// <summary>
@@ -173,9 +169,8 @@ namespace XNAControls
 
             if (!eventArgs.Cancel)
             {
-                Singleton<DialogRepository>.Instance.OpenDialogs.Pop();
+                FindAndPopThisDialogFromStack();
                 _showTaskCompletionSource.SetResult(result);
-
                 DialogClosed?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -191,6 +186,28 @@ namespace XNAControls
 
             Dispose();
             return result;
+        }
+
+        private void FindAndPopThisDialogFromStack()
+        {
+            var dlgStack = Singleton<DialogRepository>.Instance.OpenDialogs;
+
+            if (!dlgStack.Contains(this))
+                return;
+
+            var tempStack = new Stack<IXNADialog>();
+            do
+            {
+                tempStack.Push(dlgStack.Pop());
+            }
+            while (tempStack.Peek() != this);
+
+            // pop 'this' dialog from temp stack
+            tempStack.Pop();
+
+            // push all other dialogs back onto dialog stacck
+            while (tempStack.Any())
+                dlgStack.Push(tempStack.Pop());
         }
     }
 
