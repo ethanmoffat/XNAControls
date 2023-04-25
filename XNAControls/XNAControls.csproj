@@ -12,13 +12,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>utility library UI cross-platform controls XNA MonoGame</PackageTags>
     <Copyright>Copyright © 2016-2023 Ethan Moffat</Copyright>
-    <Description>Cross-platform UI control library for MonoGame/XNA.</Description>
-    <Version>1.7.4</Version>
-    <AssemblyVersion>1.7.4</AssemblyVersion>
-    <PackageVersion>1.7.4</PackageVersion>
-    <Version>1.7.0</Version>
-    <AssemblyVersion>1.7.0</AssemblyVersion>
-    <PackageVersion>1.7.0</PackageVersion>
+    <Description>Cross-platform UI control library for MonoGame</Description>
     <Version>2.0.0</Version>
     <AssemblyVersion>2.0.0</AssemblyVersion>
     <PackageVersion>2.0.0</PackageVersion>
