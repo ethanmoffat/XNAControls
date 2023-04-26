@@ -6,6 +6,7 @@
     <AssemblyName>XNAControls</AssemblyName>
     <RootNamespace>XNAControls</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageProjectUrl>https://github.com/ethanmoffat/XNAControls</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/ethanmoffat/XNAControls</RepositoryUrl>

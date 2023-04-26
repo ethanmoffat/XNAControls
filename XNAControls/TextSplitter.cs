@@ -8,6 +8,9 @@ using System.Text;
 
 namespace XNAControls
 {
+    /// <summary>
+    /// Class for splitting text based on line length
+    /// </summary>
     public class TextSplitter
     {
         private static readonly char[] _whiteSpace = new[] { ' ', '\t', '\n' };
@@ -61,6 +64,9 @@ namespace XNAControls
         private SpriteFont _spriteFont;
         private BitmapFont _bitmapFont;
 
+        /// <summary>
+        /// Construct a SpriteFont-based TextSplitter with the specified text
+        /// </summary>
         public TextSplitter(string text, SpriteFont font)
         {
             Text = text;
@@ -68,6 +74,9 @@ namespace XNAControls
             ResetToDefaults();
         }
 
+        /// <summary>
+        /// Construct a BitmapFont-based TextSplitter with the specified text
+        /// </summary>
         public TextSplitter(string text, BitmapFont font)
         {
             Text = text;
@@ -86,6 +95,9 @@ namespace XNAControls
             LineLength = 200;
         }
 
+        /// <summary>
+        /// Set the font to the specified SpriteFont
+        /// </summary>
         public void SetFont(SpriteFont newFont)
         {
             if (_bitmapFont != null)
@@ -96,6 +108,9 @@ namespace XNAControls
             _spriteFont = newFont;
         }
 
+        /// <summary>
+        /// Set the font to the specified BitmapFont
+        /// </summary>
         public void SetFont(BitmapFont newFont)
         {
             if (_spriteFont != null)

@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace XNAControls.Input
 {
+    /// <summary>
+    /// Component that handles input for the game. Sends messages to controls based on the input event that occurred.
+    /// </summary>
     public class InputManager : GameComponent
     {
         private readonly KeyboardListener _keyboardListener;
@@ -15,9 +18,16 @@ namespace XNAControls.Input
 
         private IEventReceiver _dragTarget;
 
+        /// <summary>
+        /// Create a new InputManager using the default game previously set in the GameRepository
+        /// </summary>
         public InputManager()
             : this (GameRepository.GetGame()) { }
 
+        /// <summary>
+        /// Create a new InputManager using the specified game
+        /// </summary>
+        /// <param name="game">The game class to use</param>
         public InputManager(Game game)
             : base(game)
         {
@@ -35,6 +45,7 @@ namespace XNAControls.Input
             UpdateOrder = int.MinValue;
         }
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             _keyboardListener.KeyTyped += Keyboard_KeyTyped;
@@ -48,6 +59,7 @@ namespace XNAControls.Input
             base.Initialize();
         }
 
+        /// <inheritdoc />
         public override void Update(GameTime gameTime)
         {
             _keyboardListener.Update(gameTime);
