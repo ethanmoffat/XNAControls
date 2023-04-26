@@ -9,6 +9,9 @@ using XNAControls.Input;
 
 namespace XNAControls
 {
+    /// <summary>
+    /// Represents a text input control
+    /// </summary>
     public class XNATextBox : XNAControl, IXNATextBox
     {
         internal static IXNATextBox FocusedTextbox { get; set; }
@@ -27,6 +30,7 @@ namespace XNAControls
 
         private int _lastLeftPadding;
 
+        /// <inheritdoc />
         public override Rectangle DrawArea
         {
             get => _drawArea;
@@ -38,8 +42,10 @@ namespace XNAControls
             }
         }
 
+        /// <inheritdoc />
         public int MaxChars { get; set; }
 
+        /// <inheritdoc />
         public int? MaxWidth
         {
             get => _textLabel.TextWidth;
@@ -50,10 +56,13 @@ namespace XNAControls
             }
         }
 
+        /// <inheritdoc />
         public bool PasswordBox { get; set; }
 
+        /// <inheritdoc />
         public int LeftPadding { get; set; }
 
+        /// <inheritdoc />
         public string Text
         {
             get => _actualText;
@@ -71,24 +80,28 @@ namespace XNAControls
             }
         }
 
+        /// <inheritdoc />
         public string DefaultText
         {
             get => _defaultTextLabel.Text;
             set => _defaultTextLabel.Text = value;
         }
 
+        /// <inheritdoc />
         public Color TextColor
         {
             get => _textLabel.ForeColor;
             set => _textLabel.ForeColor = value;
         }
 
+        /// <inheritdoc />
         public Color DefaultTextColor
         {
             get => _defaultTextLabel.ForeColor;
             set => _defaultTextLabel.ForeColor = value;
         }
 
+        /// <inheritdoc />
         public LabelAlignment TextAlignment
         {
             get => _textLabel.TextAlign;
@@ -99,15 +112,7 @@ namespace XNAControls
             }
         }
 
-        public int TabOrder { get; set; }
-
-        public event EventHandler OnGotFocus = delegate { };
-        public event EventHandler OnLostFocus = delegate { };
-
-        public event EventHandler OnTextChanged = delegate { };
-        public event EventHandler OnEnterPressed = delegate { };
-        public event EventHandler<MouseEventArgs> OnClicked = delegate { };
-
+        /// <inheritdoc />
         public bool Selected
         {
             get => _selected;
@@ -120,6 +125,27 @@ namespace XNAControls
             }
         }
 
+        /// <inheritdoc />
+        public int TabOrder { get; set; }
+
+        /// <inheritdoc />
+        public event EventHandler OnGotFocus = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler OnLostFocus = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler OnTextChanged = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler OnEnterPressed = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnClicked = delegate { };
+
+        /// <summary>
+        /// Create a new text box with the specified area and font (content name)
+        /// </summary>
         public XNATextBox(Rectangle area, 
                           string spriteFontContentName,
                           Texture2D backgroundTexture = null,
@@ -157,6 +183,7 @@ namespace XNAControls
             _actualText = "";
         }
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             _textLabel.Initialize();
@@ -165,6 +192,7 @@ namespace XNAControls
             base.Initialize();
         }
 
+        /// <inheritdoc />
         protected override void OnUpdateControl(GameTime gameTime)
         {
             if (_lastLeftPadding != LeftPadding)
@@ -177,6 +205,7 @@ namespace XNAControls
             base.OnUpdateControl(gameTime);
         }
 
+        /// <inheritdoc />
         protected override void OnDrawControl(GameTime gameTime)
         {
             _spriteBatch.Begin();
@@ -215,6 +244,7 @@ namespace XNAControls
             base.OnDrawControl(gameTime);
         }
 
+        /// <inheritdoc />
         protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
             FocusedTextbox?.PostMessage(EventType.LostFocus, EventArgs.Empty);
@@ -224,6 +254,7 @@ namespace XNAControls
             return true;
         }
 
+        /// <inheritdoc />
         protected override bool HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs)
         {
             if (eventArgs.Key == Keys.Tab && FocusedTextbox != null)
@@ -264,6 +295,7 @@ namespace XNAControls
             return true;
         }
 
+        /// <inheritdoc />
         protected virtual bool HandleTextInput(KeyboardEventArgs eventArgs)
         {
             switch (eventArgs.Key)
@@ -291,6 +323,7 @@ namespace XNAControls
             return true;
         }
 
+        /// <inheritdoc />
         protected override bool HandleLostFocus(IXNAControl control, EventArgs eventArgs)
         {
             OnLostFocus?.Invoke(this, eventArgs);
@@ -301,6 +334,7 @@ namespace XNAControls
             return true;
         }
 
+        /// <inheritdoc />
         protected override bool HandleGotFocus(IXNAControl control, EventArgs eventArgs)
         {
             OnGotFocus?.Invoke(this, eventArgs);
@@ -311,6 +345,7 @@ namespace XNAControls
             return true;
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing && FocusedTextbox == this)
@@ -322,23 +357,89 @@ namespace XNAControls
         }
     }
 
+    /// <summary>
+    /// Interface for a text input control
+    /// </summary>
     public interface IXNATextBox : IXNAControl
     {
+        /// <summary>
+        /// The maximum number of characters that can be entered in this text box
+        /// </summary>
         int MaxChars { get; set; }
+
+        /// <summary>
+        /// The maximum width of text as measured by the font before text starts scrolling
+        /// </summary>
         int? MaxWidth { get; set; }
+
+        /// <summary>
+        /// Set this textbox as a password box
+        /// </summary>
         bool PasswordBox { get; set; }
+
+        /// <summary>
+        /// Width of empty space to the left of the first character displayed in this text box
+        /// </summary>
         int LeftPadding { get; set; }
+
+        /// <summary>
+        /// The text to display
+        /// </summary>
         string Text { get; set; }
+
+        /// <summary>
+        /// The default text to display. This text shows before any text is entered.
+        /// </summary>
         string DefaultText { get; set; }
+
+        /// <summary>
+        /// Color of the text
+        /// </summary>
         Color TextColor { get; set; }
+
+        /// <summary>
+        /// Color of the default text
+        /// </summary>
         Color DefaultTextColor { get; set; }
+
+        /// <summary>
+        /// Alignment of the text
+        /// </summary>
         LabelAlignment TextAlignment { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether this text box is selected. Selecting this text box gives it focus.
+        /// </summary>
         bool Selected { get; set; }
+
+        /// <summary>
+        /// TabOrder of this text box. Pressing 'tab' will cycle through text boxes based on their tab order.
+        /// </summary>
         int TabOrder { get; set; }
 
+        /// <summary>
+        /// Event fired when this text box gets focus
+        /// </summary>
         event EventHandler OnGotFocus;
+
+        /// <summary>
+        /// Event fired when this text box loses focus
+        /// </summary>
         event EventHandler OnLostFocus;
+
+        /// <summary>
+        /// Event fired when text changes
+        /// </summary>
         event EventHandler OnTextChanged;
+
+        /// <summary>
+        /// Event fired when the enter key is pressed
+        /// </summary>
+        event EventHandler OnEnterPressed;
+
+        /// <summary>
+        /// Event fired when this text box is clicked
+        /// </summary>
         event EventHandler<MouseEventArgs> OnClicked;
     }
 }

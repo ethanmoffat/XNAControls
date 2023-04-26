@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace XNAControls.Input
 {
+    /// <summary>
+    /// Component that handles input for the game. Sends messages to controls based on the input event that occurred.
+    /// </summary>
     public class InputManager : GameComponent
     {
         private readonly KeyboardListener _keyboardListener;
@@ -15,26 +18,35 @@ namespace XNAControls.Input
 
         private IEventReceiver _dragTarget;
 
+        /// <summary>
+        /// Create a new InputManager using the default game previously set in the GameRepository
+        /// </summary>
         public InputManager()
             : this (GameRepository.GetGame()) { }
 
+        /// <summary>
+        /// Create a new InputManager using the specified game and default MouseListenerSettings (60ms double-click, 1px drag threshold)
+        /// </summary>
         public InputManager(Game game)
+            : this(game, new MouseListenerSettings { DoubleClickMilliseconds = 60, DragThreshold = 1 })
+        {
+        }
+
+        /// <summary>
+        /// Create a new InputManager using the specified game and MouseListenerSettings
+        /// </summary>
+        public InputManager(Game game, MouseListenerSettings mouseListenerSettings)
             : base(game)
         {
             _keyboardListener = new KeyboardListener();
-
-            var settings = new MouseListenerSettings
-            {
-                DoubleClickMilliseconds = 60,
-                DragThreshold = 1
-            };
-            _mouseListener = new MouseListener(settings);
+            _mouseListener = new MouseListener(mouseListenerSettings);
 
             _mouseOverState = new Dictionary<object, bool>();
 
             UpdateOrder = int.MinValue;
         }
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             _keyboardListener.KeyTyped += Keyboard_KeyTyped;
@@ -48,6 +60,7 @@ namespace XNAControls.Input
             base.Initialize();
         }
 
+        /// <inheritdoc />
         public override void Update(GameTime gameTime)
         {
             _keyboardListener.Update(gameTime);
@@ -56,8 +69,6 @@ namespace XNAControls.Input
             var mouseState = MouseExtended.GetState();
             if (mouseState.PositionChanged)
             {
-                var xnaControls = Game.Components.OfType<IXNAControl>();
-
                 var comps = InputTargetFinder.GetMouseOverEventTargetControl(Game.Components, mouseState.Position);
                 foreach (var component in comps)
                 {

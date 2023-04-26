@@ -5,8 +5,14 @@ using System;
 
 namespace XNAControls
 {
+    /// <summary>
+    /// Represents a button control
+    /// </summary>
     public class XNAButton : XNAControl, IXNAButton
     {
+        /// <summary>
+        /// Controls the behavior of buttons that should flash
+        /// </summary>
         public enum ButtonFlashBehavior
         {
             /// <summary>
@@ -82,6 +88,7 @@ namespace XNAControls
             ClickArea = new Rectangle(0, 0, DrawArea.Width, DrawArea.Height);
         }
 
+        /// <inheritdoc />
         protected override void OnUnconditionalUpdateControl(GameTime gameTime)
         {
             if (FlashSpeed != null && (FlashBehavior == ButtonFlashBehavior.FlashOnMouseOver || !MouseOver))
@@ -99,7 +106,8 @@ namespace XNAControls
 
             base.OnUnconditionalUpdateControl(gameTime);
         }
-        
+
+        /// <inheritdoc />
         protected override void OnDrawControl(GameTime gameTime)
         {
             _spriteBatch.Begin();
@@ -112,6 +120,7 @@ namespace XNAControls
             base.OnDrawControl(gameTime);
         }
 
+        /// <inheritdoc />
         protected override bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
         {
             if (OnClickDrag == null)
@@ -122,6 +131,7 @@ namespace XNAControls
             return true;
         }
 
+        /// <inheritdoc />
         protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
             if (OnClick == null)
@@ -133,6 +143,9 @@ namespace XNAControls
         }
     }
 
+    /// <summary>
+    /// Interface for a button control
+    /// </summary>
     public interface IXNAButton : IXNAControl
     {
         /// <summary>

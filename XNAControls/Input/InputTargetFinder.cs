@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace XNAControls.Input
 {
-    public static class InputTargetFinder
+    internal static class InputTargetFinder
     {
         public static IEnumerable<IEventReceiver> GetMouseOverEventTargetControl(IEnumerable<IGameComponent> collection, Point position)
         {

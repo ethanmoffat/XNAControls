@@ -6,6 +6,9 @@ using XNAControls.Input;
 
 namespace XNAControls
 {
+    /// <summary>
+    /// Interface representing a control
+    /// </summary>
     public interface IXNAControl : IGameComponent, IDrawable, IUpdateable, IDisposable, IEventReceiver
     {
         /// <summary>

@@ -9,6 +9,9 @@ using XNAControls.Input;
 
 namespace XNAControls
 {
+    /// <summary>
+    /// Represents a UI control
+    /// </summary>
     public abstract class XNAControl : DrawableGameComponent, IXNAControl
     {
         static XNAControl()
@@ -17,18 +20,25 @@ namespace XNAControls
             Singleton<DialogRepository>.MapIfMissing(new DialogRepository());
         }
 
+        private static EventType UnconditionalEvents => EventType.MouseEnter | EventType.MouseLeave | EventType.MouseOver;
+
         private readonly Queue<(EventType, object)> _eventQueue;
 
         private readonly List<IXNAControl> _children;
 
+        /// <summary>
+        /// The SpriteBatch for this control
+        /// </summary>
         protected readonly SpriteBatch _spriteBatch;
 
         private IEventReceiver _scrollWheelEventReceiver;
 
         private bool _disposed;
 
+        /// <inheritdoc />
         public int ZOrder => DrawOrder;
 
+        /// <inheritdoc />
         public virtual Rectangle EventArea => DrawAreaWithParentOffset;
 
         /// <summary>
@@ -130,6 +140,9 @@ namespace XNAControls
         /// </summary>
         public event EventHandler<MouseStateExtended> OnMouseLeave = delegate { };
 
+        /// <summary>
+        /// Construct a new XNAControl, using the game set in the GameRepository
+        /// </summary>
         protected XNAControl()
             : base(GameRepository.GetGame())
         {
@@ -238,7 +251,7 @@ namespace XNAControls
         /// <inheritdoc />
         public virtual void PostMessage(EventType eventType, object eventArgs)
         {
-            if (!ShouldUpdate()) return;
+            if (!UnconditionalEvents.HasFlag(eventType) && !ShouldUpdate()) return;
 
             // queue handling of the event so it happens as part of this control's update loop
             _eventQueue.Enqueue((eventType, eventArgs));
@@ -256,6 +269,8 @@ namespace XNAControls
         /// <param name="gameTime"></param>
         protected virtual void OnUnconditionalUpdateControl(GameTime gameTime)
         {
+            PumpEventQueue(UnconditionalEvents);
+
             foreach (var child in _children.OfType<XNAControl>().OrderBy(x => x.UpdateOrder))
                 child.OnUnconditionalUpdateControl(gameTime);
         }
@@ -267,19 +282,7 @@ namespace XNAControls
         /// </summary>
         protected virtual void OnUpdateControl(GameTime gameTime)
         {
-            while (_eventQueue.Any())
-            {
-                var (messageType, messageArgs) = _eventQueue.Dequeue();
-
-                if (!HandleEvent(messageType, messageArgs))
-                {
-                    IXNAControl target = ImmediateParent;
-                    while (target != null && !target.SendMessage(messageType, messageArgs))
-                    {
-                        target = target.ImmediateParent;
-                    }
-                }
-            }
+            PumpEventQueue(EventType.All);
 
             foreach (var child in _children.OrderBy(x => x.UpdateOrder))
                 child.Update(gameTime);
@@ -320,6 +323,7 @@ namespace XNAControls
                 child.Draw(gameTime);
         }
 
+        /// <inheritdoc />
         protected override void OnDrawOrderChanged(object sender, EventArgs args)
         {
             base.OnDrawOrderChanged(sender, args);
@@ -330,6 +334,36 @@ namespace XNAControls
         #endregion
 
         #region Events
+
+        private void PumpEventQueue(EventType eventsToHandle)
+        {
+            var requeue = new Queue<(EventType, object)>();
+
+            while (_eventQueue.Any())
+            {
+                var (messageType, messageArgs) = _eventQueue.Dequeue();
+
+                if (eventsToHandle.HasFlag(messageType))
+                {
+
+                    if (!HandleEvent(messageType, messageArgs))
+                    {
+                        IXNAControl target = ImmediateParent;
+                        while (target != null && !target.SendMessage(messageType, messageArgs))
+                        {
+                            target = target.ImmediateParent;
+                        }
+                    }
+                }
+                else
+                {
+                    requeue.Enqueue((messageType, messageArgs));
+                }
+            }
+
+            while (requeue.Any())
+                _eventQueue.Enqueue(requeue.Dequeue());
+        }
 
         private bool HandleEvent(EventType eventType, object eventArgs)
         {
@@ -369,20 +403,44 @@ namespace XNAControls
             return handled;
         }
 
+        /// <summary>
+        /// Default handler for DragStart event
+        /// </summary>
         protected virtual bool HandleDragStart(IXNAControl control, MouseEventArgs eventArgs) => false;
 
+        /// <summary>
+        /// Default handler for DragEnd event
+        /// </summary>
         protected virtual bool HandleDragEnd(IXNAControl control, MouseEventArgs eventArgs) => false;
 
+        /// <summary>
+        /// Default handler for Drag event
+        /// </summary>
         protected virtual bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs) => false;
 
+        /// <summary>
+        /// Default handler for Click event
+        /// </summary>
         protected virtual bool HandleClick(IXNAControl control, MouseEventArgs eventArgs) => false;
 
+        /// <summary>
+        /// Default handler for DoubleClick event
+        /// </summary>
         protected virtual bool HandleDoubleClick(IXNAControl control, MouseEventArgs eventArgs) => false;
 
+        /// <summary>
+        /// Default handler for KeyTyped event
+        /// </summary>
         protected virtual bool HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs) => false;
 
+        /// <summary>
+        /// Default handler for GotFocus event
+        /// </summary>
         protected virtual bool HandleGotFocus(IXNAControl control, EventArgs eventArgs) => false;
 
+        /// <summary>
+        /// Default handler for LostFocus event
+        /// </summary>
         protected virtual bool HandleLostFocus(IXNAControl control, EventArgs eventArgs) => false;
 
         /// <summary>
@@ -436,6 +494,9 @@ namespace XNAControls
             return Visible && !_disposed;
         }
 
+        /// <summary>
+        /// Set the size of this control
+        /// </summary>
         protected void SetSize(int newWidth, int newHeight)
         {
             DrawArea = new Rectangle(DrawArea.X, DrawArea.Y, newWidth, newHeight);
@@ -463,6 +524,7 @@ namespace XNAControls
 
         #endregion
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             PrepareForDisposal();
@@ -480,6 +542,9 @@ namespace XNAControls
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Set the _disposed field of this control to true
+        /// </summary>
         protected void PrepareForDisposal()
         {
             _disposed = true;

@@ -9,25 +9,48 @@ using XNAControls.Input;
 
 namespace XNAControls
 {
+    /// <summary>
+    /// Represents a result of a modal dialog
+    /// </summary>
     public enum XNADialogResult
     {
+        /// <inheritdoc />
         OK,
+        /// <inheritdoc />
         Cancel,
+        /// <summary>
+        /// Used when the dialog is closed programmatically without a valid result
+        /// </summary>
         NO_BUTTON_PRESSED
     }
 
+    /// <summary>
+    /// Event args for when a dialog is closing
+    /// </summary>
     public class DialogClosingEventArgs : EventArgs
     {
+        /// <summary>
+        /// The dialog result
+        /// </summary>
         public XNADialogResult Result { get; }
 
+        /// <summary>
+        /// Set to true to cancel the dialog closing event and stop it from being closed
+        /// </summary>
         public bool Cancel { get; set; }
 
+        /// <summary>
+        /// Create an instance of DialogClosingEventArgs with the given result
+        /// </summary>
         public DialogClosingEventArgs(XNADialogResult result)
         {
             Result = result;
         }
     }
 
+    /// <summary>
+    /// Represents a dialog
+    /// </summary>
     public abstract class XNADialog : XNAControl, IXNADialog
     {
         /// <summary>
@@ -53,7 +76,7 @@ namespace XNAControls
         public event EventHandler DialogClosed;
 
         /// <summary>
-        /// The background texture of the dialog. Setting the background texture automatically sets the dialog size
+        /// The background texture of the dialog. Setting the background texture automatically sets the dialog size.
         /// </summary>
         protected Texture2D BackgroundTexture
         {
@@ -69,6 +92,9 @@ namespace XNAControls
             }
         }
 
+        /// <summary>
+        /// The source area for the background texture of the dialog. Setting the texture source automatically sets the dialog size.
+        /// </summary>
         protected Rectangle? BackgroundTextureSource
         {
             get => _backgroundTextureSource;
@@ -83,6 +109,7 @@ namespace XNAControls
             }
         }
 
+        /// <inheritdoc />
         protected XNADialog()
         {
             _showTaskCompletionSource = new TaskCompletionSource<XNADialogResult>();
@@ -137,6 +164,7 @@ namespace XNAControls
             Task.Run(async () => await ShowDialogAsync(modal: false).ConfigureAwait(false));
         }
 
+        /// <inheritdoc />
         protected override bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs)
         {
             DrawPosition += eventArgs.DistanceMoved;
@@ -211,6 +239,9 @@ namespace XNAControls
         }
     }
 
+    /// <summary>
+    /// Interface for a dialog
+    /// </summary>
     public interface IXNADialog : IXNAControl
     {
         internal bool Modal { get; }

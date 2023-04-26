@@ -2,6 +2,9 @@
 
 namespace XNAControls.Input
 {
+    /// <summary>
+    /// Interface representing an entity that can receive events from the Game's InputManager
+    /// </summary>
     public interface IEventReceiver
     {
         /// <summary>

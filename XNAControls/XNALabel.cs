@@ -7,27 +7,48 @@ using MonoGame.Extended.BitmapFonts;
 
 namespace XNAControls
 {
+    /// <summary>
+    /// Controls text alignment of a label control
+    /// </summary>
     [Flags]
     public enum LabelAlignment
     {
+        /// <inheritdoc />
         Top = 1,
+        /// <inheritdoc />
         Middle = 2,
+        /// <inheritdoc />
         Bottom = 4,
+        /// <inheritdoc />
         Left = 8,
+        /// <inheritdoc />
         Right = 16,
+        /// <inheritdoc />
         Center = 32,
 
+        /// <inheritdoc />
         TopLeft = Top | Left,
+        /// <inheritdoc />
         MiddleLeft = Middle | Left,
+        /// <inheritdoc />
         BottomLeft = Bottom | Left,
+        /// <inheritdoc />
         TopCenter = Top | Center,
+        /// <inheritdoc />
         MiddleCenter = Middle | Center,
+        /// <inheritdoc />
         BottomCenter = Bottom | Center,
+        /// <inheritdoc />
         TopRight = Top | Right,
+        /// <inheritdoc />
         MiddleRight = Middle | Right,
+        /// <inheritdoc />
         BottomRight = Bottom | Right
     }
 
+    /// <summary>
+    /// Controls the text wrapping behavior of a label control
+    /// </summary>
     public enum WrapBehavior
     {
         /// <summary>
@@ -40,6 +61,9 @@ namespace XNAControls
         ScrollText,
     }
 
+    /// <summary>
+    /// Represents a text label control
+    /// </summary>
     public class XNALabel : XNAControl, IXNALabel
     {
         private readonly string _spriteFontName;
@@ -142,6 +166,9 @@ namespace XNAControls
         /// <inheritdoc />
         public bool Underline { get; set; }
 
+        /// <summary>
+        /// Create a new label control with the given sprite font name (content name)
+        /// </summary>
         public XNALabel(string spriteFontName)
         {
             _spriteFontName = spriteFontName;
@@ -156,6 +183,7 @@ namespace XNAControls
             _alignmentOffset = CalculatePositionFromAlignment();
         }
 
+        /// <inheritdoc />
         public override void Initialize()
         {
             _whitePixel = new Texture2D(Game.GraphicsDevice, 1, 1);
@@ -164,6 +192,7 @@ namespace XNAControls
             base.Initialize();
         }
 
+        /// <inheritdoc />
         protected override void LoadContent()
         {
             try
@@ -191,6 +220,7 @@ namespace XNAControls
                     (int)Math.Round(sz.Y) + (int)yPadding);
         }
 
+        /// <inheritdoc />
         protected override void OnUnconditionalUpdateControl(GameTime gameTime)
         {
             if (_lastText != Text || _lastTextWidth != TextWidth)
@@ -259,6 +289,7 @@ namespace XNAControls
                     : new Vector2(TextWidth.Value, MeasureString(Text).Y);
         }
 
+        /// <inheritdoc />
         protected override void OnDrawControl(GameTime gameTime)
         {
             float adjustedX = 0, adjustedY = 0;
@@ -351,6 +382,7 @@ namespace XNAControls
 
         private int LineHeight => _isBitmapFont ? _bFont.LineHeight : _sFont.LineSpacing;
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             PrepareForDisposal();
@@ -368,6 +400,9 @@ namespace XNAControls
         }
     }
 
+    /// <summary>
+    /// Interface for a text label control
+    /// </summary>
     public interface IXNALabel : IXNAControl
     {
         /// <summary>
