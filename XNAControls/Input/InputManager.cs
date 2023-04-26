@@ -69,8 +69,6 @@ namespace XNAControls.Input
             var mouseState = MouseExtended.GetState();
             if (mouseState.PositionChanged)
             {
-                var xnaControls = Game.Components.OfType<IXNAControl>();
-
                 var comps = InputTargetFinder.GetMouseOverEventTargetControl(Game.Components, mouseState.Position);
                 foreach (var component in comps)
                 {

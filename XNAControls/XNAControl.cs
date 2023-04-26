@@ -20,6 +20,8 @@ namespace XNAControls
             Singleton<DialogRepository>.MapIfMissing(new DialogRepository());
         }
 
+        private static EventType UnconditionalEvents => EventType.MouseEnter | EventType.MouseLeave | EventType.MouseOver;
+
         private readonly Queue<(EventType, object)> _eventQueue;
 
         private readonly List<IXNAControl> _children;
@@ -249,7 +251,7 @@ namespace XNAControls
         /// <inheritdoc />
         public virtual void PostMessage(EventType eventType, object eventArgs)
         {
-            if (!ShouldUpdate()) return;
+            if (!UnconditionalEvents.HasFlag(eventType) && !ShouldUpdate()) return;
 
             // queue handling of the event so it happens as part of this control's update loop
             _eventQueue.Enqueue((eventType, eventArgs));
@@ -267,6 +269,8 @@ namespace XNAControls
         /// <param name="gameTime"></param>
         protected virtual void OnUnconditionalUpdateControl(GameTime gameTime)
         {
+            PumpEventQueue(UnconditionalEvents);
+
             foreach (var child in _children.OfType<XNAControl>().OrderBy(x => x.UpdateOrder))
                 child.OnUnconditionalUpdateControl(gameTime);
         }
@@ -278,19 +282,7 @@ namespace XNAControls
         /// </summary>
         protected virtual void OnUpdateControl(GameTime gameTime)
         {
-            while (_eventQueue.Any())
-            {
-                var (messageType, messageArgs) = _eventQueue.Dequeue();
-
-                if (!HandleEvent(messageType, messageArgs))
-                {
-                    IXNAControl target = ImmediateParent;
-                    while (target != null && !target.SendMessage(messageType, messageArgs))
-                    {
-                        target = target.ImmediateParent;
-                    }
-                }
-            }
+            PumpEventQueue(EventType.All);
 
             foreach (var child in _children.OrderBy(x => x.UpdateOrder))
                 child.Update(gameTime);
@@ -342,6 +334,36 @@ namespace XNAControls
         #endregion
 
         #region Events
+
+        private void PumpEventQueue(EventType eventsToHandle)
+        {
+            var requeue = new Queue<(EventType, object)>();
+
+            while (_eventQueue.Any())
+            {
+                var (messageType, messageArgs) = _eventQueue.Dequeue();
+
+                if (eventsToHandle.HasFlag(messageType))
+                {
+
+                    if (!HandleEvent(messageType, messageArgs))
+                    {
+                        IXNAControl target = ImmediateParent;
+                        while (target != null && !target.SendMessage(messageType, messageArgs))
+                        {
+                            target = target.ImmediateParent;
+                        }
+                    }
+                }
+                else
+                {
+                    requeue.Enqueue((messageType, messageArgs));
+                }
+            }
+
+            while (requeue.Any())
+                _eventQueue.Enqueue(requeue.Dequeue());
+        }
 
         private bool HandleEvent(EventType eventType, object eventArgs)
         {
