@@ -25,20 +25,21 @@ namespace XNAControls.Input
             : this (GameRepository.GetGame()) { }
 
         /// <summary>
-        /// Create a new InputManager using the specified game
+        /// Create a new InputManager using the specified game and default MouseListenerSettings (60ms double-click, 1px drag threshold)
         /// </summary>
-        /// <param name="game">The game class to use</param>
         public InputManager(Game game)
+            : this(game, new MouseListenerSettings { DoubleClickMilliseconds = 60, DragThreshold = 1 })
+        {
+        }
+
+        /// <summary>
+        /// Create a new InputManager using the specified game and MouseListenerSettings
+        /// </summary>
+        public InputManager(Game game, MouseListenerSettings mouseListenerSettings)
             : base(game)
         {
             _keyboardListener = new KeyboardListener();
-
-            var settings = new MouseListenerSettings
-            {
-                DoubleClickMilliseconds = 60,
-                DragThreshold = 1
-            };
-            _mouseListener = new MouseListener(settings);
+            _mouseListener = new MouseListener(mouseListenerSettings);
 
             _mouseOverState = new Dictionary<object, bool>();
 
