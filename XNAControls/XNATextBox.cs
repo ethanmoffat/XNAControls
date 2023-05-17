@@ -261,12 +261,15 @@ namespace XNAControls
             {
                 IXNATextBox nextTextBox;
 
+                var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
+                var textBoxes = dialogStack.Any()
+                    ? dialogStack.Peek().FlattenedChildren.OfType<IXNATextBox>()
+                    : Game.Components.OfType<IXNATextBox>().Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.FlattenedChildren.OfType<IXNATextBox>()));
+
                 var state = KeyboardExtended.GetState();
                 if (state.IsShiftDown())
                 {
-                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
-                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
-                        .OrderByDescending(x => x.TabOrder);
+                    var orderTextBoxesEnumerable = textBoxes.OrderByDescending(x => x.TabOrder);
                     nextTextBox = orderTextBoxesEnumerable
                         .SkipWhile(x => x.TabOrder >= FocusedTextbox.TabOrder)
                         .FirstOrDefault();
@@ -274,9 +277,7 @@ namespace XNAControls
                 }
                 else
                 {
-                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
-                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
-                        .OrderBy(x => x.TabOrder);
+                    var orderTextBoxesEnumerable = textBoxes.OrderBy(x => x.TabOrder);
                     nextTextBox = orderTextBoxesEnumerable
                         .SkipWhile(x => x.TabOrder <= FocusedTextbox.TabOrder)
                         .FirstOrDefault();
