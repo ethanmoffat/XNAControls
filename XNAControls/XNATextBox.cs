@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using MonoGame.Extended.Input;
 using MonoGame.Extended.Input.InputListeners;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using XNAControls.Input;
 
@@ -21,14 +22,16 @@ namespace XNAControls
         private readonly Texture2D _textBoxRight;
         private readonly Texture2D _caretTexture;
 
-        private readonly XNALabel _textLabel;
-        private readonly XNALabel _defaultTextLabel;
+        private readonly XNATextBoxLabel _textLabel;
+        private readonly XNATextBoxLabel _defaultTextLabel;
 
         private Rectangle _drawArea;
         private string _actualText;
         private bool _selected;
 
         private int _lastLeftPadding;
+
+        private bool _multiline;
 
         /// <inheritdoc />
         public override Rectangle DrawArea
@@ -129,6 +132,32 @@ namespace XNAControls
         public int TabOrder { get; set; }
 
         /// <inheritdoc />
+        public bool Multiline
+        {
+            get => _multiline;
+            set
+            {
+                _multiline = value;
+                _textLabel.WrapBehavior = _defaultTextLabel.WrapBehavior = 
+                    _multiline ? WrapBehavior.WrapToNewLine : WrapBehavior.ScrollText;
+            }
+        }
+
+        /// <inheritdoc />
+        public IScrollHandler ScrollHandler
+        {
+            get => _textLabel.ScrollHandler;
+            set => _textLabel.ScrollHandler = value;
+        }
+
+        /// <inheritdoc />
+        public int? RowSpacing
+        {
+            get => _textLabel.RowSpacing;
+            set => _textLabel.RowSpacing = value;
+        }
+
+        /// <inheritdoc />
         public event EventHandler OnGotFocus = delegate { };
 
         /// <inheritdoc />
@@ -158,7 +187,7 @@ namespace XNAControls
             _textBoxRight = rightSideTexture;
             _caretTexture = caretTexture;
 
-            _textLabel = new XNALabel(spriteFontContentName)
+            _textLabel = new XNATextBoxLabel(spriteFontContentName)
             {
                 AutoSize = false,
                 BackColor = Color.Transparent,
@@ -168,7 +197,7 @@ namespace XNAControls
             };
             _textLabel.SetParentControl(this);
 
-            _defaultTextLabel = new XNALabel(spriteFontContentName)
+            _defaultTextLabel = new XNATextBoxLabel(spriteFontContentName)
             {
                 AutoSize = false,
                 BackColor = Color.Transparent,
@@ -202,7 +231,10 @@ namespace XNAControls
                 _defaultTextLabel.DrawPosition = new Vector2(LeftPadding, 0);
             }
 
-            base.OnUpdateControl(gameTime);
+            if (Enabled)
+            {
+                base.OnUpdateControl(gameTime);
+            }
         }
 
         /// <inheritdoc />
@@ -229,12 +261,26 @@ namespace XNAControls
                 var caretVisible = !(gameTime.TotalGameTime.TotalMilliseconds % 1000 < 500);
                 if (caretVisible)
                 {
-                    var textWidth = _textLabel.TextWidth.HasValue && _textLabel.ActualWidth > _textLabel.TextWidth
-                        ? _textLabel.TextWidth.Value
-                        : _textLabel.ActualWidth;
+                    Vector2 caretAdjust;
+
+                    if (Multiline)
+                    {
+                        var textWidth = _textLabel.MeasureString(_textLabel.TextRows.Last()).X;
+                        var linesToRender = Math.Min(_textLabel.ScrollHandler?.LinesToRender ?? _textLabel.TextRows.Count, _textLabel.TextRows.Count);
+                        var textHeight = (linesToRender - 1) * (_textLabel.RowSpacing ?? (int)_textLabel.ActualHeight);
+                        caretAdjust = new Vector2(textWidth, textHeight);
+                    }
+                    else
+                    {
+                        var textWidth = _textLabel.TextWidth.HasValue && _textLabel.ActualWidth > _textLabel.TextWidth
+                            ? _textLabel.TextWidth.Value
+                            : _textLabel.ActualWidth;
+
+                        caretAdjust = new Vector2(textWidth, 0);
+                    }
+
                     _spriteBatch.Draw(_caretTexture,
-                                      new Vector2(_textLabel.AdjustedDrawPosition.X + textWidth + 2,
-                                                  DrawAreaWithParentOffset.Y + (int)Math.Round((DrawArea.Height - _caretTexture.Height) / 2.0)),
+                                      _textLabel.AdjustedDrawPosition + caretAdjust,
                                       Color.White);
                 }
             }
@@ -261,12 +307,15 @@ namespace XNAControls
             {
                 IXNATextBox nextTextBox;
 
+                var dialogStack = Singleton<DialogRepository>.Instance.OpenDialogs;
+                var textBoxes = dialogStack.Any()
+                    ? dialogStack.Peek().FlattenedChildren.OfType<IXNATextBox>()
+                    : Game.Components.OfType<IXNATextBox>().Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.FlattenedChildren.OfType<IXNATextBox>()));
+
                 var state = KeyboardExtended.GetState();
                 if (state.IsShiftDown())
                 {
-                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
-                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
-                        .OrderByDescending(x => x.TabOrder);
+                    var orderTextBoxesEnumerable = textBoxes.OrderByDescending(x => x.TabOrder);
                     nextTextBox = orderTextBoxesEnumerable
                         .SkipWhile(x => x.TabOrder >= FocusedTextbox.TabOrder)
                         .FirstOrDefault();
@@ -274,9 +323,7 @@ namespace XNAControls
                 }
                 else
                 {
-                    var orderTextBoxesEnumerable = Game.Components.OfType<IXNATextBox>()
-                        .Concat(Game.Components.OfType<IXNAControl>().SelectMany(x => x.ChildControls.OfType<IXNATextBox>()))
-                        .OrderBy(x => x.TabOrder);
+                    var orderTextBoxesEnumerable = textBoxes.OrderBy(x => x.TabOrder);
                     nextTextBox = orderTextBoxesEnumerable
                         .SkipWhile(x => x.TabOrder <= FocusedTextbox.TabOrder)
                         .FirstOrDefault();
@@ -303,19 +350,28 @@ namespace XNAControls
                 case Keys.Tab: break;
                 case Keys.Enter:
                     {
+                        if (Multiline)
+                        {
+                            Text += '\n';
+                        }
+
                         OnEnterPressed?.Invoke(this, EventArgs.Empty);
                     }
                     break;
                 case Keys.Back:
                     {
                         if (!string.IsNullOrEmpty(Text))
+                        {
                             Text = Text.Remove(Text.Length - 1);
+                        }
                     }
                     break;
                 default:
                     {
                         if (eventArgs.Character != null)
+                        {
                             Text += eventArgs.Character;
+                        }
                     }
                     break;
             }
@@ -354,6 +410,58 @@ namespace XNAControls
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// A class wth logic to handle multiline textboxes
+        /// </summary>
+        protected internal class XNATextBoxLabel : XNALabel
+        {
+            /// <inheritdoc />
+            public IReadOnlyList<string> TextRows => DrawStrings.Count == 0 ? new List<string> { Text } : DrawStrings;
+
+            /// <inheritdoc />
+            public IScrollHandler ScrollHandler { get; set; }
+
+            /// <inheritdoc />
+            public XNATextBoxLabel(string spriteFontName)
+                : base(spriteFontName)
+            {
+            }
+
+            /// <inheritdoc />
+            public new Vector2 MeasureString(string input) => base.MeasureString(input);
+
+            /// <inheritdoc />
+            protected override void DrawMultiLine(float adjustedX, float adjustedY)
+            {
+                var start = ScrollHandler == null || DrawStrings.Count <= ScrollHandler.LinesToRender
+                    ? 0
+                    : ScrollHandler.ScrollOffset;
+                var end = ScrollHandler == null || DrawStrings.Count <= ScrollHandler.LinesToRender
+                    ? DrawStrings.Count
+                    : ScrollHandler.LinesToRender + ScrollHandler.ScrollOffset;
+
+                for (int i = start; i < Math.Min(DrawStrings.Count, end); i++)
+                {
+                    var line = DrawStrings[i];
+                    DrawTextLine(line, adjustedX, adjustedY + (RowSpacing ?? LineHeight) * (i - start));
+                }
+            }
+
+            /// <inheritdoc/>
+            protected override void OnWrappedTextUpdated()
+            {
+                if (!AutoSize || !DrawStrings.Any())
+                {
+                    ScrollHandler?.UpdateDimensions(TextRows.Count);
+
+                    if (ImmediateParent.Enabled)
+                    {
+                        ScrollHandler?.ScrollToEnd();
+                    }
+                }
+            }
         }
     }
 
@@ -416,6 +524,21 @@ namespace XNAControls
         /// TabOrder of this text box. Pressing 'tab' will cycle through text boxes based on their tab order.
         /// </summary>
         int TabOrder { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the control is a multiline textbox. Text behavior will wrap instead of scrolling.
+        /// </summary>
+        bool Multiline { get; set; }
+
+        /// <summary>
+        /// Gets or sets the scroll handler, which handles vertical scrolling text in multiline text box controls.
+        /// </summary>
+        IScrollHandler ScrollHandler { get; set; }
+
+        /// <summary>
+        /// Gets or sets the spacing between rows in a multiline textbox, in pixels
+        /// </summary>
+        int? RowSpacing { get; set; }
 
         /// <summary>
         /// Event fired when this text box gets focus

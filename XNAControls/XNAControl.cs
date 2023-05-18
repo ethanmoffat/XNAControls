@@ -20,7 +20,7 @@ namespace XNAControls
             Singleton<DialogRepository>.MapIfMissing(new DialogRepository());
         }
 
-        private static EventType UnconditionalEvents => EventType.MouseEnter | EventType.MouseLeave | EventType.MouseOver;
+        private static EventType UnconditionalEvents => EventType.MouseEnter | EventType.MouseLeave | EventType.MouseOver | EventType.MouseWheelMoved;
 
         private readonly Queue<(EventType, object)> _eventQueue;
 
@@ -118,6 +118,20 @@ namespace XNAControls
         /// A list of all child controls of this control
         /// </summary>
         public IReadOnlyList<IXNAControl> ChildControls => _children;
+
+        /// <inheritdoc />
+        public IReadOnlyList<IXNAControl> FlattenedChildren
+        {
+            get
+            {
+                var ret = new List<IXNAControl>(_children);
+
+                for (int i = 0; i < ret.Count; i++)
+                    ret.AddRange(ret[i].ChildControls);
+
+                return ret;
+            }
+        }
 
         /// <summary>
         /// True to force the control to stay within the client's window bounds, false otherwise.

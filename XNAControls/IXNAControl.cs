@@ -57,9 +57,14 @@ namespace XNAControls
         IXNAControl TopParent { get; }
 
         /// <summary>
-        /// A list of all child controls of this control
+        /// A list of all immediate child controls of this control
         /// </summary>
         IReadOnlyList<IXNAControl> ChildControls { get; }
+
+        /// <summary>
+        /// A list of all child controls and their child controls, flattened into a single list
+        /// </summary>
+        IReadOnlyList<IXNAControl> FlattenedChildren { get; }
 
         /// <summary>
         /// Event that is invoked when the mouse is over the control

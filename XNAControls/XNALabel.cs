@@ -80,7 +80,7 @@ namespace XNAControls
         private string _actualText;
         private string _displayText;
 
-        private int _rowHeight;
+        private int? _rowHeight;
 
         private Vector2 _alignmentOffset, _totalTextArea;
 
@@ -151,7 +151,7 @@ namespace XNAControls
             {
                 return _drawStrings.Count <= 1
                     ? MeasureString(Text).X
-                    : _drawStrings.Select(x => MeasureString(x).X).Max();
+                    : _drawStrings.Max(x => MeasureString(x).X);
             }
         }
 
@@ -165,6 +165,16 @@ namespace XNAControls
 
         /// <inheritdoc />
         public bool Underline { get; set; }
+
+        /// <summary>
+        /// The height of each text line, as measured by the loaded font
+        /// </summary>
+        protected int LineHeight => _isBitmapFont ? _bFont.LineHeight : _sFont.LineSpacing;
+
+        /// <summary>
+        /// The list of strings as split by the label's properties and measured by the font in use
+        /// </summary>
+        protected IReadOnlyList<string> DrawStrings => _drawStrings;
 
         /// <summary>
         /// Create a new label control with the given sprite font name (content name)
@@ -205,7 +215,7 @@ namespace XNAControls
                 _isBitmapFont = true;
             }
 
-            _rowHeight = LineHeight;
+            _rowHeight ??= LineHeight;
 
             base.LoadContent();
         }
@@ -238,9 +248,11 @@ namespace XNAControls
 
                     if (AutoSize && _drawStrings.Any())
                     {
-                        var largestWidth = _drawStrings.Select(line => MeasureString(line).X).Max();
+                        var largestWidth = _drawStrings.Max(line => MeasureString(line).X);
                         SetSize((int)largestWidth, _drawStrings.Count * LineHeight);
                     }
+
+                    OnWrappedTextUpdated();
                 }
                 else
                 {
@@ -278,8 +290,11 @@ namespace XNAControls
 
         private Vector2 CalculateSizeOfTextArea()
         {
-            if (Text == null || (_sFont == null && _bFont == null) || _drawStrings == null)
+            if (_sFont == null && _bFont == null)
                 return Vector2.Zero;
+
+            if (string.IsNullOrEmpty(Text) || _drawStrings == null || !_drawStrings.Any())
+                return MeasureString(Text);
 
             return TextWidth == null
                 ? MeasureString(Text)
@@ -309,11 +324,7 @@ namespace XNAControls
             }
             else if (WrapBehavior == WrapBehavior.WrapToNewLine)
             {
-                for (int i = 0; i < _drawStrings.Count; i++)
-                {
-                    var line = _drawStrings[i];
-                    DrawTextLine(line, adjustedX, adjustedY + LineHeight * i);
-                }
+                DrawMultiLine(adjustedX, adjustedY);
             }
             else if (WrapBehavior == WrapBehavior.ScrollText)
             {
@@ -338,7 +349,27 @@ namespace XNAControls
             _spriteBatch.Draw(_whitePixel, backgroundTargetRectangle, BackColor);
         }
 
-        private void DrawTextLine(string textLine, float adjustedX, float adjustedY)
+        /// <summary>
+        /// Handler to draw multiline text strings. Default implementation internally calls DrawTextLine. Used when wrap behavior is WrapToNewLine.
+        /// </summary>
+        /// <param name="adjustedX">Adjusted X coordinate based on <see cref="TextAlign"/> property</param>
+        /// <param name="adjustedY">Adjusted Y coordinate based on <see cref="TextAlign"/> property</param>
+        protected virtual void DrawMultiLine(float adjustedX, float adjustedY)
+        {
+            for (int i = 0; i < _drawStrings.Count; i++)
+            {
+                var line = _drawStrings[i];
+                DrawTextLine(line, adjustedX, adjustedY + (RowSpacing ?? LineHeight) * i);
+            }
+        }
+
+        /// <summary>
+        /// Handler for drawing a single line of text
+        /// </summary>
+        /// <param name="textLine">The text to draw</param>
+        /// <param name="adjustedX">Adjusted X coordinate based on <see cref="TextAlign"/> property</param>
+        /// <param name="adjustedY">Adjusted Y coordinate based on <see cref="TextAlign"/> property</param>
+        protected virtual void DrawTextLine(string textLine, float adjustedX, float adjustedY)
         {
             if ((_sFont == null && _bFont == null) || textLine == null)
                 return;
@@ -373,14 +404,27 @@ namespace XNAControls
             }
         }
 
-        private Vector2 MeasureString(string input)
+        /// <summary>
+        /// Measures the input string using the current font
+        /// </summary>
+        protected Vector2 MeasureString(string input)
         {
-            return _isBitmapFont
-                ? (Vector2)_bFont.MeasureString(input)
-                : _sFont.MeasureString(input);
+            var measureFunc = _isBitmapFont
+                ? new Func<string, Vector2>(s => (Vector2)_bFont.MeasureString(s))
+                : _sFont.MeasureString;
+
+            if (string.IsNullOrEmpty(input))
+                return new Vector2(0, measureFunc("L").Y);
+
+            return measureFunc(input);
         }
 
-        private int LineHeight => _isBitmapFont ? _bFont.LineHeight : _sFont.LineSpacing;
+        /// <summary>
+        /// Called when <see cref="WrapBehavior"/> is <see cref="WrapBehavior.WrapToNewLine"/> and the text is changed in an Update() call
+        /// </summary>
+        protected virtual void OnWrappedTextUpdated()
+        {
+        }
 
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
