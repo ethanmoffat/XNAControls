@@ -59,14 +59,14 @@ namespace XNAControls.Test
         public void DrawPosition_MatchesDrawArea()
         {
             _control.DrawArea = new Rectangle(50, 100, 200, 400);
-            Assert.AreEqual(new Vector2(50, 100), _control.DrawPosition);
+            Assert.That(_control.DrawPosition, Is.EqualTo(new Vector2(50, 100)));
         }
 
         [Test]
         public void DrawArea_MatchesDrawPosition()
         {
             _control.DrawPosition = new Vector2(100, 50);
-            Assert.AreEqual(new Rectangle(100, 50, 0, 0), _control.DrawArea);
+            Assert.That(_control.DrawArea, Is.EqualTo(new Rectangle(100, 50, 0, 0)));
         }
 
         [Test]
@@ -79,7 +79,7 @@ namespace XNAControls.Test
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
             _control.Update(new GameTime());
 
-            Assert.IsTrue(_control.MouseOverDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.True);
         }
 
         [Test]
@@ -91,7 +91,7 @@ namespace XNAControls.Test
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
             _control.Update(new GameTime());
 
-            Assert.IsTrue(_control.MouseOverDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.True);
         }
 
         [Test]
@@ -103,13 +103,13 @@ namespace XNAControls.Test
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
             _control.Update(new GameTime());
 
-            Assert.IsTrue(_control.MouseOverDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.True);
 
             _control.PostMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
             _control.Update(new GameTime());
 
-            Assert.IsFalse(_control.MouseOverDuringUpdate);
-            Assert.IsTrue(_control.MouseOverPreviouslyDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.False);
+            Assert.That(_control.MouseOverPreviouslyDuringUpdate, Is.True);
         }
 
         [Test]
@@ -127,7 +127,7 @@ namespace XNAControls.Test
             _control.DrawArea = new Rectangle(5, 5, 10, 10);
             _control.Update(new GameTime());
 
-            Assert.IsTrue(_control.MouseOverDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.True);
         }
 
         [Test]
@@ -144,7 +144,7 @@ namespace XNAControls.Test
 
             _control.Update(new GameTime());
 
-            Assert.IsTrue(_control.MouseOverDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.True);
         }
 
         [Test]
@@ -161,13 +161,13 @@ namespace XNAControls.Test
 
             _control.Update(new GameTime());
 
-            Assert.IsTrue(_control.MouseOverDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.True);
 
             _control.PostMessage(EventType.MouseLeave, MouseStateExtendedWithPosition(11, 10));
             _control.Update(new GameTime());
 
-            Assert.IsFalse(_control.MouseOverDuringUpdate);
-            Assert.IsTrue(_control.MouseOverPreviouslyDuringUpdate);
+            Assert.That(_control.MouseOverDuringUpdate, Is.False);
+            Assert.That(_control.MouseOverPreviouslyDuringUpdate, Is.True);
         }
 
         [Test]
@@ -179,7 +179,7 @@ namespace XNAControls.Test
             _control.SetParentControl(parent);
             _control.DrawPosition = new Vector2(100, 100);
 
-            Assert.AreEqual(new Vector2(200, 200), _control.DrawPositionWithParentOffset);
+            Assert.That(_control.DrawPositionWithParentOffset, Is.EqualTo(new Vector2(200, 200)));
         }
 
         [Test]
@@ -191,7 +191,7 @@ namespace XNAControls.Test
             _control.SetParentControl(parent);
             _control.DrawArea = new Rectangle(100, 100, 200, 200);
 
-            Assert.AreEqual(new Rectangle(200, 200, 200, 200), _control.DrawAreaWithParentOffset);
+            Assert.That(_control.DrawAreaWithParentOffset, Is.EqualTo(new Rectangle(200, 200, 200, 200)));
         }
 
         [Test]
@@ -203,7 +203,7 @@ namespace XNAControls.Test
             _control.DrawPosition = new Vector2(100, 100);
             _control.SetParentControl(parent);
 
-            Assert.AreEqual(new Vector2(150, 150), _control.DrawPositionWithParentOffset);
+            Assert.That(_control.DrawPositionWithParentOffset, Is.EqualTo(new Vector2(150, 150)));
         }
 
         [Test]
@@ -215,13 +215,13 @@ namespace XNAControls.Test
             _control.DrawArea = new Rectangle(150, 150, 200, 200);
             _control.SetParentControl(parent);
 
-            Assert.AreEqual(new Rectangle(200, 200, 200, 200), _control.DrawAreaWithParentOffset);
+            Assert.That(_control.DrawAreaWithParentOffset, Is.EqualTo(new Rectangle(200, 200, 200, 200)));
         }
 
         [Test]
         public void TopParent_IsNull_WhenNoParent()
         {
-            Assert.IsNull(_control.TopParent);
+            Assert.That(_control.TopParent, Is.Null);
         }
 
         [Test]
@@ -229,7 +229,7 @@ namespace XNAControls.Test
         {
             var parent = CreateFakeControl();
             _control.SetParentControl(parent);
-            Assert.AreEqual(parent, _control.TopParent);
+            Assert.That(_control.TopParent, Is.EqualTo(parent));
         }
 
         [Test]
@@ -243,14 +243,14 @@ namespace XNAControls.Test
             parent.SetParentControl(nextParent);
             nextParent.SetParentControl(topParent);
 
-            Assert.AreEqual(topParent, _control.TopParent);
+            Assert.That(_control.TopParent, Is.EqualTo(topParent));
         }
 
         [Test]
         public void AddToDefaultGame_AddsControlToDefaultGame()
         {
             _control.AddControlToDefaultGame();
-            Assert.AreEqual(_control, _gameManager.Game.Components.Single());
+            Assert.That(_gameManager.Game.Components.Single(), Is.EqualTo(_control));
         }
 
         [Test]
@@ -271,8 +271,8 @@ namespace XNAControls.Test
 
             _control.AddControlToDefaultGame();
 
-            CollectionAssert.AreEqual(new[] {child1}, parent.ChildControls);
-            Assert.IsNull(_control.ImmediateParent);
+            Assert.That(parent.ChildControls, Is.EqualTo(new[] {child1}));
+            Assert.That(_control.ImmediateParent, Is.Null);
         }
 
         [Test]
@@ -296,8 +296,8 @@ namespace XNAControls.Test
             var newParent = CreateFakeControl();
             _control.SetParentControl(newParent);
 
-            Assert.AreNotEqual(oldParent, _control.ImmediateParent);
-            Assert.IsFalse(oldParent.ChildControls.Contains(_control));
+            Assert.That(_control.ImmediateParent, Is.Not.EqualTo(oldParent));
+            Assert.That(oldParent.ChildControls.Contains(_control), Is.False);
         }
 
         [Test]
@@ -309,20 +309,20 @@ namespace XNAControls.Test
             var newParent = CreateFakeControl();
             _control.SetParentControl(newParent);
 
-            Assert.AreEqual(newParent, _control.ImmediateParent);
-            Assert.IsTrue(newParent.ChildControls.Contains(_control));
+            Assert.That(_control.ImmediateParent, Is.EqualTo(newParent));
+            Assert.That(newParent.ChildControls.Contains(_control), Is.True);
         }
 
         [Test]
         public void SetParentControl_ControlIsRemovedFromGameComponents()
         {
             _control.AddControlToDefaultGame();
-            Assert.IsTrue(_gameManager.Game.Components.Contains(_control));
+            Assert.That(_gameManager.Game.Components.Contains(_control), Is.True);
 
             var parent = CreateFakeControl();
             _control.SetParentControl(parent);
 
-            Assert.IsFalse(_gameManager.Game.Components.Contains(_control));
+            Assert.That(_gameManager.Game.Components.Contains(_control), Is.False);
         }
 
         [Test]
@@ -334,7 +334,7 @@ namespace XNAControls.Test
 
             _control.SetParentControl(parent);
 
-            Assert.AreEqual(124, _control.DrawOrder);
+            Assert.That(_control.DrawOrder, Is.EqualTo(124));
         }
 
         [Test]
@@ -342,12 +342,12 @@ namespace XNAControls.Test
         {
             var parent = CreateFakeControl();
             _control.SetParentControl(parent);
-            Assert.AreEqual(parent, _control.ImmediateParent);
-            Assert.IsTrue(parent.ChildControls.Contains(_control));
+            Assert.That(_control.ImmediateParent, Is.EqualTo(parent));
+            Assert.That(parent.ChildControls.Contains(_control), Is.True);
 
             _control.SetControlUnparented();
-            Assert.IsNull(_control.ImmediateParent);
-            Assert.IsFalse(parent.ChildControls.Contains(_control));
+            Assert.That(_control.ImmediateParent, Is.Null);
+            Assert.That(parent.ChildControls.Contains(_control), Is.False);
         }
 
         [Test]
@@ -355,7 +355,7 @@ namespace XNAControls.Test
         {
             _control.DrawOrder = 11;
             _control.SetDrawOrder(12);
-            Assert.AreEqual(12, _control.DrawOrder);
+            Assert.That(_control.DrawOrder, Is.EqualTo(12));
         }
 
         [Test]
@@ -373,7 +373,7 @@ namespace XNAControls.Test
 
             parent.SetDrawOrder(15);
 
-            CollectionAssert.AreEqual(Enumerable.Repeat(16, 3), parent.ChildControls.Select(x => x.DrawOrder));
+            Assert.That(parent.ChildControls.Select(x => x.DrawOrder), Has.Exactly(3).Items.EqualTo(16));
         }
 
         [Test]
@@ -395,11 +395,11 @@ namespace XNAControls.Test
 
             parent.SetDrawOrder(15);
 
-            Assert.AreEqual(16, child.DrawOrder);
-            Assert.AreEqual(16, child2.DrawOrder);
-            Assert.AreEqual(16, _control.DrawOrder);
-            Assert.AreEqual(17, nestedChild.DrawOrder);
-            Assert.AreEqual(17, nestedChild2.DrawOrder);
+            Assert.That(child.DrawOrder, Is.EqualTo(16));
+            Assert.That(child2.DrawOrder, Is.EqualTo(16));
+            Assert.That(_control.DrawOrder, Is.EqualTo(16));
+            Assert.That(nestedChild.DrawOrder, Is.EqualTo(17));
+            Assert.That(nestedChild2.DrawOrder, Is.EqualTo(17));
         }
 
         [Test]
@@ -411,7 +411,7 @@ namespace XNAControls.Test
             _control.ResetUpdated();
             _control.Update(new GameTime());
 
-            Assert.IsFalse(_control.Updated);
+            Assert.That(_control.Updated, Is.False);
         }
 
         [Test]
@@ -424,7 +424,7 @@ namespace XNAControls.Test
             _control.ResetUpdated();
             _control.Update(new GameTime());
 
-            Assert.IsFalse(_control.Updated);
+            Assert.That(_control.Updated, Is.False);
         }
 
         [Test]
@@ -436,7 +436,7 @@ namespace XNAControls.Test
 
             _control.Update(new GameTime());
 
-            Assert.IsFalse(_control.Updated);
+            Assert.That(_control.Updated, Is.False);
         }
 
         [Test]
@@ -447,7 +447,7 @@ namespace XNAControls.Test
 
             _control.Update(new GameTime());
 
-            Assert.IsTrue(_control.Updated);
+            Assert.That(_control.Updated, Is.True);
         }
 
         [Test]
@@ -466,8 +466,8 @@ namespace XNAControls.Test
 
             _control.Update(new GameTime());
 
-            Assert.IsTrue(child.Updated);
-            Assert.IsTrue(child2.Updated);
+            Assert.That(child.Updated, Is.True);
+            Assert.That(child2.Updated, Is.True);
         }
 
         [Test]
@@ -477,7 +477,7 @@ namespace XNAControls.Test
 
             _control.Draw(new GameTime());
 
-            Assert.IsFalse(_control.Drawn);
+            Assert.That(_control.Drawn, Is.False);
         }
 
         [Test]
@@ -488,7 +488,7 @@ namespace XNAControls.Test
 
             _control.Draw(new GameTime());
 
-            Assert.IsFalse(_control.Drawn);
+            Assert.That(_control.Drawn, Is.False);
         }
 
         [Test]
@@ -499,7 +499,7 @@ namespace XNAControls.Test
 
             _control.Draw(new GameTime());
 
-            Assert.IsTrue(_control.Drawn);
+            Assert.That(_control.Drawn, Is.True);
         }
 
         [Test]
@@ -510,7 +510,7 @@ namespace XNAControls.Test
 
             _control.Draw(new GameTime());
 
-            Assert.IsTrue(_control.Drawn);
+            Assert.That(_control.Drawn, Is.True);
         }
 
         [Test]
@@ -528,28 +528,28 @@ namespace XNAControls.Test
 
             _control.Draw(new GameTime());
 
-            Assert.IsTrue(child.Drawn);
-            Assert.IsTrue(child2.Drawn);
+            Assert.That(child.Drawn, Is.True);
+            Assert.That(child2.Drawn, Is.True);
         }
 
         [Test]
         public void Dispose_SetsValueForDisposed_ToTrue()
         {
-            Assert.IsFalse(_control.IsDisposed);
+            Assert.That(_control.IsDisposed, Is.False);
 
             _control.Dispose();
 
-            Assert.IsTrue(_control.IsDisposed);
+            Assert.That(_control.IsDisposed, Is.True);
         }
 
         [Test]
         public void Dispose_RemovesControlFromGameComponents()
         {
             _control.AddControlToDefaultGame();
-            Assert.IsTrue(_gameManager.Game.Components.Contains(_control));
+            Assert.That(_gameManager.Game.Components.Contains(_control), Is.True);
 
             _control.Dispose();
-            Assert.IsFalse(_gameManager.Game.Components.Contains(_control));
+            Assert.That(_gameManager.Game.Components.Contains(_control), Is.False);
         }
 
         [Test]
@@ -563,8 +563,8 @@ namespace XNAControls.Test
 
             _control.Dispose();
 
-            Assert.IsTrue(child1.IsDisposed);
-            Assert.IsTrue(child2.IsDisposed);
+            Assert.That(child1.IsDisposed, Is.True);
+            Assert.That(child2.IsDisposed, Is.True);
         }
 
         private static void GivenGameIsActive(params FakeXNAControl[] controls)
