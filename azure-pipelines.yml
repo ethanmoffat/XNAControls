@@ -1,5 +1,8 @@
 name: 2.2.0.$(rev:rrr)
 
+pr:
+- master
+
 trigger:
 - master
 
