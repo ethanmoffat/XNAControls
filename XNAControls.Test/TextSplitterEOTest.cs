@@ -37,7 +37,7 @@ namespace XNAControls.Test
         }
 
         [Test]
-        [Timeout(1000)]
+        [CancelAfter(1000)]
         public void SordieMacroDisplaysCorrectly()
         {
             _ts.Text = @"  ___                  _ _    /  __|  __ _ _ __|  (_)__  \__ \/ _ \ '_/  _`  | / -_)  |___/\__/_| \__,_|,\__|";
@@ -52,11 +52,11 @@ namespace XNAControls.Test
 
             var actual = _ts.SplitIntoLines();
 
-            CollectionAssert.AreEqual(expected, actual);
+            Assert.That(actual, Is.EqualTo(expected));
         }
 
         [Test]
-        [Timeout(1000)]
+        [CancelAfter(1000)]
         public void ByeMacroDisplaysCorrectly()
         {
             _ts.Text = @" ___               Byes     |  _  )_   _ ___  Byes   |  _  \ |_| /  - _)   Byes  |___/\_, \___|     Byes         |__/";
@@ -72,11 +72,11 @@ namespace XNAControls.Test
 
             var actual = _ts.SplitIntoLines();
 
-            CollectionAssert.AreEqual(expected, actual);
+            Assert.That(actual, Is.EqualTo(expected));
         }
 
         [Test]
-        [Timeout(1000)]
+        [CancelAfter(1000)]
         public void STFUMacroDisplaysCorrectly()
         {
             _ts.Text = @"    __  ___  ___             /__`    |    |__    |      |    .__/   |    |        \__/    .";
@@ -91,11 +91,11 @@ namespace XNAControls.Test
 
             var actual = _ts.SplitIntoLines();
 
-            CollectionAssert.AreEqual(expected, actual);
+            Assert.That(actual, Is.EqualTo(expected));
         }
 
         [Test]
-        [Timeout(1000)]
+        [CancelAfter(1000)]
         public void LoveMacroDisplaysCorrectly()
         {
             _ts.Text = @" ,d88b.d88b,               8888888888    Sordie  Y8888888Y    Loves     Y8888Y        You            ''Y''\";
@@ -111,7 +111,7 @@ namespace XNAControls.Test
 
             var actual = _ts.SplitIntoLines();
 
-            CollectionAssert.AreEqual(expected, actual);
+            Assert.That(actual, Is.EqualTo(expected));
         }
 
         private static BitmapFont LoadBitmapFontFromWorkingDirectory()

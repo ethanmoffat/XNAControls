@@ -1,4 +1,7 @@
-name: 2.1.0.$(rev:rrr)
+name: 2.2.0.$(rev:rrr)
+
+pr:
+- master
 
 trigger:
 - master
@@ -21,7 +24,7 @@ steps:
   lfs: true
 - task: UseDotNet@2
   inputs:
-    version: 6.0.x
+    version: 8.0.x
 - task: DotNetCoreCLI@2
   displayName: 'dotnet restore'
   inputs:
