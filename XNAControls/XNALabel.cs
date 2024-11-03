@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.BitmapFonts;
@@ -205,14 +208,23 @@ namespace XNAControls
         /// <inheritdoc />
         protected override void LoadContent()
         {
-            try
-            {
-                _sFont = Game.Content.Load<SpriteFont>(_spriteFontName);
-            }
-            catch
+            var contentFile = Path.Combine(Game.Content.RootDirectory, $"{_spriteFontName}.xnb");
+
+            using var st = File.OpenRead(contentFile);
+            using var br = new BinaryReader(st, Encoding.UTF8);
+
+            var importerLen = br.Read7BitEncodedInt();
+            var importer = Encoding.UTF8.GetString(br.ReadBytes(importerLen));
+
+            _isBitmapFont = importer.Contains("MonoGame.Extended.BitmapFonts.BitmapFontReader");
+
+            if (_isBitmapFont)
             {
                 _bFont = Game.Content.Load<BitmapFont>(_spriteFontName);
-                _isBitmapFont = true;
+            }
+            else
+            {
+                _sFont = Game.Content.Load<SpriteFont>(_spriteFontName);
             }
 
             _rowHeight ??= LineHeight;
