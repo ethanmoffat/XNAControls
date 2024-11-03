@@ -409,6 +409,8 @@ namespace XNAControls
                 case EventType.Click: handled = HandleClick(this, (MouseEventArgs)eventArgs); break;
                 case EventType.DoubleClick: handled = HandleDoubleClick(this, (MouseEventArgs)eventArgs);  break;
                 case EventType.KeyTyped: handled = HandleKeyTyped(this, (KeyboardEventArgs)eventArgs); break;
+                case EventType.KeyPressed: handled = HandleKeyPressed(this, (KeyboardEventArgs)eventArgs); break;
+                case EventType.KeyReleased: handled = HandleKeyReleased(this, (KeyboardEventArgs)eventArgs); break;
                 case EventType.GotFocus: handled = HandleGotFocus(this, EventArgs.Empty); break;
                 case EventType.LostFocus: handled = HandleLostFocus(this, EventArgs.Empty); break;
                 case EventType.MouseWheelMoved: handled = HandleMouseWheelMoved(this, (MouseEventArgs)eventArgs); break;
@@ -446,6 +448,16 @@ namespace XNAControls
         /// Default handler for KeyTyped event
         /// </summary>
         protected virtual bool HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs) => false;
+
+        /// <summary>
+        /// Default handler for KeyPressed event
+        /// </summary>
+        protected virtual bool HandleKeyPressed(IXNAControl control, KeyboardEventArgs eventArgs) => false;
+
+        /// <summary>
+        /// Default handler for KeyReleased event
+        /// </summary>
+        protected virtual bool HandleKeyReleased(IXNAControl control, KeyboardEventArgs eventArgs) => false;
 
         /// <summary>
         /// Default handler for GotFocus event

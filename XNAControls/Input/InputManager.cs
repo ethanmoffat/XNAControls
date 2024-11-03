@@ -50,6 +50,8 @@ namespace XNAControls.Input
         public override void Initialize()
         {
             _keyboardListener.KeyTyped += Keyboard_KeyTyped;
+            _keyboardListener.KeyPressed += Keyboard_KeyPressed;
+            _keyboardListener.KeyReleased += Keyboard_KeyReleased;
             _mouseListener.MouseClicked += Mouse_Click;
             _mouseListener.MouseDoubleClicked += Mouse_DoubleClick;
             _mouseListener.MouseDragStart += Mouse_DragStart;
@@ -100,6 +102,16 @@ namespace XNAControls.Input
         {
             // todo: is there a better place to store which textbox is focused?
             XNATextBox.FocusedTextbox?.PostMessage(EventType.KeyTyped, e);
+        }
+
+        private void Keyboard_KeyPressed(object sender, KeyboardEventArgs e)
+        {
+            XNATextBox.FocusedTextbox?.PostMessage(EventType.KeyPressed, e);
+        }
+
+        private void Keyboard_KeyReleased(object sender, KeyboardEventArgs e)
+        {
+            XNATextBox.FocusedTextbox?.PostMessage(EventType.KeyReleased, e);
         }
 
         private void Mouse_Click(object sender, MouseEventArgs e)
