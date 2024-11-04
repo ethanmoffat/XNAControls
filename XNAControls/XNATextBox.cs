@@ -170,6 +170,12 @@ namespace XNAControls
         public event EventHandler OnEnterPressed = delegate { };
 
         /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnMouseDown = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnMouseUp = delegate { };
+
+        /// <inheritdoc />
         public event EventHandler<MouseEventArgs> OnClicked = delegate { };
 
         /// <summary>
@@ -288,6 +294,28 @@ namespace XNAControls
             _spriteBatch.End();
 
             base.OnDrawControl(gameTime);
+        }
+
+        /// <inheritdoc />
+        protected override bool HandleMouseDown(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            if (OnMouseDown == null)
+                return false;
+
+            OnMouseDown(control, eventArgs);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        protected override bool HandleMouseUp(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            if (OnMouseUp == null)
+                return false;
+
+            OnMouseUp(control, eventArgs);
+
+            return true;
         }
 
         /// <inheritdoc />
@@ -559,6 +587,16 @@ namespace XNAControls
         /// Event fired when the enter key is pressed
         /// </summary>
         event EventHandler OnEnterPressed;
+
+        /// <summary>
+        /// Event fired when a mouse button is pressed on a button control
+        /// </summary>
+        event EventHandler<MouseEventArgs> OnMouseDown;
+
+        /// <summary>
+        /// Event fired when a mouse button is released on a button control
+        /// </summary>
+        event EventHandler<MouseEventArgs> OnMouseUp;
 
         /// <summary>
         /// Event fired when this text box is clicked

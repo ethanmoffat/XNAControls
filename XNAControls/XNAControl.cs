@@ -406,6 +406,8 @@ namespace XNAControls
                 case EventType.DragStart: handled = HandleDragStart(this, (MouseEventArgs)eventArgs); break;
                 case EventType.DragEnd: handled = HandleDragEnd(this, (MouseEventArgs)eventArgs); break;
                 case EventType.Drag: handled = HandleDrag(this, (MouseEventArgs)eventArgs); break;
+                case EventType.MouseDown: handled = HandleMouseDown(this, (MouseEventArgs)eventArgs); break;
+                case EventType.MouseUp: handled = HandleMouseUp(this, (MouseEventArgs)eventArgs); break;
                 case EventType.Click: handled = HandleClick(this, (MouseEventArgs)eventArgs); break;
                 case EventType.DoubleClick: handled = HandleDoubleClick(this, (MouseEventArgs)eventArgs);  break;
                 case EventType.KeyTyped: handled = HandleKeyTyped(this, (KeyboardEventArgs)eventArgs); break;
@@ -433,6 +435,16 @@ namespace XNAControls
         /// Default handler for Drag event
         /// </summary>
         protected virtual bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs) => false;
+
+        /// <summary>
+        /// Default handler for MouseDown event
+        /// </summary>
+        protected virtual bool HandleMouseDown(IXNAControl control, MouseEventArgs eventArgs) => false;
+
+        /// <summary>
+        /// Default handler for MouseUp event
+        /// </summary>
+        protected virtual bool HandleMouseUp(IXNAControl control, MouseEventArgs eventArgs) => false;
 
         /// <summary>
         /// Default handler for Click event

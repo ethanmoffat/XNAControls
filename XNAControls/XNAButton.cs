@@ -33,15 +33,17 @@ namespace XNAControls
 
         private long _lastFlashTick;
 
-        /// <summary>
-        /// Invoked when the button control is clicked once
-        /// </summary>
-        public event EventHandler<MouseEventArgs> OnClick;
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnMouseDown = delegate { };
 
-        /// <summary>
-        /// Invoked when the button control is being dragged
-        /// </summary>
-        public event EventHandler<MouseEventArgs> OnClickDrag;
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnMouseUp = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnClick = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnClickDrag = delegate { };
 
         /// <summary>
         /// Set the FlashSpeed which causes the over/out textures to cycle once every 'FlashSpeed' milliseconds
@@ -132,6 +134,28 @@ namespace XNAControls
         }
 
         /// <inheritdoc />
+        protected override bool HandleMouseDown(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            if (OnMouseDown == null)
+                return false;
+
+            OnMouseDown(control, eventArgs);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        protected override bool HandleMouseUp(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            if (OnMouseUp == null)
+                return false;
+
+            OnMouseUp(control, eventArgs);
+
+            return true;
+        }
+
+        /// <inheritdoc />
         protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
             if (OnClick == null)
@@ -148,6 +172,16 @@ namespace XNAControls
     /// </summary>
     public interface IXNAButton : IXNAControl
     {
+        /// <summary>
+        /// Invoked when a mouse button is pressed on a button control
+        /// </summary>
+        event EventHandler<MouseEventArgs> OnMouseDown;
+
+        /// <summary>
+        /// Invoked when a mouse button is released on a button control
+        /// </summary>
+        event EventHandler<MouseEventArgs> OnMouseUp;
+
         /// <summary>
         /// Invoked when the button control is clicked once
         /// </summary>

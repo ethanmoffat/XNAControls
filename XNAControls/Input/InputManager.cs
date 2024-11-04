@@ -4,8 +4,6 @@ using Microsoft.Xna.Framework;
 
 using MonoGame.Extended.Input;
 using MonoGame.Extended.Input.InputListeners;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace XNAControls.Input
 {
@@ -51,6 +49,8 @@ namespace XNAControls.Input
             _keyboardListener.KeyTyped += Keyboard_KeyTyped;
             _keyboardListener.KeyPressed += Keyboard_KeyPressed;
             _keyboardListener.KeyReleased += Keyboard_KeyReleased;
+            _mouseListener.MouseDown += Mouse_Down;
+            _mouseListener.MouseUp += Mouse_Up;
             _mouseListener.MouseClicked += Mouse_Click;
             _mouseListener.MouseDoubleClicked += Mouse_DoubleClick;
             _mouseListener.MouseDragStart += Mouse_DragStart;
@@ -113,15 +113,27 @@ namespace XNAControls.Input
             XNATextBox.FocusedTextbox?.PostMessage(EventType.KeyReleased, e);
         }
 
+        private void Mouse_Down(object sender, MouseEventArgs e)
+        {
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
+            clickTarget?.PostMessage(EventType.MouseDown, e);
+        }
+
+        private void Mouse_Up(object sender, MouseEventArgs e)
+        {
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
+            clickTarget?.PostMessage(EventType.MouseUp, e);
+        }
+
         private void Mouse_Click(object sender, MouseEventArgs e)
         {
-            var clickTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components);
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             clickTarget?.PostMessage(EventType.Click, e);
         }
 
         private void Mouse_DoubleClick(object sender, MouseEventArgs e)
         {
-            var clickTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components);
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             clickTarget?.PostMessage(EventType.DoubleClick, e);
         }
 
@@ -130,7 +142,7 @@ namespace XNAControls.Input
             if (_dragTarget != null)
                 return;
 
-            _dragTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components);
+            _dragTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             _dragTarget?.PostMessage(EventType.DragStart, e);
         }
 
@@ -153,7 +165,7 @@ namespace XNAControls.Input
 
         private void Mouse_WheelMoved(object sender, MouseEventArgs e)
         {
-            var clickTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components);
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             clickTarget?.PostMessage(EventType.MouseWheelMoved, e);
         }
 

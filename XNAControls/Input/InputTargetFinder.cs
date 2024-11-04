@@ -31,7 +31,7 @@ namespace XNAControls.Input
             return targets;
         }
 
-        internal static IEventReceiver GetMouseDownEventTargetControl(IEnumerable<IGameComponent> collection, bool includeChildren = true)
+        internal static IEventReceiver GetMouseButtonEventTargetControl(IEnumerable<IGameComponent> collection, bool includeChildren = true)
         {
             var targets = collection
                 .OfType<IEventReceiver>()

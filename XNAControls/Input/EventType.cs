@@ -69,6 +69,14 @@ namespace XNAControls.Input
         /// </summary>
         KeyReleased = 0x2000,
         /// <summary>
+        /// MouseDown event
+        /// </summary>
+        MouseDown = 0x4000,
+        /// <summary>
+        /// MouseUp event
+        /// </summary>
+        MouseUp = 0x8000,
+        /// <summary>
         /// All events
         /// </summary>
         All = 0xFFFF

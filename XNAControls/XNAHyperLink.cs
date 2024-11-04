@@ -12,14 +12,16 @@ namespace XNAControls
     {
         private Color _temporaryForeColor;
 
-        /// <summary>
-        /// Color for the link when the mouse is over the link
-        /// </summary>
+        /// <inheritdoc />
         public Color MouseOverColor { get; set; }
 
-        /// <summary>
-        /// Event that is invoked when the link is clicked
-        /// </summary>
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnMouseDown = delegate { };
+
+        /// <inheritdoc />
+        public event EventHandler<MouseEventArgs> OnMouseUp = delegate { };
+
+        /// <inheritdoc />
         public event EventHandler<MouseEventArgs> OnClick = delegate { };
 
         /// <summary>
@@ -38,12 +40,35 @@ namespace XNAControls
         }
 
         /// <inheritdoc />
+        protected override bool HandleMouseDown(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            if (OnMouseDown == null)
+                return false;
+
+            OnMouseDown(control, eventArgs);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        protected override bool HandleMouseUp(IXNAControl control, MouseEventArgs eventArgs)
+        {
+            if (OnMouseUp == null)
+                return false;
+
+            OnMouseUp(control, eventArgs);
+
+            return true;
+        }
+
+        /// <inheritdoc />
         protected override bool HandleClick(IXNAControl control, MouseEventArgs eventArgs)
         {
             if (OnClick == null)
                 return false;
 
             OnClick?.Invoke(control, eventArgs);
+
             return true;
         }
 
@@ -71,7 +96,17 @@ namespace XNAControls
         Color MouseOverColor { get; set; }
 
         /// <summary>
-        /// Event that is invoked when the link is clicked
+        /// Invoked when a mouse button is pressed on a button control
+        /// </summary>
+        event EventHandler<MouseEventArgs> OnMouseDown;
+
+        /// <summary>
+        /// Invoked when a mouse button is released on a button control
+        /// </summary>
+        event EventHandler<MouseEventArgs> OnMouseUp;
+
+        /// <summary>
+        /// Invoked when the link is clicked
         /// </summary>
         event EventHandler<MouseEventArgs> OnClick;
     }
