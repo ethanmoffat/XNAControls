@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 
@@ -16,6 +17,7 @@ namespace XNAControls.Input
         private readonly MouseListener _mouseListener;
 
         private IEventReceiver _dragTarget;
+        private bool _componentsChanged;
 
         /// <summary>
         /// Create a new InputManager using the default game previously set in the GameRepository
@@ -41,6 +43,19 @@ namespace XNAControls.Input
             _mouseListener = new MouseListener(mouseListenerSettings);
 
             UpdateOrder = int.MinValue;
+
+            Game.Components.ComponentAdded += Components_ComponentAdded;
+            Game.Components.ComponentRemoved += Components_ComponentRemoved;
+
+            void Components_ComponentRemoved(object sender, GameComponentCollectionEventArgs e)
+            {
+                _componentsChanged = true;
+            }
+
+            void Components_ComponentAdded(object sender, GameComponentCollectionEventArgs e)
+            {
+                _componentsChanged = true;
+            }
         }
 
         /// <inheritdoc />
@@ -65,7 +80,7 @@ namespace XNAControls.Input
         public override void Update(GameTime gameTime)
         {
             var mouseState = MouseExtended.GetState();
-            if (mouseState.PositionChanged)
+            if (mouseState.PositionChanged || _componentsChanged)
             {
                 var comps = InputTargetFinder.GetMouseOverEventTargetControl(Game.Components);
                 foreach (var component in comps)
@@ -89,6 +104,8 @@ namespace XNAControls.Input
                         Mouse_Leave(component, mouseState);
                     }
                 }
+
+                _componentsChanged = false;
             }
 
             _keyboardListener.Update(gameTime);
