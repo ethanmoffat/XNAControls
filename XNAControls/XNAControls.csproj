@@ -18,18 +18,7 @@
     <PackageVersion>2.3.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\CppNet.dll" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\libmojoshader_64.dll" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\mgfxc.deps.json" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\mgfxc.dll" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\mgfxc.exe" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\mgfxc.pdb" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\mgfxc.runtimeconfig.dev.json" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\mgfxc.runtimeconfig.json" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\SharpDX.D3DCompiler.dll" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\SharpDX.D3DCompiler.xml" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\SharpDX.dll" />
-    <Content Remove="C:\Users\ethan\.nuget\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\SharpDX.xml" />
+    <Content Remove="..\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\*.*" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Extended" Version="3.8.0" />
