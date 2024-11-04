@@ -406,9 +406,13 @@ namespace XNAControls
                 case EventType.DragStart: handled = HandleDragStart(this, (MouseEventArgs)eventArgs); break;
                 case EventType.DragEnd: handled = HandleDragEnd(this, (MouseEventArgs)eventArgs); break;
                 case EventType.Drag: handled = HandleDrag(this, (MouseEventArgs)eventArgs); break;
+                case EventType.MouseDown: handled = HandleMouseDown(this, (MouseEventArgs)eventArgs); break;
+                case EventType.MouseUp: handled = HandleMouseUp(this, (MouseEventArgs)eventArgs); break;
                 case EventType.Click: handled = HandleClick(this, (MouseEventArgs)eventArgs); break;
                 case EventType.DoubleClick: handled = HandleDoubleClick(this, (MouseEventArgs)eventArgs);  break;
                 case EventType.KeyTyped: handled = HandleKeyTyped(this, (KeyboardEventArgs)eventArgs); break;
+                case EventType.KeyPressed: handled = HandleKeyPressed(this, (KeyboardEventArgs)eventArgs); break;
+                case EventType.KeyReleased: handled = HandleKeyReleased(this, (KeyboardEventArgs)eventArgs); break;
                 case EventType.GotFocus: handled = HandleGotFocus(this, EventArgs.Empty); break;
                 case EventType.LostFocus: handled = HandleLostFocus(this, EventArgs.Empty); break;
                 case EventType.MouseWheelMoved: handled = HandleMouseWheelMoved(this, (MouseEventArgs)eventArgs); break;
@@ -433,6 +437,16 @@ namespace XNAControls
         protected virtual bool HandleDrag(IXNAControl control, MouseEventArgs eventArgs) => false;
 
         /// <summary>
+        /// Default handler for MouseDown event
+        /// </summary>
+        protected virtual bool HandleMouseDown(IXNAControl control, MouseEventArgs eventArgs) => false;
+
+        /// <summary>
+        /// Default handler for MouseUp event
+        /// </summary>
+        protected virtual bool HandleMouseUp(IXNAControl control, MouseEventArgs eventArgs) => false;
+
+        /// <summary>
         /// Default handler for Click event
         /// </summary>
         protected virtual bool HandleClick(IXNAControl control, MouseEventArgs eventArgs) => false;
@@ -446,6 +460,16 @@ namespace XNAControls
         /// Default handler for KeyTyped event
         /// </summary>
         protected virtual bool HandleKeyTyped(IXNAControl control, KeyboardEventArgs eventArgs) => false;
+
+        /// <summary>
+        /// Default handler for KeyPressed event
+        /// </summary>
+        protected virtual bool HandleKeyPressed(IXNAControl control, KeyboardEventArgs eventArgs) => false;
+
+        /// <summary>
+        /// Default handler for KeyReleased event
+        /// </summary>
+        protected virtual bool HandleKeyReleased(IXNAControl control, KeyboardEventArgs eventArgs) => false;
 
         /// <summary>
         /// Default handler for GotFocus event

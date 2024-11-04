@@ -6,7 +6,9 @@ namespace XNAControls.Input
 {
     internal static class InputTargetFinder
     {
-        public static IEnumerable<IEventReceiver> GetMouseOverEventTargetControl(IEnumerable<IGameComponent> collection, Point position)
+        internal static Dictionary<object, bool> MouseOverState { get; } = [];
+
+        internal static IEnumerable<IEventReceiver> GetMouseOverEventTargetControl(IEnumerable<IGameComponent> collection)
         {
             var targets = collection
                 .OfType<IEventReceiver>()
@@ -29,21 +31,21 @@ namespace XNAControls.Input
             return targets;
         }
 
-        public static IEventReceiver GetMouseDownEventTargetControl(IEnumerable<IGameComponent> collection, Point position, bool includeChildren = true)
+        internal static IEventReceiver GetMouseButtonEventTargetControl(IEnumerable<IGameComponent> collection, bool includeChildren = true)
         {
             var targets = collection
                 .OfType<IEventReceiver>()
-                .Where(x => IsValidMouseDownTarget(x, position))
+                .Where(IsValidMouseDownTarget)
                 .ToList();
 
             if (includeChildren)
             {
                 var toProcess = new Queue<IXNAControl>(targets.OfType<IXNAControl>());
-                while (toProcess.Any())
+                while (toProcess.Count != 0)
                 {
                     var parent = toProcess.Dequeue();
 
-                    var childtargets = parent.ChildControls.Where(x => IsValidMouseDownTarget(x, position));
+                    var childtargets = parent.ChildControls.Where(IsValidMouseDownTarget);
                     foreach (var child in childtargets)
                         toProcess.Enqueue(child);
 
@@ -52,7 +54,7 @@ namespace XNAControls.Input
                 }
             }
 
-            if (!targets.Any()) return null;
+            if (targets.Count == 0) return null;
             if (targets.Count == 1) return targets.Single();
 
             var max = targets.Max(x => x.ZOrder);
@@ -80,15 +82,15 @@ namespace XNAControls.Input
             return component as IDrawable == null || ((IDrawable)component).Visible;
         }
 
-        private static bool IsValidMouseDownTarget(IEventReceiver eventReceiver, Point position)
+        private static bool IsValidMouseDownTarget(IEventReceiver eventReceiver)
         {
-            return eventReceiver.EventArea.Contains(position) && AllParentsVisible(eventReceiver);
+            return MouseOverState.TryGetValue(eventReceiver, out var mouseOver)
+                && mouseOver && AllParentsVisible(eventReceiver);
         }
 
         private static bool AllParentsVisible(IEventReceiver eventReceiver)
         {
-            var control = eventReceiver as IXNAControl;
-            if (control == null)
+            if (eventReceiver is not IXNAControl control)
             {
                 var drawable = eventReceiver as IDrawable;
                 return drawable?.Visible ?? true;

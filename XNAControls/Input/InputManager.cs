@@ -1,8 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+
+using Microsoft.Xna.Framework;
+
 using MonoGame.Extended.Input;
 using MonoGame.Extended.Input.InputListeners;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace XNAControls.Input
 {
@@ -14,9 +16,8 @@ namespace XNAControls.Input
         private readonly KeyboardListener _keyboardListener;
         private readonly MouseListener _mouseListener;
 
-        private readonly Dictionary<object, bool> _mouseOverState;
-
         private IEventReceiver _dragTarget;
+        private bool _componentsChanged;
 
         /// <summary>
         /// Create a new InputManager using the default game previously set in the GameRepository
@@ -41,15 +42,30 @@ namespace XNAControls.Input
             _keyboardListener = new KeyboardListener();
             _mouseListener = new MouseListener(mouseListenerSettings);
 
-            _mouseOverState = new Dictionary<object, bool>();
-
             UpdateOrder = int.MinValue;
+
+            Game.Components.ComponentAdded += Components_ComponentAdded;
+            Game.Components.ComponentRemoved += Components_ComponentRemoved;
+
+            void Components_ComponentRemoved(object sender, GameComponentCollectionEventArgs e)
+            {
+                _componentsChanged = true;
+            }
+
+            void Components_ComponentAdded(object sender, GameComponentCollectionEventArgs e)
+            {
+                _componentsChanged = true;
+            }
         }
 
         /// <inheritdoc />
         public override void Initialize()
         {
             _keyboardListener.KeyTyped += Keyboard_KeyTyped;
+            _keyboardListener.KeyPressed += Keyboard_KeyPressed;
+            _keyboardListener.KeyReleased += Keyboard_KeyReleased;
+            _mouseListener.MouseDown += Mouse_Down;
+            _mouseListener.MouseUp += Mouse_Up;
             _mouseListener.MouseClicked += Mouse_Click;
             _mouseListener.MouseDoubleClicked += Mouse_DoubleClick;
             _mouseListener.MouseDragStart += Mouse_DragStart;
@@ -63,35 +79,37 @@ namespace XNAControls.Input
         /// <inheritdoc />
         public override void Update(GameTime gameTime)
         {
-            _keyboardListener.Update(gameTime);
-            _mouseListener.Update(gameTime);
-
             var mouseState = MouseExtended.GetState();
-            if (mouseState.PositionChanged)
+            if (mouseState.PositionChanged || _componentsChanged)
             {
-                var comps = InputTargetFinder.GetMouseOverEventTargetControl(Game.Components, mouseState.Position);
+                var comps = InputTargetFinder.GetMouseOverEventTargetControl(Game.Components);
                 foreach (var component in comps)
                 {
                     if (component.EventArea.Contains(mouseState.Position))
                     {
-                        if (!_mouseOverState.TryGetValue(component, out var value) || !value)
+                        if (!InputTargetFinder.MouseOverState.TryGetValue(component, out var value) || !value)
                         {
-                            _mouseOverState[component] = true;
+                            InputTargetFinder.MouseOverState[component] = true;
                             Mouse_Enter(component, mouseState);
                         }
                         else
                         {
-                            _mouseOverState[component] = true;
+                            InputTargetFinder.MouseOverState[component] = true;
                             Mouse_Over(component, mouseState);
                         }
                     }
-                    else if (_mouseOverState.TryGetValue(component, out var value) && value)
+                    else if (InputTargetFinder.MouseOverState.TryGetValue(component, out var value) && value)
                     {
-                        _mouseOverState[component] = false;
+                        InputTargetFinder.MouseOverState[component] = false;
                         Mouse_Leave(component, mouseState);
                     }
                 }
+
+                _componentsChanged = false;
             }
+
+            _keyboardListener.Update(gameTime);
+            _mouseListener.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -102,15 +120,37 @@ namespace XNAControls.Input
             XNATextBox.FocusedTextbox?.PostMessage(EventType.KeyTyped, e);
         }
 
+        private void Keyboard_KeyPressed(object sender, KeyboardEventArgs e)
+        {
+            XNATextBox.FocusedTextbox?.PostMessage(EventType.KeyPressed, e);
+        }
+
+        private void Keyboard_KeyReleased(object sender, KeyboardEventArgs e)
+        {
+            XNATextBox.FocusedTextbox?.PostMessage(EventType.KeyReleased, e);
+        }
+
+        private void Mouse_Down(object sender, MouseEventArgs e)
+        {
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
+            clickTarget?.PostMessage(EventType.MouseDown, e);
+        }
+
+        private void Mouse_Up(object sender, MouseEventArgs e)
+        {
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
+            clickTarget?.PostMessage(EventType.MouseUp, e);
+        }
+
         private void Mouse_Click(object sender, MouseEventArgs e)
         {
-            var clickTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components, e.Position);
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             clickTarget?.PostMessage(EventType.Click, e);
         }
 
         private void Mouse_DoubleClick(object sender, MouseEventArgs e)
         {
-            var clickTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components, e.Position);
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             clickTarget?.PostMessage(EventType.DoubleClick, e);
         }
 
@@ -119,7 +159,7 @@ namespace XNAControls.Input
             if (_dragTarget != null)
                 return;
 
-            _dragTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components, e.Position);
+            _dragTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             _dragTarget?.PostMessage(EventType.DragStart, e);
         }
 
@@ -142,7 +182,7 @@ namespace XNAControls.Input
 
         private void Mouse_WheelMoved(object sender, MouseEventArgs e)
         {
-            var clickTarget = InputTargetFinder.GetMouseDownEventTargetControl(Game.Components, e.Position);
+            var clickTarget = InputTargetFinder.GetMouseButtonEventTargetControl(Game.Components);
             clickTarget?.PostMessage(EventType.MouseWheelMoved, e);
         }
 
