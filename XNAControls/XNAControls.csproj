@@ -13,9 +13,9 @@
     <PackageTags>utility library UI cross-platform controls XNA MonoGame</PackageTags>
     <Copyright>Copyright © 2016-2024 Ethan Moffat</Copyright>
     <Description>Cross-platform UI control library for MonoGame</Description>
-    <Version>2.3.0</Version>
-    <AssemblyVersion>2.3.0</AssemblyVersion>
-    <PackageVersion>2.3.0</PackageVersion>
+    <Version>2.3.1</Version>
+    <AssemblyVersion>2.3.1</AssemblyVersion>
+    <PackageVersion>2.3.1</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="..\packages\monogame.extended\3.8.0\contentFiles\any\netstandard2.0\*.*" />
