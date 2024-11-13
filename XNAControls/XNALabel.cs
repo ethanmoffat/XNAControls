@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using Microsoft.Xna.Framework;
@@ -208,7 +209,9 @@ namespace XNAControls
         /// <inheritdoc />
         protected override void LoadContent()
         {
-            var contentFile = Path.Combine(Game.Content.RootDirectory, $"{_spriteFontName}.xnb");
+            var contentFile = RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                ? Path.Combine("Contents", "Resources", Game.Content.RootDirectory, $"{_spriteFontName}.xnb")
+                : Path.Combine(Game.Content.RootDirectory, $"{_spriteFontName}.xnb");
 
             using var st = File.OpenRead(contentFile);
             using var br = new BinaryReader(st, Encoding.UTF8);
